@@ -1,10 +1,10 @@
 import io.papermc.paperweight.util.constants.*
+import io.papermc.paperweight.util.Git
 
 plugins {
     java
-    `maven-publish`
     id("com.github.johnrengelman.shadow") version "7.1.0" apply false
-    id("io.papermc.paperweight.patcher") version "1.3.1"
+    id("io.papermc.paperweight.patcher") version "1.3.2-SNAPSHOT"
 }
 
 repositories {
@@ -22,7 +22,6 @@ dependencies {
 
 allprojects {
     apply(plugin = "java")
-    apply(plugin = "maven-publish")
 
     java {
         toolchain {
@@ -36,77 +35,60 @@ subprojects {
         options.encoding = Charsets.UTF_8.name()
         options.release.set(17)
     }
-    tasks.withType<Javadoc> {
-        options.encoding = Charsets.UTF_8.name()
-    }
-    tasks.withType<ProcessResources> {
-        filteringCharset = Charsets.UTF_8.name()
-    }
+        tasks.withType<Javadoc> {
+            options.encoding = Charsets.UTF_8.name()
+        }
+        tasks.withType<ProcessResources> {
+            filteringCharset = Charsets.UTF_8.name()
+        }
 
     repositories {
         mavenCentral()
         maven("https://papermc.io/repo/repository/maven-public/")
+        maven("https://oss.sonatype.org/content/groups/public/")
+        maven("https://papermc.io/repo/repository/maven-public/")
+        maven("https://ci.emc.gs/nexus/content/groups/aikar/")
+        maven("https://repo.aikar.co/content/groups/aikar")
+        maven("https://repo.md-5.net/content/repositories/releases/")
+        maven("https://hub.spigotmc.org/nexus/content/groups/public/")
+        maven("https://jitpack.io")
     }
 }
 
+val pufferfishDir = layout.projectDirectory.dir("Pufferfish")
+val initSubmodules by tasks.registering {
+    outputs.upToDateWhen { false }
+    doLast {
+        Git(layout.projectDirectory)("submodule", "update", "--init").executeOut()
+    }
+}
+
+
 paperweight {
-    serverProject.set(project(":forktest-server"))
+    serverProject.set(project(":atelier-server"))
 
     remapRepo.set("https://maven.fabricmc.net/")
     decompileRepo.set("https://files.minecraftforge.net/maven/")
 
-    usePaperUpstream(providers.gradleProperty("paperRef")) {
-        withPaperPatcher {
-            apiPatchDir.set(layout.projectDirectory.dir("patches/api"))
-            apiOutputDir.set(layout.projectDirectory.dir("forktest-api"))
-
-            serverPatchDir.set(layout.projectDirectory.dir("patches/server"))
-            serverOutputDir.set(layout.projectDirectory.dir("forktest-server"))
-        }
-    }
-}
-
-//
-// Everything below here is optional if you don't care about publishing API or dev bundles to your repository
-//
-
-tasks.generateDevelopmentBundle {
-    apiCoordinates.set("com.example.paperfork:forktest-api")
-    mojangApiCoordinates.set("io.papermc.paper:paper-mojangapi")
-    libraryRepositories.set(
-        listOf(
-            "https://repo.maven.apache.org/maven2/",
-            "https://libraries.minecraft.net/",
-            "https://papermc.io/repo/repository/maven-public/",
-            "https://maven.quiltmc.org/repository/release/",
-            // "https://my.repo/", // This should be a repo hosting your API (in this example, 'com.example.paperfork:forktest-api')
-        )
-    )
-}
-
-allprojects {
-    // Publishing API:
-    // ./gradlew :ForkTest-API:publish[ToMavenLocal]
-    publishing {
-        repositories {
-            maven {
-                name = "myRepoSnapshots"
-                url = uri("https://my.repo/")
-                // See Gradle docs for how to provide credentials to PasswordCredentials
-                // https://docs.gradle.org/current/samples/sample_publishing_credentials.html
-                credentials(PasswordCredentials::class)
+    upstreams {
+        register("pufferfish") {
+            upstreamDataTask {
+                dependsOn(initSubmodules)
+                projectDir.set(pufferfishDir)
             }
-        }
-    }
-}
 
-publishing {
-    // Publishing dev bundle:
-    // ./gradlew publishDevBundlePublicationTo(MavenLocal|MyRepoSnapshotsRepository) -PpublishDevBundle
-    if (project.hasProperty("publishDevBundle")) {
-        publications.create<MavenPublication>("devBundle") {
-            artifact(tasks.generateDevelopmentBundle) {
-                artifactId = "dev-bundle"
+            patchTasks {
+                register("api") {
+                    upstreamDir.set(pufferfishDir.dir("pufferfish-api"))
+                    patchDir.set(layout.projectDirectory.dir("patches/api"))
+                    outputDir.set(layout.projectDirectory.dir("atelier-api"))
+                }
+                register("server") {
+                    upstreamDir.set(pufferfishDir.dir("pufferfish-server"))
+                    patchDir.set(layout.projectDirectory.dir("patches/server"))
+                    outputDir.set(layout.projectDirectory.dir("atelier-server"))
+                    importMcDev.set(true)
+                }
             }
         }
     }

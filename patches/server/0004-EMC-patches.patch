@@ -1,0 +1,48 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: JustMangoT <minetuan2@gmail.com>
+Date: Fri, 10 Dec 2021 00:29:56 +0700
+Subject: [PATCH] EMC patches
+
+
+diff --git a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
+index 254a917cb1d706ebc6c2dd060971c6b264a8a50c..7e12ddccf1416b20da5eca9a2f8a462860367c4c 100644
+--- a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
++++ b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
+@@ -2067,7 +2067,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+     private void handleChat(TextFilter.FilteredText message) {
+         if (this.player.isRemoved() || this.player.getChatVisibility() == ChatVisiblity.HIDDEN) { // CraftBukkit - dead men tell no tales
+             this.send(new ClientboundChatPacket((new TranslatableComponent("chat.disabled.options")).withStyle(ChatFormatting.RED), ChatType.SYSTEM, Util.NIL_UUID));
+-        } else {
++        } else if (player.didPlayerJoinEvent) { // EMC - do not handle chat messages before they joined
+             this.player.resetLastActionTime();
+             String s = message.getRaw();
+ 
+diff --git a/src/main/java/net/minecraft/world/entity/projectile/FireworkRocketEntity.java b/src/main/java/net/minecraft/world/entity/projectile/FireworkRocketEntity.java
+index fe502e148e218ae404e0049c0251d3e3ca08c825..015422d2a01c99c121481643473b8a129bbbac77 100644
+--- a/src/main/java/net/minecraft/world/entity/projectile/FireworkRocketEntity.java
++++ b/src/main/java/net/minecraft/world/entity/projectile/FireworkRocketEntity.java
+@@ -355,4 +355,11 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
+     public boolean isAttackable() {
+         return false;
+     }
++
++    // EMC start
++    @Override
++    public boolean shouldBeSaved() {
++        return false;
++    }
++    // EMC end
+ }
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+index ac41bc23d2f7e16bbacdc9b33fcf6c0d706fa023..dba5c4a65ab0f649d8dcb0e66398d5e5b0192854 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+@@ -373,7 +373,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+ 
+     @Override
+     public boolean unloadChunk(int x, int z) {
+-        return this.unloadChunk(x, z, true);
++        return this.unloadChunkRequest(x, z); // EMC
+     }
+ 
+     @Override

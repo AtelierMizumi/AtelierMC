@@ -1,5 +1,4 @@
 .gradle/
-build/
 
 # Eclipse stuff
 .classpath
@@ -46,7 +45,7 @@ out/
 # other stuff
 run/
 
-forktest-server
-forktest-api
+atelier-server
+atelier-api
 
 !gradle/wrapper/gradle-wrapper.jar

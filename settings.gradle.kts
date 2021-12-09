@@ -5,6 +5,5 @@ pluginManagement {
     }
 }
 
-rootProject.name = "forktest"
-
-include("forktest-api", "forktest-server")
+rootProject.name = "atelier"
+include("atelier-api", "atelier-server")
