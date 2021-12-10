@@ -126,10 +126,10 @@ index 74003e8887624736b154807e07835c315e836cf3..ec3d3e3e3497eeb921125ace1d336c13
      public static Runnable once(Runnable run) {
          AtomicBoolean ran = new AtomicBoolean(false);
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 70aaa97163899289b9724e702b136205544ba30c..63d5ddd96041fe6552d7e469acf65a98be30171b 100644
+index fc3caf31ac8390e89fd36c8d382d4445b599f248..71beb3ea3eaa058629f2b7486480c411ca5a9811 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -372,6 +372,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
+@@ -373,6 +373,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
              return;
          }
  
@@ -137,7 +137,7 @@ index 70aaa97163899289b9724e702b136205544ba30c..63d5ddd96041fe6552d7e469acf65a98
          co.aikar.timings.MinecraftTimings.midTickChunkTasks.startTiming();
          try {
              for (;;) {
-@@ -1098,6 +1099,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
+@@ -1099,6 +1100,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
          LOGGER.info("Flushing Chunk IO");
          com.destroystokyo.paper.io.PaperFileIOThread.Holder.INSTANCE.close(true, true); // Paper
          LOGGER.info("Closing Thread Pool");
@@ -145,7 +145,7 @@ index 70aaa97163899289b9724e702b136205544ba30c..63d5ddd96041fe6552d7e469acf65a98
          Util.shutdownExecutors(); // Paper
          LOGGER.info("Closing Server");
          try {
-@@ -1526,6 +1528,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
+@@ -1528,6 +1530,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
          io.papermc.paper.util.CachedLists.reset(); // Paper
          // Paper start - move executeAll() into full server tick timing
          try (co.aikar.timings.Timing ignored = MinecraftTimings.processTasksTimer.startTiming()) {

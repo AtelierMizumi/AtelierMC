@@ -53,6 +53,61 @@ index f6b73f8c6638ddf79e45042f5c8902ea1f271f5c..5a34a501715ef7b5f0abf84878ee90ad
          player.connection.send(new ClientboundCommandsPacket(rootcommandnode));
      }
  
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index b2bed5512d38044c672cc7aebf5ba0b3485f98ab..27acea5831e3e6b408c5adcd3799db38e3e898ea 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -304,6 +304,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+     public static final int TICK_TIME = 1000000000 / MinecraftServer.TPS;
+     private static final int SAMPLE_INTERVAL = 20; // Paper
+     public final double[] recentTps = new double[ 3 ];
++    public boolean lagging = false; // Purpur
+     public final SlackActivityAccountant slackActivityAccountant = new SlackActivityAccountant();
+     // Spigot end
+     public static long currentTickLong = 0L; // Paper
+@@ -1249,6 +1250,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+                         this.recentTps[1] = tps5.getAverage();
+                         this.recentTps[2] = tps15.getAverage();
+                         // Paper end
++                        lagging = recentTps[0] < 18.3635D; // Purpur
+                         tickSection = curTime;
+                     }
+                     // Spigot end
+diff --git a/src/main/java/net/minecraft/server/level/ServerEntity.java b/src/main/java/net/minecraft/server/level/ServerEntity.java
+index e80176708db486190dd527e3ade5fc690ceb39f7..96e5d68f405d748f8b35b415642b84739bc5e6d7 100644
+--- a/src/main/java/net/minecraft/server/level/ServerEntity.java
++++ b/src/main/java/net/minecraft/server/level/ServerEntity.java
+@@ -189,6 +189,7 @@ public class ServerEntity {
+                         this.teleportDelay = 0;
+                         packet1 = new ClientboundTeleportEntityPacket(this.entity);
+                     }
++                    if (isUselessPacket(packet1)) packet1 = null; // Purpur
+                 }
+ 
+                 if ((this.trackDelta || this.entity.hasImpulse || this.entity instanceof LivingEntity && ((LivingEntity) this.entity).isFallFlying()) && this.tickCount > 0) {
+@@ -257,6 +258,22 @@ public class ServerEntity {
+ 
+     }
+ 
++    // Purpur start
++    private boolean isUselessPacket(Packet<?> possibleUselessPacket) {
++        if (possibleUselessPacket instanceof ClientboundMoveEntityPacket) {
++            ClientboundMoveEntityPacket packet = (ClientboundMoveEntityPacket) possibleUselessPacket;
++            if (possibleUselessPacket instanceof ClientboundMoveEntityPacket.Pos) {
++                return packet.getXa() == 0 && packet.getYa() == 0 && packet.getZa() == 0;
++            } else if (possibleUselessPacket instanceof ClientboundMoveEntityPacket.PosRot) {
++                return packet.getXa() == 0 && packet.getYa() == 0 && packet.getZa() == 0 && packet.getyRot() == 0 && packet.getxRot() == 0;
++            } else if (possibleUselessPacket instanceof ClientboundMoveEntityPacket.Rot) {
++                return packet.getyRot() == 0 && packet.getxRot() == 0;
++            }
++        }
++        return false;
++    }
++    // Purpur end
++
+     public void removePairing(ServerPlayer player) {
+         this.entity.stopSeenByPlayer(player);
+         player.connection.send(new ClientboundRemoveEntitiesPacket(new int[]{this.entity.getId()}));
 diff --git a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
 index 254a917cb1d706ebc6c2dd060971c6b264a8a50c..40a66cac9f91f745c2e03d7e935db67bf15754f4 100644
 --- a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
@@ -127,6 +182,18 @@ index 254a917cb1d706ebc6c2dd060971c6b264a8a50c..40a66cac9f91f745c2e03d7e935db67b
      }
  
      @Override
+diff --git a/src/main/java/net/minecraft/server/network/ServerStatusPacketListenerImpl.java b/src/main/java/net/minecraft/server/network/ServerStatusPacketListenerImpl.java
+index 4fa79d37ff4e70c61672cce7c55257c46232c026..df43d0a0f3d1e34baabae150cbf01a008eb5a588 100644
+--- a/src/main/java/net/minecraft/server/network/ServerStatusPacketListenerImpl.java
++++ b/src/main/java/net/minecraft/server/network/ServerStatusPacketListenerImpl.java
+@@ -153,6 +153,7 @@ public class ServerStatusPacketListenerImpl implements ServerStatusPacketListene
+             this.connection.send(new ClientboundStatusResponsePacket(ping));
+             // CraftBukkit end
+             */
++            if (this.server.getStatus().getVersion() == null) return; // Purpur - do not respond to pings before we know the protocol version
+             com.destroystokyo.paper.network.StandardPaperServerListPingEventImpl.processRequest(this.server, this.connection);
+             // Paper end
+         }
 diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
 index 009e05d874c5a6ecfbc829d3f9ccb75fa84a4ae9..f22bbacfd7a3f5564679c8f7bf55427b3004839f 100644
 --- a/src/main/java/net/minecraft/world/entity/Entity.java
@@ -152,6 +219,37 @@ index af9c58944b38e8aeeca5dca75c9f97e49f2895f2..c4d54dfd88f8de90ccba52a0ad4f50f0
          double d0 = this.getX() - this.xo;
          double d1 = this.getZ() - this.zo;
          float f = (float) (d0 * d0 + d1 * d1);
+diff --git a/src/main/java/net/minecraft/world/entity/npc/Villager.java b/src/main/java/net/minecraft/world/entity/npc/Villager.java
+index 7364a50d440b990fd3ec0939b3cde6dae9bdb88b..0d1450b342c741d64959797fd2b3b340fcd66d04 100644
+--- a/src/main/java/net/minecraft/world/entity/npc/Villager.java
++++ b/src/main/java/net/minecraft/world/entity/npc/Villager.java
+@@ -137,6 +137,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
+     }, MemoryModuleType.MEETING_POINT, (entityvillager, villageplacetype) -> {
+         return villageplacetype == PoiType.MEETING;
+     });
++    private final int brainTickOffset; // Purpur
+ 
+     public long nextGolemPanic = -1; // Pufferfish
+ 
+@@ -151,6 +152,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
+         this.getNavigation().setCanFloat(true);
+         this.setCanPickUpLoot(true);
+         this.setVillagerData(this.getVillagerData().setType(type).setProfession(VillagerProfession.NONE));
++        this.brainTickOffset = getRandom().nextInt(100); // Purpur
+     }
+ 
+     @Override
+@@ -248,6 +250,10 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
+     protected void customServerAiStep() { mobTick(false); }
+     protected void mobTick(boolean inactive) {
+         this.level.getProfiler().push("villagerBrain");
++        // Purpur start
++        boolean tick = (level.getGameTime() + brainTickOffset) % 2 == 0;
++        if (!((ServerLevel) level).getServer().lagging || tick)
++        // Purpur end
+         // Pufferfish start
+         if (!inactive) {
+             if (this.behaviorTick++ % this.activatedPriority == 0) // Pufferfish
 diff --git a/src/main/java/net/minecraft/world/entity/projectile/FireworkRocketEntity.java b/src/main/java/net/minecraft/world/entity/projectile/FireworkRocketEntity.java
 index fe502e148e218ae404e0049c0251d3e3ca08c825..015422d2a01c99c121481643473b8a129bbbac77 100644
 --- a/src/main/java/net/minecraft/world/entity/projectile/FireworkRocketEntity.java

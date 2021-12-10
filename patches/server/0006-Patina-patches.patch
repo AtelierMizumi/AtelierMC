@@ -45,7 +45,7 @@ index cb0045fc4ddd738c45dee89d57b213a633b9a136..680075da2705a1fd928166612a89a18f
      public CommandSourceStack(CommandSource output, Vec3 pos, Vec2 rot, ServerLevel world, int level, String name, Component displayName, MinecraftServer server, @Nullable Entity entity) {
          this(output, pos, rot, world, level, name, displayName, server, entity, false, (commandcontext, flag, j) -> {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index b2bed5512d38044c672cc7aebf5ba0b3485f98ab..8b0f6803cfa1bc8e60ecd0ae7f861824f31b9ee1 100644
+index 27acea5831e3e6b408c5adcd3799db38e3e898ea..fc3caf31ac8390e89fd36c8d382d4445b599f248 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -186,7 +186,7 @@ import org.bukkit.event.server.ServerLoadEvent;
@@ -57,7 +57,7 @@ index b2bed5512d38044c672cc7aebf5ba0b3485f98ab..8b0f6803cfa1bc8e60ecd0ae7f861824
  
      private static MinecraftServer SERVER; // Paper
      public static final Logger LOGGER = LogManager.getLogger();
-@@ -650,7 +650,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -651,7 +651,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
  
              if (worlddimension == null) {
                  dimensionmanager = (DimensionType) this.registryHolder.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getOrThrow(DimensionType.OVERWORLD_LOCATION);
@@ -66,7 +66,7 @@ index b2bed5512d38044c672cc7aebf5ba0b3485f98ab..8b0f6803cfa1bc8e60ecd0ae7f861824
              } else {
                  dimensionmanager = worlddimension.type();
                  chunkgenerator = worlddimension.generator();
-@@ -1366,20 +1366,25 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -1368,20 +1368,25 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
          });
      }
  
@@ -94,7 +94,7 @@ index b2bed5512d38044c672cc7aebf5ba0b3485f98ab..8b0f6803cfa1bc8e60ecd0ae7f861824
  
      @Override
      public boolean pollTask() {
-@@ -1410,10 +1415,14 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -1412,10 +1417,14 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
          }
      }
  
