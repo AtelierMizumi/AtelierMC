@@ -1,0 +1,137 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: JustMangoT <minetuan2@gmail.com>
+Date: Fri, 10 Dec 2021 11:37:58 +0700
+Subject: [PATCH] New NBT cache
+
+
+diff --git a/src/main/java/ga/caomile/atelier/cache/NBTCache.java b/src/main/java/ga/caomile/atelier/cache/NBTCache.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..999cebf7a9a209b1ca75d4e59be183d111104ac5
+--- /dev/null
++++ b/src/main/java/ga/caomile/atelier/cache/NBTCache.java
+@@ -0,0 +1,31 @@
++package ga.caomile.atelier.cache;
++
++import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenCustomHashMap;
++import net.minecraft.server.MinecraftServer;
++import net.minecraft.nbt.CompoundTag;
++
++import java.io.File;
++
++public class NBTCache extends Object2ObjectLinkedOpenCustomHashMap<File, CompoundTag> {
++    public NBTCache() {
++        super(100, 0.75F, new Strategy<File>() {
++            @Override
++            public int hashCode(File k) {
++                return k.hashCode();
++            }
++
++            @Override
++            public boolean equals(File k, File k1) {
++                return k.equals(k1);
++            }
++        });
++    }
++
++    @Override
++    public CompoundTag put(File k, CompoundTag v) {
++        if (this.size() > MinecraftServer.getServer().getPlayerCount()) {
++            this.removeLast();
++        }
++        return super.putAndMoveToFirst(k, v);
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 63d5ddd96041fe6552d7e469acf65a98be30171b..95c5b0e719fda37a5597559f1dd20659b2d93468 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -1088,7 +1088,9 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
+         }
+         // Spigot start
+         MCUtil.asyncExecutor.shutdown(); // Paper
++        this.playerDataStorage.executorService.shutdown(); // Atelier
+         try { MCUtil.asyncExecutor.awaitTermination(30, java.util.concurrent.TimeUnit.SECONDS); // Paper
++            this.playerDataStorage.executorService.awaitTermination(30, java.util.concurrent.TimeUnit.SECONDS); // Atelier - New async nbt cache
+         } catch (java.lang.InterruptedException ignored) {} // Paper
+         if (org.spigotmc.SpigotConfig.saveUserCacheOnStopOnly) {
+             MinecraftServer.LOGGER.info("Saving usercache.json");
+diff --git a/src/main/java/net/minecraft/world/level/storage/PlayerDataStorage.java b/src/main/java/net/minecraft/world/level/storage/PlayerDataStorage.java
+index 331ed6aa983714d6fc3596526fc7df0ab993062c..eb0e033e237c12628018ec4a60833a6a613f2d41 100644
+--- a/src/main/java/net/minecraft/world/level/storage/PlayerDataStorage.java
++++ b/src/main/java/net/minecraft/world/level/storage/PlayerDataStorage.java
+@@ -24,6 +24,11 @@ public class PlayerDataStorage {
+     private static final Logger LOGGER = LogManager.getLogger();
+     private final File playerDir;
+     protected final DataFixer fixerUpper;
++    // Atelier start - NBT Cache system
++    private final ga.caomile.atelier.cache.NBTCache dataCache = new ga.caomile.atelier.cache.NBTCache();
++    public final java.util.concurrent.ExecutorService executorService = java.util.concurrent.Executors.newSingleThreadExecutor(new com.google.common.util.concurrent.ThreadFactoryBuilder().setDaemon(true).setPriority(Thread.NORM_PRIORITY - 1).build());
++    // Atelier end
++
+ 
+     public PlayerDataStorage(LevelStorageSource.LevelStorageAccess session, DataFixer dataFixer) {
+         this.fixerUpper = dataFixer;
+@@ -37,11 +42,23 @@ public class PlayerDataStorage {
+             CompoundTag nbttagcompound = player.saveWithoutId(new CompoundTag());
+             File file = File.createTempFile(player.getStringUUID() + "-", ".dat", this.playerDir);
+ 
+-            NbtIo.writeCompressed(nbttagcompound, file);
+-            File file1 = new File(this.playerDir, player.getStringUUID() + ".dat");
+-            File file2 = new File(this.playerDir, player.getStringUUID() + ".dat_old");
++            // Atelier start - NBT Cache system
++            Runnable task = () -> {
++                try {
++                    NbtIo.writeCompressed(nbttagcompound, file);
++                    File file1 = new File(this.playerDir, player.getStringUUID() + ".dat");
++                    File file2 = new File(this.playerDir, player.getStringUUID() + ".dat_old");
+ 
+-            Util.safeReplaceFile(file1, file, file2);
++                    Util.safeReplaceFile(file1, file, file2);
++                } catch (Exception exception) {
++                    PlayerDataStorage.LOGGER.error("Failed to save player data for {}", player.getScoreboardName(), exception); // Paper
++                }
++            };
++            synchronized (this.dataCache){
++                this.dataCache.put(file, nbttagcompound);
++            }
++            this.executorService.execute(task);
++            // Atelier end
+         } catch (Exception exception) {
+             PlayerDataStorage.LOGGER.warn("Failed to save player data for {}", player.getScoreboardName(), exception); // Paper
+         }
+@@ -57,20 +74,33 @@ public class PlayerDataStorage {
+             // Spigot Start
+             boolean usingWrongFile = false;
+             boolean normalFile = file.exists() && file.isFile(); // Akarin - ensures normal file
+-            if ( org.bukkit.Bukkit.getOnlineMode() && !normalFile ) // Paper - Check online mode first // Akarin - ensures normal file
++            // Atelier start
++            CompoundTag playerData;
++            synchronized (this.dataCache){
++                playerData = this.dataCache.get(file);
++            }
++            if ( playerData == null && org.bukkit.Bukkit.getOnlineMode() && !normalFile ) // Paper - Check online mode first // Akarin - ensures normal file
+             {
+                 file = new File( this.playerDir, java.util.UUID.nameUUIDFromBytes( ( "OfflinePlayer:" + player.getScoreboardName() ).getBytes( "UTF-8" ) ).toString() + ".dat");
++                synchronized (this.dataCache){
++                    playerData = this.dataCache.get(file);
++                }
+                 if ( file.exists() )
+                 {
+                     usingWrongFile = true;
+                     org.bukkit.Bukkit.getServer().getLogger().warning( "Using offline mode UUID file for player " + player.getScoreboardName() + " as it is the only copy we can find." );
+                 }
+             }
++            // Atelier end
+             // Spigot End
+ 
+-            if (normalFile) { // Akarin - avoid double I/O operation
++            // Atelier start
++            if (playerData != null) {
++                nbttagcompound = playerData;
++            } else if (normalFile) { // Akarin - avoid double I/O operation
+                 nbttagcompound = NbtIo.readCompressed(file);
+             }
++            // Atelier end
+             // Spigot Start
+             if ( usingWrongFile )
+             {
