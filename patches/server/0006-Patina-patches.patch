@@ -1,0 +1,192 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: JustMangoT <minetuan2@gmail.com>
+Date: Fri, 10 Dec 2021 10:06:14 +0700
+Subject: [PATCH] Patina patches
+
+
+diff --git a/src/main/java/net/minecraft/Util.java b/src/main/java/net/minecraft/Util.java
+index 32a4b7554677609691e23f833a5ec76d1d437ff0..64b98810a5657c6e9d334a16018497bb09365a2e 100644
+--- a/src/main/java/net/minecraft/Util.java
++++ b/src/main/java/net/minecraft/Util.java
+@@ -67,7 +67,7 @@ public class Util {
+     private static final int DEFAULT_MAX_THREADS = 255;
+     private static final String MAX_THREADS_SYSTEM_PROPERTY = "max.bg.threads";
+     private static final AtomicInteger WORKER_COUNT = new AtomicInteger(1);
+-    private static final ExecutorService BOOTSTRAP_EXECUTOR = makeExecutor("Bootstrap", -2); // Paper - add -2 priority
++    // private static final ExecutorService BOOTSTRAP_EXECUTOR = makeExecutor("Bootstrap", -2); // Paper - add -2 priority // Patina
+     private static final ExecutorService BACKGROUND_EXECUTOR = makeExecutor("Main", -1); // Paper - add -1 priority
+     // Paper start - don't submit BLOCKING PROFILE LOOKUPS to the world gen thread
+     public static final ExecutorService PROFILE_EXECUTOR = Executors.newFixedThreadPool(2, new java.util.concurrent.ThreadFactory() {
+@@ -183,9 +183,13 @@ public class Util {
+         return 255;
+     }
+ 
++    // Patina start
++    /*
+     public static ExecutorService bootstrapExecutor() {
+         return BOOTSTRAP_EXECUTOR;
+     }
++    */
++    // Patina end
+ 
+     public static ExecutorService backgroundExecutor() {
+         return BACKGROUND_EXECUTOR;
+diff --git a/src/main/java/net/minecraft/commands/CommandSourceStack.java b/src/main/java/net/minecraft/commands/CommandSourceStack.java
+index cb0045fc4ddd738c45dee89d57b213a633b9a136..680075da2705a1fd928166612a89a18f2ec1107e 100644
+--- a/src/main/java/net/minecraft/commands/CommandSourceStack.java
++++ b/src/main/java/net/minecraft/commands/CommandSourceStack.java
+@@ -56,7 +56,7 @@ public class CommandSourceStack implements SharedSuggestionProvider, com.destroy
+     private final ResultConsumer<CommandSourceStack> consumer;
+     private final EntityAnchorArgument.Anchor anchor;
+     private final Vec2 rotation;
+-    public java.util.Map<Thread, CommandNode> currentCommand = new java.util.concurrent.ConcurrentHashMap<>(); // CraftBukkit // Paper
++    public final java.util.Map<Thread, CommandNode> currentCommand = new java.util.concurrent.ConcurrentHashMap<>(); // CraftBukkit // Paper // Patina
+ 
+     public CommandSourceStack(CommandSource output, Vec3 pos, Vec2 rot, ServerLevel world, int level, String name, Component displayName, MinecraftServer server, @Nullable Entity entity) {
+         this(output, pos, rot, world, level, name, displayName, server, entity, false, (commandcontext, flag, j) -> {
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index b2bed5512d38044c672cc7aebf5ba0b3485f98ab..70aaa97163899289b9724e702b136205544ba30c 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -186,7 +186,7 @@ import org.bukkit.event.server.ServerLoadEvent;
+ import co.aikar.timings.MinecraftTimings; // Paper
+ import org.spigotmc.SlackActivityAccountant; // Spigot
+ 
+-public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTask> implements CommandSource, AutoCloseable {
++public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnable> implements CommandSource, AutoCloseable { // Patina
+ 
+     private static MinecraftServer SERVER; // Paper
+     public static final Logger LOGGER = LogManager.getLogger();
+@@ -1366,20 +1366,25 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+         });
+     }
+ 
++    // Patina start
+     @Override
+-    public TickTask wrapRunnable(Runnable runnable) {
++    public Runnable wrapRunnable(Runnable runnable) {
+         // Paper start - anything that does try to post to main during watchdog crash, run on watchdog
+         if (this.hasStopped && Thread.currentThread().equals(shutdownThread)) {
+             runnable.run();
+             runnable = () -> {};
+         }
+         // Paper end
+-        return new TickTask(this.tickCount, runnable);
++        // return new TickTask(this.tickCount, runnable);
++        return runnable;
+     }
+ 
++    /*
+     protected boolean shouldRun(TickTask ticktask) {
+         return ticktask.getTick() + 3 < this.tickCount || this.haveTime();
+     }
++    */
++    // Patina end
+ 
+     @Override
+     public boolean pollTask() {
+@@ -1410,10 +1415,14 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+         }
+     }
+ 
++    // Patina start
++    /*
+     public void doRunTask(TickTask ticktask) { // CraftBukkit - decompile error
+         this.getProfiler().incrementCounter("runTask");
+         super.doRunTask(ticktask);
+     }
++    */
++    // Patina end
+ 
+     private void updateStatusIcon(ServerStatus metadata) {
+         Optional<File> optional = Optional.of(this.getFile("server-icon.png")).filter(File::isFile);
+diff --git a/src/main/java/net/minecraft/server/level/ServerChunkCache.java b/src/main/java/net/minecraft/server/level/ServerChunkCache.java
+index 406bfe20a7b8786bbc6bee46151be91dadec6180..649310b437aa84870ad50a9d5da75bb7c95823f9 100644
+--- a/src/main/java/net/minecraft/server/level/ServerChunkCache.java
++++ b/src/main/java/net/minecraft/server/level/ServerChunkCache.java
+@@ -1262,10 +1262,14 @@ public class ServerChunkCache extends ChunkSource {
+             return runnable;
+         }
+ 
++        // Patina start
++        /*
+         @Override
+         protected boolean shouldRun(Runnable task) {
+             return true;
+         }
++        */
++        // Patina end
+ 
+         @Override
+         protected boolean scheduleExecutables() {
+diff --git a/src/main/java/net/minecraft/util/datafix/DataFixers.java b/src/main/java/net/minecraft/util/datafix/DataFixers.java
+index b08d32bc80b4a65ebb980366a3e717c3b0e1bdab..91ffc377cb101be514059a1436c3a8d811bc4a2f 100644
+--- a/src/main/java/net/minecraft/util/datafix/DataFixers.java
++++ b/src/main/java/net/minecraft/util/datafix/DataFixers.java
+@@ -78,15 +78,19 @@ public class DataFixers {
+ 
+     private static final BiFunction<Integer, Schema, Schema> SAME = Schema::new;
+     private static final BiFunction<Integer, Schema, Schema> SAME_NAMESPACED = NamespacedSchema::new;
+-    private static final DataFixer DATA_FIXER = DataFixers.createFixerUpper();
++    // Patina start
++    private static final DataFixer DATA_FIXER /*= DataFixers.createFixerUpper()*/;
+ 
+     public DataFixers() {}
+ 
+-    private static DataFixer createFixerUpper() {
++    //private static DataFixer createFixerUpper() {
++    static {
+         DataFixerBuilder datafixerbuilder = new DataFixerBuilder(SharedConstants.getCurrentVersion().getWorldVersion());
+ 
+         DataFixers.addFixers(datafixerbuilder);
+-        return datafixerbuilder.build(Util.bootstrapExecutor());
++        //return datafixerbuilder.build(Util.bootstrapExecutor());
++        DATA_FIXER = datafixerbuilder.build(Util.backgroundExecutor());
++        // Patina end
+     }
+ 
+     public static DataFixer getDataFixer() {
+diff --git a/src/main/java/net/minecraft/util/thread/BlockableEventLoop.java b/src/main/java/net/minecraft/util/thread/BlockableEventLoop.java
+index dcce05d2f4ab16424db4ab103a12188e207a457b..10d40f5601b665ca7768e99dab37410b891c5f87 100644
+--- a/src/main/java/net/minecraft/util/thread/BlockableEventLoop.java
++++ b/src/main/java/net/minecraft/util/thread/BlockableEventLoop.java
+@@ -29,7 +29,7 @@ public abstract class BlockableEventLoop<R extends Runnable> implements Profiler
+ 
+     protected abstract R wrapRunnable(Runnable runnable);
+ 
+-    protected abstract boolean shouldRun(R task);
++    //protected abstract boolean shouldRun(R task); // Patina
+ 
+     public boolean isSameThread() {
+         return Thread.currentThread() == this.getRunningThread();
+@@ -116,7 +116,7 @@ public abstract class BlockableEventLoop<R extends Runnable> implements Profiler
+         R runnable = this.pendingRunnables.peek();
+         if (runnable == null) {
+             return false;
+-        } else if (this.blockingCount == 0 && !this.shouldRun(runnable)) {
++        } else if (this.blockingCount == 0 && false /*!this.shouldRun(runnable)*/) { // Patina
+             return false;
+         } else {
+             this.doRunTask(this.pendingRunnables.remove());
+diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
+index f22bbacfd7a3f5564679c8f7bf55427b3004839f..d22c1226c9686360fc9beadd5565efd11587d4a8 100644
+--- a/src/main/java/net/minecraft/world/entity/Entity.java
++++ b/src/main/java/net/minecraft/world/entity/Entity.java
+@@ -163,7 +163,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
+         @Override
+         public synchronized void setSeed(long seed) {
+             if (locked) {
+-                LogManager.getLogger().error("Ignoring setSeed on Entity.SHARED_RANDOM", new Throwable());
++                LOGGER.error("Ignoring setSeed on Entity.SHARED_RANDOM", new Throwable()); // Patina - LOGGER
+             } else {
+                 super.setSeed(seed);
+                 locked = true;
+@@ -2327,7 +2327,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
+                 try {
+                     spawnReason = org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.valueOf(spawnReasonName);
+                 } catch (Exception ignored) {
+-                    LogManager.getLogger().error("Unknown SpawnReason " + spawnReasonName + " for " + this);
++                    LOGGER.error("Unknown SpawnReason " + spawnReasonName + " for " + this); // Patina - LOGGER
+                 }
+             }
+             if (spawnReason == null) {

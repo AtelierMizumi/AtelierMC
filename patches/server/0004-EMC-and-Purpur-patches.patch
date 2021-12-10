@@ -1,0 +1,208 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: JustMangoT <minetuan2@gmail.com>
+Date: Fri, 10 Dec 2021 00:29:56 +0700
+Subject: [PATCH] EMC and Purpur patches
+
+
+diff --git a/src/main/java/io/papermc/paper/adventure/PaperAdventure.java b/src/main/java/io/papermc/paper/adventure/PaperAdventure.java
+index f763a3ea5796737304e0c1f41349622e1d7adadf..26c5c3c6e7c51ad6ccc9bac05e2af4972658179d 100644
+--- a/src/main/java/io/papermc/paper/adventure/PaperAdventure.java
++++ b/src/main/java/io/papermc/paper/adventure/PaperAdventure.java
+@@ -91,6 +91,7 @@ public final class PaperAdventure {
+         })
+         .build();
+     public static final LegacyComponentSerializer LEGACY_SECTION_UXRC = LegacyComponentSerializer.builder().flattener(FLATTENER).hexColors().useUnusualXRepeatedCharacterHexFormat().build();
++    public static final LegacyComponentSerializer LEGACY_AMPERSAND = LegacyComponentSerializer.builder().character(LegacyComponentSerializer.AMPERSAND_CHAR).hexColors().build(); // Purpur
+     public static final PlainComponentSerializer PLAIN = PlainComponentSerializer.builder().flattener(FLATTENER).build();
+     public static final GsonComponentSerializer GSON = GsonComponentSerializer.builder()
+         .legacyHoverEventSerializer(NBTLegacyHoverEventSerializer.INSTANCE)
+diff --git a/src/main/java/net/minecraft/commands/Commands.java b/src/main/java/net/minecraft/commands/Commands.java
+index f6b73f8c6638ddf79e45042f5c8902ea1f271f5c..5a34a501715ef7b5f0abf84878ee90adfed303b6 100644
+--- a/src/main/java/net/minecraft/commands/Commands.java
++++ b/src/main/java/net/minecraft/commands/Commands.java
+@@ -389,18 +389,22 @@ public class Commands {
+     }
+ 
+     private void runSync(ServerPlayer player, Collection<String> bukkit, RootCommandNode<SharedSuggestionProvider> rootcommandnode) {
+-        // Paper end - Async command map building
+-        new com.destroystokyo.paper.event.brigadier.AsyncPlayerSendCommandsEvent<CommandSourceStack>(player.getBukkitEntity(), (RootCommandNode) rootcommandnode, false).callEvent(); // Paper
+-        PlayerCommandSendEvent event = new PlayerCommandSendEvent(player.getBukkitEntity(), new LinkedHashSet<>(bukkit));
+-        event.getPlayer().getServer().getPluginManager().callEvent(event);
+-
+-        // Remove labels that were removed during the event
+-        for (String orig : bukkit) {
+-            if (!event.getCommands().contains(orig)) {
+-                rootcommandnode.removeCommand(orig);
++        // Purpur start - skip all this crap if there's nothing listening
++        if (PlayerCommandSendEvent.getHandlerList().getRegisteredListeners().length > 0) {
++            // Paper end - Async command map building
++            new com.destroystokyo.paper.event.brigadier.AsyncPlayerSendCommandsEvent<CommandSourceStack>(player.getBukkitEntity(), (RootCommandNode) rootcommandnode, false).callEvent(); // Paper
++            PlayerCommandSendEvent event = new PlayerCommandSendEvent(player.getBukkitEntity(), new LinkedHashSet<>(bukkit));
++            event.getPlayer().getServer().getPluginManager().callEvent(event);
++
++            // Remove labels that were removed during the event
++            for (String orig : bukkit) {
++                if (!event.getCommands().contains(orig)) {
++                    rootcommandnode.removeCommand(orig);
++                }
+             }
++            // CraftBukkit end
+         }
+-        // CraftBukkit end
++        // Purpur end - skip event
+         player.connection.send(new ClientboundCommandsPacket(rootcommandnode));
+     }
+ 
+diff --git a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
+index 254a917cb1d706ebc6c2dd060971c6b264a8a50c..40a66cac9f91f745c2e03d7e935db67bf15754f4 100644
+--- a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
++++ b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
+@@ -227,6 +227,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+     private long keepAliveTime = Util.getMillis();
+     private boolean keepAlivePending;
+     private long keepAliveChallenge;
++    private java.util.List<Long> keepAlives = new java.util.ArrayList<>(); // Purpur
+     // CraftBukkit start - multithreaded fields
+     private final AtomicInteger chatSpamTickCount = new AtomicInteger();
+     private final java.util.concurrent.atomic.AtomicInteger tabSpamLimiter = new java.util.concurrent.atomic.AtomicInteger(); // Paper - configurable tab spam limits
+@@ -357,6 +358,8 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+         long currentTime = Util.getMillis();
+         long elapsedTime = currentTime - this.keepAliveTime;
+ 
++        // Purpur start
++        /*
+         if (this.keepAlivePending) {
+             if (!this.processedDisconnect && elapsedTime >= KEEPALIVE_LIMIT) { // check keepalive limit, don't fire if already disconnected
+                 ServerGamePacketListenerImpl.LOGGER.warn("{} was kicked due to keepalive timeout!", this.player.getScoreboardName()); // more info
+@@ -370,6 +373,18 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+                 this.send(new ClientboundKeepAlivePacket(this.keepAliveChallenge));
+             }
+         }
++        */
++        if (elapsedTime >= 1000L) { // 1 second
++            if (!processedDisconnect && keepAlives.size() > KEEPALIVE_LIMIT) {
++                LOGGER.warn("{} was kicked due to keepalive timeout!", player.getName());
++                disconnect(new TranslatableComponent("disconnect.timeout"));
++            } else {
++                keepAliveTime = currentTime; // hijack this field for 1 second intervals
++                keepAlives.add(currentTime); // currentTime is ID
++                send(new ClientboundKeepAlivePacket(currentTime));
++            }
++        }
++        // Purpur end
+         // Paper end
+ 
+         this.server.getProfiler().pop();
+@@ -2067,7 +2082,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+     private void handleChat(TextFilter.FilteredText message) {
+         if (this.player.isRemoved() || this.player.getChatVisibility() == ChatVisiblity.HIDDEN) { // CraftBukkit - dead men tell no tales
+             this.send(new ClientboundChatPacket((new TranslatableComponent("chat.disabled.options")).withStyle(ChatFormatting.RED), ChatType.SYSTEM, Util.NIL_UUID));
+-        } else {
++        } else if (player.didPlayerJoinEvent) { // EMC - do not handle chat messages before they joined
+             this.player.resetLastActionTime();
+             String s = message.getRaw();
+ 
+@@ -3082,6 +3097,8 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+ 
+     @Override
+     public void handleKeepAlive(ServerboundKeepAlivePacket packet) {
++        // Purpur start
++        /*
+         //PlayerConnectionUtils.ensureMainThread(packetplayinkeepalive, this, this.player.getWorldServer()); // CraftBukkit // Paper - This shouldn't be on the main thread
+         if (this.keepAlivePending && packet.getId() == this.keepAliveChallenge) {
+             int i = (int) (Util.getMillis() - this.keepAliveTime);
+@@ -3095,7 +3112,14 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+             });
+             // Paper end
+         }
+-
++        */
++        long id = packet.getId();
++        if (keepAlives.size() > 0 && keepAlives.contains(id)) {
++            int ping = (int) (Util.getMillis() - id);
++            player.latency = (player.latency * 3 + ping) / 4;
++            keepAlives.clear(); // we got a valid response, lets roll with it and forget the rest
++        }
++        // Purpur end
+     }
+ 
+     @Override
+diff --git a/src/main/java/net/minecraft/server/network/ServerStatusPacketListenerImpl.java b/src/main/java/net/minecraft/server/network/ServerStatusPacketListenerImpl.java
+index 4fa79d37ff4e70c61672cce7c55257c46232c026..df43d0a0f3d1e34baabae150cbf01a008eb5a588 100644
+--- a/src/main/java/net/minecraft/server/network/ServerStatusPacketListenerImpl.java
++++ b/src/main/java/net/minecraft/server/network/ServerStatusPacketListenerImpl.java
+@@ -153,6 +153,7 @@ public class ServerStatusPacketListenerImpl implements ServerStatusPacketListene
+             this.connection.send(new ClientboundStatusResponsePacket(ping));
+             // CraftBukkit end
+             */
++            if (this.server.getStatus().getVersion() == null) return; // Purpur - do not respond to pings before we know the protocol version
+             com.destroystokyo.paper.network.StandardPaperServerListPingEventImpl.processRequest(this.server, this.connection);
+             // Paper end
+         }
+diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
+index 009e05d874c5a6ecfbc829d3f9ccb75fa84a4ae9..f22bbacfd7a3f5564679c8f7bf55427b3004839f 100644
+--- a/src/main/java/net/minecraft/world/entity/Entity.java
++++ b/src/main/java/net/minecraft/world/entity/Entity.java
+@@ -1763,6 +1763,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
+         this.yRotO = this.getYRot();
+         this.xRotO = this.getXRot();
+         this.setYHeadRot(yaw); // Paper - Update head rotation
++        if (valid && !this.isRemoved()) level.getChunk((int) Math.floor(this.getX()) >> 4, (int) Math.floor(this.getZ()) >> 4); // CraftBukkit // Paper // Purpur
+     }
+ 
+     public void absMoveTo(double x, double y, double z) {
+diff --git a/src/main/java/net/minecraft/world/entity/LivingEntity.java b/src/main/java/net/minecraft/world/entity/LivingEntity.java
+index af9c58944b38e8aeeca5dca75c9f97e49f2895f2..c4d54dfd88f8de90ccba52a0ad4f50f076d8461b 100644
+--- a/src/main/java/net/minecraft/world/entity/LivingEntity.java
++++ b/src/main/java/net/minecraft/world/entity/LivingEntity.java
+@@ -2925,7 +2925,7 @@ public abstract class LivingEntity extends Entity {
+             }
+         }
+ 
+-        this.aiStep();
++        if (!this.isRemoved()) this.aiStep(); // Purpur
+         double d0 = this.getX() - this.xo;
+         double d1 = this.getZ() - this.zo;
+         float f = (float) (d0 * d0 + d1 * d1);
+diff --git a/src/main/java/net/minecraft/world/entity/projectile/FireworkRocketEntity.java b/src/main/java/net/minecraft/world/entity/projectile/FireworkRocketEntity.java
+index fe502e148e218ae404e0049c0251d3e3ca08c825..015422d2a01c99c121481643473b8a129bbbac77 100644
+--- a/src/main/java/net/minecraft/world/entity/projectile/FireworkRocketEntity.java
++++ b/src/main/java/net/minecraft/world/entity/projectile/FireworkRocketEntity.java
+@@ -355,4 +355,11 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
+     public boolean isAttackable() {
+         return false;
+     }
++
++    // EMC start
++    @Override
++    public boolean shouldBeSaved() {
++        return false;
++    }
++    // EMC end
+ }
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+index ac41bc23d2f7e16bbacdc9b33fcf6c0d706fa023..dba5c4a65ab0f649d8dcb0e66398d5e5b0192854 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+@@ -373,7 +373,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+ 
+     @Override
+     public boolean unloadChunk(int x, int z) {
+-        return this.unloadChunk(x, z, true);
++        return this.unloadChunkRequest(x, z); // EMC
+     }
+ 
+     @Override
+diff --git a/src/main/java/org/bukkit/craftbukkit/legacy/CraftLegacy.java b/src/main/java/org/bukkit/craftbukkit/legacy/CraftLegacy.java
+index b2a15c986c7500a0ce227a54cb61ec3f5378f6f3..adc6f02bd3d381b3b059a69e947c57446163de9c 100644
+--- a/src/main/java/org/bukkit/craftbukkit/legacy/CraftLegacy.java
++++ b/src/main/java/org/bukkit/craftbukkit/legacy/CraftLegacy.java
+@@ -255,7 +255,7 @@ public final class CraftLegacy {
+     }
+ 
+     static {
+-        System.err.println("Initializing Legacy Material Support. Unless you have legacy plugins and/or data this is a bug!");
++        // System.err.println("Initializing Legacy Material Support. Unless you have legacy plugins and/or data this is a bug!"); // Purpur
+         if (MinecraftServer.getServer() != null && MinecraftServer.getServer().isDebugging()) {
+             new Exception().printStackTrace();
+         }
