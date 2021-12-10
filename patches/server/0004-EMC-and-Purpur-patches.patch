@@ -266,6 +266,40 @@ index fe502e148e218ae404e0049c0251d3e3ca08c825..015422d2a01c99c121481643473b8a12
 +    }
 +    // EMC end
  }
+diff --git a/src/main/java/net/minecraft/world/level/Level.java b/src/main/java/net/minecraft/world/level/Level.java
+index 90aa1d75b5c23e5ee27ceae9f6ef90de913a6601..1a7188b8b756b7fe625582b8e7144141cf9ed6dd 100644
+--- a/src/main/java/net/minecraft/world/level/Level.java
++++ b/src/main/java/net/minecraft/world/level/Level.java
+@@ -893,7 +893,11 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
+ 
+     public void neighborChanged(BlockPos pos, Block sourceBlock, BlockPos neighborPos) {
+         if (!this.isClientSide) {
+-            BlockState iblockdata = this.getBlockState(pos);
++            // EMC start
++            // BlockState iblockdata = this.getBlockState(pos);
++            BlockState iblockdata = this.getBlockStateIfLoaded(pos);
++            if (iblockdata == null) return;
++            // EMC end
+ 
+             try {
+                 // CraftBukkit start
+diff --git a/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java b/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
+index 05c46f3b3bce5225b819d86e6e06729a5093e092..bd64a98720819bafd9d7ce5fad0d1bcaa1910232 100644
+--- a/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
++++ b/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
+@@ -930,7 +930,11 @@ public abstract class BlockBehaviour {
+                 Direction enumdirection = aenumdirection[l];
+ 
+                 blockposition_mutableblockposition.setWithOffset(pos, enumdirection);
+-                BlockState iblockdata = world.getBlockState(blockposition_mutableblockposition);
++                // EMC start
++                //BlockState iblockdata = world.getBlockState(blockposition_mutableblockposition);
++                BlockState iblockdata = world.getBlockStateIfLoaded(blockposition_mutableblockposition);
++                if (iblockdata == null) continue;
++                // EMC end
+                 BlockState iblockdata1 = iblockdata.updateShape(enumdirection.getOpposite(), this.asState(), world, blockposition_mutableblockposition, pos);
+ 
+                 Block.updateOrDestroy(iblockdata, iblockdata1, world, blockposition_mutableblockposition, flags, maxUpdateDepth);
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 index ac41bc23d2f7e16bbacdc9b33fcf6c0d706fa023..dba5c4a65ab0f649d8dcb0e66398d5e5b0192854 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
