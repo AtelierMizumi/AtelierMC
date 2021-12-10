@@ -127,18 +127,6 @@ index 254a917cb1d706ebc6c2dd060971c6b264a8a50c..40a66cac9f91f745c2e03d7e935db67b
      }
  
      @Override
-diff --git a/src/main/java/net/minecraft/server/network/ServerStatusPacketListenerImpl.java b/src/main/java/net/minecraft/server/network/ServerStatusPacketListenerImpl.java
-index 4fa79d37ff4e70c61672cce7c55257c46232c026..df43d0a0f3d1e34baabae150cbf01a008eb5a588 100644
---- a/src/main/java/net/minecraft/server/network/ServerStatusPacketListenerImpl.java
-+++ b/src/main/java/net/minecraft/server/network/ServerStatusPacketListenerImpl.java
-@@ -153,6 +153,7 @@ public class ServerStatusPacketListenerImpl implements ServerStatusPacketListene
-             this.connection.send(new ClientboundStatusResponsePacket(ping));
-             // CraftBukkit end
-             */
-+            if (this.server.getStatus().getVersion() == null) return; // Purpur - do not respond to pings before we know the protocol version
-             com.destroystokyo.paper.network.StandardPaperServerListPingEventImpl.processRequest(this.server, this.connection);
-             // Paper end
-         }
 diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
 index 009e05d874c5a6ecfbc829d3f9ccb75fa84a4ae9..f22bbacfd7a3f5564679c8f7bf55427b3004839f 100644
 --- a/src/main/java/net/minecraft/world/entity/Entity.java
