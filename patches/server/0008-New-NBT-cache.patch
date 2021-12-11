@@ -42,31 +42,31 @@ index 0000000000000000000000000000000000000000..999cebf7a9a209b1ca75d4e59be183d1
 +    }
 +}
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 71beb3ea3eaa058629f2b7486480c411ca5a9811..4dc3b536d01515452c9dd562e3af1b4bef414660 100644
+index bfcde65302acf0c7c5b27063b0061003ce757848..7eb1c3baea59cf9eba6aeb15ce1bd999409adba1 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -1089,7 +1089,9 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
          }
          // Spigot start
          MCUtil.asyncExecutor.shutdown(); // Paper
-+        this.playerDataStorage.executorService.shutdown(); // Atelier
++        this.playerDataStorage.executorService.shutdown(); // AtelierMC
          try { MCUtil.asyncExecutor.awaitTermination(30, java.util.concurrent.TimeUnit.SECONDS); // Paper
-+            this.playerDataStorage.executorService.awaitTermination(30, java.util.concurrent.TimeUnit.SECONDS); // Atelier - New async nbt cache
++            this.playerDataStorage.executorService.awaitTermination(30, java.util.concurrent.TimeUnit.SECONDS); // AtelierMC - New async nbt cache
          } catch (java.lang.InterruptedException ignored) {} // Paper
          if (org.spigotmc.SpigotConfig.saveUserCacheOnStopOnly) {
              MinecraftServer.LOGGER.info("Saving usercache.json");
 diff --git a/src/main/java/net/minecraft/world/level/storage/PlayerDataStorage.java b/src/main/java/net/minecraft/world/level/storage/PlayerDataStorage.java
-index 331ed6aa983714d6fc3596526fc7df0ab993062c..eb0e033e237c12628018ec4a60833a6a613f2d41 100644
+index 331ed6aa983714d6fc3596526fc7df0ab993062c..eb9f66433d5227611a2e7b00aff2156c84b8192f 100644
 --- a/src/main/java/net/minecraft/world/level/storage/PlayerDataStorage.java
 +++ b/src/main/java/net/minecraft/world/level/storage/PlayerDataStorage.java
 @@ -24,6 +24,11 @@ public class PlayerDataStorage {
      private static final Logger LOGGER = LogManager.getLogger();
      private final File playerDir;
      protected final DataFixer fixerUpper;
-+    // Atelier start - NBT Cache system
++    // AtelierMC start - NBT Cache system
 +    private final ga.caomile.atelier.cache.NBTCache dataCache = new ga.caomile.atelier.cache.NBTCache();
 +    public final java.util.concurrent.ExecutorService executorService = java.util.concurrent.Executors.newSingleThreadExecutor(new com.google.common.util.concurrent.ThreadFactoryBuilder().setDaemon(true).setPriority(Thread.NORM_PRIORITY - 1).build());
-+    // Atelier end
++    // AtelierMC end
 +
  
      public PlayerDataStorage(LevelStorageSource.LevelStorageAccess session, DataFixer dataFixer) {
@@ -78,7 +78,7 @@ index 331ed6aa983714d6fc3596526fc7df0ab993062c..eb0e033e237c12628018ec4a60833a6a
 -            NbtIo.writeCompressed(nbttagcompound, file);
 -            File file1 = new File(this.playerDir, player.getStringUUID() + ".dat");
 -            File file2 = new File(this.playerDir, player.getStringUUID() + ".dat_old");
-+            // Atelier start - NBT Cache system
++            // AtelierMC start - NBT Cache system
 +            Runnable task = () -> {
 +                try {
 +                    NbtIo.writeCompressed(nbttagcompound, file);
@@ -95,7 +95,7 @@ index 331ed6aa983714d6fc3596526fc7df0ab993062c..eb0e033e237c12628018ec4a60833a6a
 +                this.dataCache.put(file, nbttagcompound);
 +            }
 +            this.executorService.execute(task);
-+            // Atelier end
++            // AtelierMC end
          } catch (Exception exception) {
              PlayerDataStorage.LOGGER.warn("Failed to save player data for {}", player.getScoreboardName(), exception); // Paper
          }
@@ -104,7 +104,7 @@ index 331ed6aa983714d6fc3596526fc7df0ab993062c..eb0e033e237c12628018ec4a60833a6a
              boolean usingWrongFile = false;
              boolean normalFile = file.exists() && file.isFile(); // Akarin - ensures normal file
 -            if ( org.bukkit.Bukkit.getOnlineMode() && !normalFile ) // Paper - Check online mode first // Akarin - ensures normal file
-+            // Atelier start
++            // AtelierMC start
 +            CompoundTag playerData;
 +            synchronized (this.dataCache){
 +                playerData = this.dataCache.get(file);
@@ -121,17 +121,17 @@ index 331ed6aa983714d6fc3596526fc7df0ab993062c..eb0e033e237c12628018ec4a60833a6a
                      org.bukkit.Bukkit.getServer().getLogger().warning( "Using offline mode UUID file for player " + player.getScoreboardName() + " as it is the only copy we can find." );
                  }
              }
-+            // Atelier end
++            // AtelierMC end
              // Spigot End
  
 -            if (normalFile) { // Akarin - avoid double I/O operation
-+            // Atelier start
++            // AtelierMC start
 +            if (playerData != null) {
 +                nbttagcompound = playerData;
 +            } else if (normalFile) { // Akarin - avoid double I/O operation
                  nbttagcompound = NbtIo.readCompressed(file);
              }
-+            // Atelier end
++            // AtelierMC end
              // Spigot Start
              if ( usingWrongFile )
              {

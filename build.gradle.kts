@@ -65,7 +65,7 @@ val initSubmodules by tasks.registering {
 
 
 paperweight {
-    serverProject.set(project(":atelier-server"))
+    serverProject.set(project(":ateliermc-server"))
 
     remapRepo.set("https://maven.fabricmc.net/")
     decompileRepo.set("https://files.minecraftforge.net/maven/")
@@ -81,12 +81,12 @@ paperweight {
                 register("api") {
                     upstreamDir.set(pufferfishDir.dir("pufferfish-api"))
                     patchDir.set(layout.projectDirectory.dir("patches/api"))
-                    outputDir.set(layout.projectDirectory.dir("atelier-api"))
+                    outputDir.set(layout.projectDirectory.dir("ateliermc-api"))
                 }
                 register("server") {
                     upstreamDir.set(pufferfishDir.dir("pufferfish-server"))
                     patchDir.set(layout.projectDirectory.dir("patches/server"))
-                    outputDir.set(layout.projectDirectory.dir("atelier-server"))
+                    outputDir.set(layout.projectDirectory.dir("ateliermc-server"))
                     importMcDev.set(true)
                 }
             }

@@ -5,7 +5,7 @@ Subject: [PATCH] Remove Pufferfish features
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 73b0e9b88f1d3612a1208f503fb790559aa6e846..f83104c8c9e8ee8bc4d14b27743c169d52a4649c 100644
+index 2a7910dc9cee69309b6ea87b777e9d4291992636..a899889a28d8d7ab62054bbd8baf46b6b73765b3 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -61,7 +61,7 @@ dependencies {

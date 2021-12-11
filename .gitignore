@@ -45,7 +45,7 @@ out/
 # other stuff
 run/
 
-atelier-server
-atelier-api
+ateliermc-server
+ateliermc-api
 
 !gradle/wrapper/gradle-wrapper.jar

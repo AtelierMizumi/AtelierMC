@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: JustMangoT <minetuan2@gmail.com>
 Date: Fri, 10 Dec 2021 12:24:01 +0700
-Subject: [PATCH] Optimised halloween checker
+Subject: [PATCH] Optimized halloween checker
 
 
 diff --git a/src/main/java/ga/caomile/atelier/HalloweenChecker.java b/src/main/java/ga/caomile/atelier/HalloweenChecker.java
@@ -67,26 +67,26 @@ index 0000000000000000000000000000000000000000..04d55f06c5b831da25fcb27e3bb39fc4
 +    }
 +}
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 4dc3b536d01515452c9dd562e3af1b4bef414660..26f7945ddecc728bc6383a04eb475c2c584b4439 100644
+index 7eb1c3baea59cf9eba6aeb15ce1bd999409adba1..522ef905239a7f7e263bffa3ee874253493b804d 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -1536,6 +1536,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
              this.runAllTasks();
          }
          // Paper end
-+        ga.caomile.atelier.HalloweenChecker.tick(); // Atelier
++        ga.caomile.atelier.HalloweenChecker.tick(); // AtelierMC
          // Paper start
          long endTime = System.nanoTime();
          long remaining = (TICK_TIME - (endTime - lastTick)) - catchupTime;
 diff --git a/src/main/java/net/minecraft/world/entity/ambient/Bat.java b/src/main/java/net/minecraft/world/entity/ambient/Bat.java
-index a76b754305036bf9c6387e27b86ec1559b290774..9583b2360db147829e5bf307a140a3566b09af9b 100644
+index a76b754305036bf9c6387e27b86ec1559b290774..ea13d8870a214b671cb9ed16e007d2e8a63c4225 100644
 --- a/src/main/java/net/minecraft/world/entity/ambient/Bat.java
 +++ b/src/main/java/net/minecraft/world/entity/ambient/Bat.java
 @@ -254,11 +254,15 @@ public class Bat extends AmbientCreature {
          }
      }
  
-+    // Atelier start - optimised halloween checker
++    // AtelierMC start - optimized halloween checker
 +    /*
      // Pufferfish start - only check for spooky season once an hour
      private static boolean isSpookySeason = false;
@@ -107,19 +107,19 @@ index a76b754305036bf9c6387e27b86ec1559b290774..9583b2360db147829e5bf307a140a356
 +        return ga.caomile.atelier.HalloweenChecker.isHalloweenSeason();
      }
      // Pufferfish end
-+    // Atelier end
++    // AtelierMC end
  
      @Override
      protected float getStandingEyeHeight(Pose pose, EntityDimensions dimensions) {
 diff --git a/src/main/java/net/minecraft/world/entity/monster/AbstractSkeleton.java b/src/main/java/net/minecraft/world/entity/monster/AbstractSkeleton.java
-index e23fe546291e670f89447398507d08a0a07efa85..f04bbe31ed10e5f5ad80d777681541ad43da83f6 100644
+index e23fe546291e670f89447398507d08a0a07efa85..dab2f5fab940729d9b4d836eea0837aee92a868c 100644
 --- a/src/main/java/net/minecraft/world/entity/monster/AbstractSkeleton.java
 +++ b/src/main/java/net/minecraft/world/entity/monster/AbstractSkeleton.java
 @@ -155,14 +155,19 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
          this.reassessWeaponGoal();
          this.setCanPickUpLoot(this.level.paperConfig.skeletonsAlwaysCanPickUpLoot || this.random.nextFloat() < 0.55F * difficulty.getSpecialMultiplier()); // Paper
          if (this.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
-+            // Atelier start - optimised halloween checker
++            // AtelierMC start - optimized halloween checker
 +            /*
              LocalDate localdate = LocalDate.now();
              int i = localdate.get(ChronoField.DAY_OF_MONTH);
@@ -131,19 +131,19 @@ index e23fe546291e670f89447398507d08a0a07efa85..f04bbe31ed10e5f5ad80d777681541ad
                  this.setItemSlot(EquipmentSlot.HEAD, new ItemStack(this.random.nextFloat() < 0.1F ? Blocks.JACK_O_LANTERN : Blocks.CARVED_PUMPKIN));
                  this.armorDropChances[EquipmentSlot.HEAD.getIndex()] = 0.0F;
              }
-+            // Atelier end
++            // AtelierMC end
          }
  
          return entityData;
 diff --git a/src/main/java/net/minecraft/world/entity/monster/Zombie.java b/src/main/java/net/minecraft/world/entity/monster/Zombie.java
-index e72e9b748b3f3e34baddf01366c703efba50c67c..8bec297f6722fb13924be47d93933c7db8892b4b 100644
+index e72e9b748b3f3e34baddf01366c703efba50c67c..582ae1b4a192546f0f75b25affe3cbec223ea35f 100644
 --- a/src/main/java/net/minecraft/world/entity/monster/Zombie.java
 +++ b/src/main/java/net/minecraft/world/entity/monster/Zombie.java
 @@ -536,14 +536,19 @@ public class Zombie extends Monster {
          }
  
          if (this.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
-+            // Atelier start - optimised halloween checker
++            // AtelierMC start - optimized halloween checker
 +            /*
              LocalDate localdate = LocalDate.now();
              int i = localdate.get(ChronoField.DAY_OF_MONTH);
@@ -155,7 +155,7 @@ index e72e9b748b3f3e34baddf01366c703efba50c67c..8bec297f6722fb13924be47d93933c7d
                  this.setItemSlot(EquipmentSlot.HEAD, new ItemStack(this.random.nextFloat() < 0.1F ? Blocks.JACK_O_LANTERN : Blocks.CARVED_PUMPKIN));
                  this.armorDropChances[EquipmentSlot.HEAD.getIndex()] = 0.0F;
              }
-+            // Atelier end
++            // AtelierMC end
          }
  
          this.handleAttributes(f);
