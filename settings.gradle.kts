@@ -5,5 +5,5 @@ pluginManagement {
     }
 }
 
-rootProject.name = "atelier"
+rootProject.name = "ateliermc"
 include("ateliermc-api", "ateliermc-server")
