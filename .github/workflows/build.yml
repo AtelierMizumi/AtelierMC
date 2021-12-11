@@ -33,7 +33,7 @@ jobs:
         run: |
           ./gradlew applyPatches --stacktrace --no-daemon
       - name: Get MC Version
-        run: echo "::set-output name=mcver::$(grep mcVersion gradle.properties | awk '{print $3;}')"
+        run: echo "::set-output name=mcver::$(grep mcVersion gradle.properties | cut -d "=" -f2)"
         id: mcver
       - name: Build
         run: |
