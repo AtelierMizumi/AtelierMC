@@ -41,7 +41,7 @@ jobs:
       - name: Archive Paperclip
         uses: actions/upload-artifact@v2
         with:
-          name: Patina
+          name: AtelierMC
           path: build/libs/atelier-paperclip-${{ steps.mcver.outputs.mcver }}-R0.1-SNAPSHOT.jar
       - name: Prepare Github Page Files
         run: |
