@@ -5,13 +5,13 @@ Subject: [PATCH] Jettpack patches
 
 
 diff --git a/src/main/java/net/minecraft/Util.java b/src/main/java/net/minecraft/Util.java
-index 64b98810a5657c6e9d334a16018497bb09365a2e..be7c477178b4a72d7969ff169aa90273d8ef1e52 100644
+index e33265ff8793eae1075dc6dcb5630b83c09ae336..f992299dca87a3ae42e438338ad6ff7697e06450 100644
 --- a/src/main/java/net/minecraft/Util.java
 +++ b/src/main/java/net/minecraft/Util.java
-@@ -61,6 +61,12 @@ import net.minecraft.world.level.block.state.properties.Property;
- import org.apache.commons.io.IOUtils;
- import org.apache.logging.log4j.LogManager;
- import org.apache.logging.log4j.Logger;
+@@ -67,6 +67,12 @@ import org.apache.logging.log4j.core.LoggerContext;
+ import org.apache.logging.log4j.core.config.Configuration;
+ import org.apache.logging.log4j.core.lookup.StrLookup;
+ import org.apache.logging.log4j.core.lookup.StrSubstitutor;
 +// Jettpack start
 +import java.util.concurrent.AbstractExecutorService;
 +import net.minecraft.server.ServerWorkerWrapper;
@@ -21,7 +21,7 @@ index 64b98810a5657c6e9d334a16018497bb09365a2e..be7c477178b4a72d7969ff169aa90273
  
  public class Util {
      static final Logger LOGGER = LogManager.getLogger();
-@@ -142,7 +148,45 @@ public class Util {
+@@ -151,7 +157,45 @@ public class Util {
          if (i <= 0) {
              executorService = MoreExecutors.newDirectExecutorService();
          } else {
@@ -126,7 +126,7 @@ index 74003e8887624736b154807e07835c315e836cf3..ec3d3e3e3497eeb921125ace1d336c13
      public static Runnable once(Runnable run) {
          AtomicBoolean ran = new AtomicBoolean(false);
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index fc3caf31ac8390e89fd36c8d382d4445b599f248..71beb3ea3eaa058629f2b7486480c411ca5a9811 100644
+index 3b8c741ce6c22658b4b6b3dcd091130a41a76551..bfcde65302acf0c7c5b27063b0061003ce757848 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -373,6 +373,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
@@ -185,7 +185,7 @@ index 0000000000000000000000000000000000000000..e641609e92f3dc6b1918a04e45d8f3cd
 +}
 +
 diff --git a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
-index 88e910ed4d959f9fd7dfade4d3b61564c56a4570..a76ac3a3020de2d5c8aa4c68bdf7c2f29a3385bf 100644
+index 6006911c5a307d757fee5a0a8ab3772df845e43b..0dc8b6e779ebfa5394485fea445c9da7713ed018 100644
 --- a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
 @@ -426,7 +426,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
@@ -193,7 +193,7 @@ index 88e910ed4d959f9fd7dfade4d3b61564c56a4570..a76ac3a3020de2d5c8aa4c68bdf7c2f2
  
          try {
 -            bufferedwriter.write(String.format("sync-chunk-writes=%s%n", dedicatedserverproperties.syncChunkWrites));
-+            // bufferedwriter.write(String.format("sync-chunk-writes=%s%n", dedicatedserverproperties.syncChunkWrites)); // JettPack - remove 'sync-chunk-writes' in server.properties
++            // bufferedwriter.write(String.format("sync-chunk-writes=%s%n", dedicatedserverproperties.syncChunkWrites)); // Jettpack - remove 'sync-chunk-writes' in server.properties
              bufferedwriter.write(String.format("gamemode=%s%n", dedicatedserverproperties.gamemode));
              bufferedwriter.write(String.format("spawn-monsters=%s%n", dedicatedserverproperties.spawnMonsters));
              bufferedwriter.write(String.format("entity-broadcast-range-percentage=%d%n", dedicatedserverproperties.entityBroadcastRangePercentage));

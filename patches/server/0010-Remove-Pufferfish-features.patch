@@ -18,7 +18,7 @@ index 2a7910dc9cee69309b6ea87b777e9d4291992636..a899889a28d8d7ab62054bbd8baf46b6
      testImplementation("io.github.classgraph:classgraph:4.8.47") // Paper - mob goal test
      testImplementation("junit:junit:4.13.1")
 diff --git a/src/main/java/gg/pufferfish/pufferfish/PufferfishConfig.java b/src/main/java/gg/pufferfish/pufferfish/PufferfishConfig.java
-index 42783a321b489aeed7d23a2e5cae2ee44394bbd9..aa70437de9b9be0e200e98bcb15021a46622495a 100644
+index e78a41b9e19e78faa0fc25911e89c5fb32a0795f..0a0c8483caa570f46a0ac01800fafe1cb073c48a 100644
 --- a/src/main/java/gg/pufferfish/pufferfish/PufferfishConfig.java
 +++ b/src/main/java/gg/pufferfish/pufferfish/PufferfishConfig.java
 @@ -11,7 +11,6 @@ import net.minecraft.world.entity.EntityType;
@@ -49,16 +49,16 @@ index 42783a321b489aeed7d23a2e5cae2ee44394bbd9..aa70437de9b9be0e200e98bcb15021a4
  	
  	public static boolean enableBooks;
  	private static void books() {
-@@ -225,6 +228,8 @@ public class PufferfishConfig {
-         setComment("dab", "Optimizes entity brains when", "they're far away from the player");
-     }
+@@ -229,6 +232,8 @@ public class PufferfishConfig {
+ 				"This can improve performance by a few percent, but has minor gameplay implications.");
+ 	}
  
 +    // Atelier start - Remove flare
 +    /*
      public static URI profileWebUrl;
      private static void profilerOptions() {
          profileWebUrl = URI.create(getString("flare.url", "https://flare.airplane.gg", "Sets the server to use for profiles."));
-@@ -248,7 +253,8 @@ public class PufferfishConfig {
+@@ -252,7 +257,8 @@ public class PufferfishConfig {
          setComment("web-services", "Options for connecting to Pufferfish/Airplane's online utilities");
  
      }

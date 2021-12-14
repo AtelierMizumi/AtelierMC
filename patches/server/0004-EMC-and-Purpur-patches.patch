@@ -54,7 +54,7 @@ index f6b73f8c6638ddf79e45042f5c8902ea1f271f5c..5a34a501715ef7b5f0abf84878ee90ad
      }
  
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index b2bed5512d38044c672cc7aebf5ba0b3485f98ab..27acea5831e3e6b408c5adcd3799db38e3e898ea 100644
+index cec1208aaf12d685b862e9aeb3d9b3062fcf5478..2d061d5ebf58a2e08e294e0eb9ffb89305c240e6 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -304,6 +304,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
@@ -109,7 +109,7 @@ index e80176708db486190dd527e3ade5fc690ceb39f7..96e5d68f405d748f8b35b415642b8473
          this.entity.stopSeenByPlayer(player);
          player.connection.send(new ClientboundRemoveEntitiesPacket(new int[]{this.entity.getId()}));
 diff --git a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
-index 254a917cb1d706ebc6c2dd060971c6b264a8a50c..40a66cac9f91f745c2e03d7e935db67bf15754f4 100644
+index 0f7f811510188f2b37443c5d2378a138dbf43b32..784df84250cb98098669631c3fe09341eb8d1125 100644
 --- a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
 +++ b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
 @@ -227,6 +227,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
@@ -120,7 +120,7 @@ index 254a917cb1d706ebc6c2dd060971c6b264a8a50c..40a66cac9f91f745c2e03d7e935db67b
      // CraftBukkit start - multithreaded fields
      private final AtomicInteger chatSpamTickCount = new AtomicInteger();
      private final java.util.concurrent.atomic.AtomicInteger tabSpamLimiter = new java.util.concurrent.atomic.AtomicInteger(); // Paper - configurable tab spam limits
-@@ -357,6 +358,8 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+@@ -358,6 +359,8 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
          long currentTime = Util.getMillis();
          long elapsedTime = currentTime - this.keepAliveTime;
  
@@ -129,7 +129,7 @@ index 254a917cb1d706ebc6c2dd060971c6b264a8a50c..40a66cac9f91f745c2e03d7e935db67b
          if (this.keepAlivePending) {
              if (!this.processedDisconnect && elapsedTime >= KEEPALIVE_LIMIT) { // check keepalive limit, don't fire if already disconnected
                  ServerGamePacketListenerImpl.LOGGER.warn("{} was kicked due to keepalive timeout!", this.player.getScoreboardName()); // more info
-@@ -370,6 +373,18 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+@@ -371,6 +374,18 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
                  this.send(new ClientboundKeepAlivePacket(this.keepAliveChallenge));
              }
          }
@@ -148,7 +148,7 @@ index 254a917cb1d706ebc6c2dd060971c6b264a8a50c..40a66cac9f91f745c2e03d7e935db67b
          // Paper end
  
          this.server.getProfiler().pop();
-@@ -2067,7 +2082,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+@@ -2068,7 +2083,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
      private void handleChat(TextFilter.FilteredText message) {
          if (this.player.isRemoved() || this.player.getChatVisibility() == ChatVisiblity.HIDDEN) { // CraftBukkit - dead men tell no tales
              this.send(new ClientboundChatPacket((new TranslatableComponent("chat.disabled.options")).withStyle(ChatFormatting.RED), ChatType.SYSTEM, Util.NIL_UUID));
@@ -157,7 +157,7 @@ index 254a917cb1d706ebc6c2dd060971c6b264a8a50c..40a66cac9f91f745c2e03d7e935db67b
              this.player.resetLastActionTime();
              String s = message.getRaw();
  
-@@ -3082,6 +3097,8 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+@@ -3083,6 +3098,8 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
  
      @Override
      public void handleKeepAlive(ServerboundKeepAlivePacket packet) {
@@ -166,7 +166,7 @@ index 254a917cb1d706ebc6c2dd060971c6b264a8a50c..40a66cac9f91f745c2e03d7e935db67b
          //PlayerConnectionUtils.ensureMainThread(packetplayinkeepalive, this, this.player.getWorldServer()); // CraftBukkit // Paper - This shouldn't be on the main thread
          if (this.keepAlivePending && packet.getId() == this.keepAliveChallenge) {
              int i = (int) (Util.getMillis() - this.keepAliveTime);
-@@ -3095,7 +3112,14 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+@@ -3096,7 +3113,14 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
              });
              // Paper end
          }
@@ -195,7 +195,7 @@ index 4fa79d37ff4e70c61672cce7c55257c46232c026..df43d0a0f3d1e34baabae150cbf01a00
              // Paper end
          }
 diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
-index 009e05d874c5a6ecfbc829d3f9ccb75fa84a4ae9..f22bbacfd7a3f5564679c8f7bf55427b3004839f 100644
+index 3fb5d13103aff84ed93b0a0c844f9d1203352896..6da22c91c97d6b30c734b1f2a167f714958ae7a5 100644
 --- a/src/main/java/net/minecraft/world/entity/Entity.java
 +++ b/src/main/java/net/minecraft/world/entity/Entity.java
 @@ -1763,6 +1763,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
