@@ -149,6 +149,28 @@ index 96e5d68f405d748f8b35b415642b84739bc5e6d7..c71f56cd178f3328df1f7b9f8845853f
          }
  
          if (this.entity instanceof LivingEntity) {
+diff --git a/src/main/java/net/minecraft/server/level/WorldGenRegion.java b/src/main/java/net/minecraft/server/level/WorldGenRegion.java
+index 9b25d36fe5230e287d81b99be31b9eddd8e76002..20235df3239ef941f16c437acb7ee0831da18050 100644
+--- a/src/main/java/net/minecraft/server/level/WorldGenRegion.java
++++ b/src/main/java/net/minecraft/server/level/WorldGenRegion.java
+@@ -226,7 +226,7 @@ public class WorldGenRegion implements WorldGenLevel {
+                 Block.dropResources(iblockdata, this.level, pos, tileentity, breakingEntity, ItemStack.EMPTY);
+             }
+ 
+-            return this.setBlock(pos, Blocks.AIR.defaultBlockState(), 3, maxUpdateDepth);
++            return this.setBlock(pos, Blocks.AIR.defaultBlockState(), 3, maxUpdateDepth, true); // Slice
+         }
+     }
+ 
+@@ -292,7 +292,7 @@ public class WorldGenRegion implements WorldGenLevel {
+     }
+ 
+     @Override
+-    public boolean setBlock(BlockPos pos, BlockState state, int flags, int maxUpdateDepth) {
++    public boolean setBlock(BlockPos pos, BlockState state, int flags, int maxUpdateDepth, boolean checkLight) { // Slice
+         if (!this.ensureCanWrite(pos)) {
+             return false;
+         } else {
 diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
 index 9fdfd567596101d008d13ec93272ec66c884a4cc..22d9f3a07047b70cd51d32cfa41d1e9a2d45b931 100644
 --- a/src/main/java/net/minecraft/world/entity/Entity.java
@@ -177,6 +199,19 @@ index 9fdfd567596101d008d13ec93272ec66c884a4cc..22d9f3a07047b70cd51d32cfa41d1e9a
          // CraftBukkit end
      }
  
+diff --git a/src/main/java/net/minecraft/world/entity/LivingEntity.java b/src/main/java/net/minecraft/world/entity/LivingEntity.java
+index 66f567145d65e5bb46b6c13250cc439b612abdc2..892fd7608328817888b936b932dbb26e8cad6cf3 100644
+--- a/src/main/java/net/minecraft/world/entity/LivingEntity.java
++++ b/src/main/java/net/minecraft/world/entity/LivingEntity.java
+@@ -3044,7 +3044,7 @@ public abstract class LivingEntity extends Entity {
+ 
+             ItemStack itemstack1 = this.getItemBySlot(enumitemslot);
+ 
+-            if (!ItemStack.matches(itemstack1, itemstack)) {
++            if (!ItemStack.isSameIgnoreDurability(itemstack1, itemstack)) { // Slice - Don't send equipment updates if only durability changed
+                 // Paper start - PlayerArmorChangeEvent
+                 if (this instanceof ServerPlayer && enumitemslot.getType() == EquipmentSlot.Type.ARMOR) {
+                     final org.bukkit.inventory.ItemStack oldItem = CraftItemStack.asBukkitCopy(itemstack);
 diff --git a/src/main/java/net/minecraft/world/entity/player/Player.java b/src/main/java/net/minecraft/world/entity/player/Player.java
 index 2c00a766130a7f682fc6c4c74321e10637ca7932..6eff69877f2f6a20fece578e20a587743c7dd0bd 100644
 --- a/src/main/java/net/minecraft/world/entity/player/Player.java
@@ -190,6 +225,128 @@ index 2c00a766130a7f682fc6c4c74321e10637ca7932..6eff69877f2f6a20fece578e20a58774
      }
  
      @Override
+diff --git a/src/main/java/net/minecraft/world/level/Level.java b/src/main/java/net/minecraft/world/level/Level.java
+index d3fb3915df05900e855d088f196c36f82b1ed1f4..c15af04acde102dc7eb60deab116f25ce018c094 100644
+--- a/src/main/java/net/minecraft/world/level/Level.java
++++ b/src/main/java/net/minecraft/world/level/Level.java
+@@ -647,12 +647,12 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
+     }
+ 
+     @Override
+-    public final boolean setBlock(BlockPos pos, BlockState state, int flags) { // Paper - final for inline
+-        return this.setBlock(pos, state, flags, 512);
++    public final boolean setBlock(BlockPos pos, BlockState state, int flags, boolean checkLight) { // Paper - final for inline // Slice
++        return this.setBlock(pos, state, flags, 512, checkLight); // Slice
+     }
+ 
+     @Override
+-    public boolean setBlock(BlockPos pos, BlockState state, int flags, int maxUpdateDepth) {
++    public boolean setBlock(BlockPos pos, BlockState state, int flags, int maxUpdateDepth, boolean checkLight) { // Slice
+         // CraftBukkit start - tree generation
+         if (this.captureTreeGeneration) {
+             // Paper start
+@@ -699,7 +699,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
+             } else {
+                 BlockState iblockdata2 = this.getBlockState(pos);
+ 
+-                if ((flags & 128) == 0 && iblockdata2 != iblockdata1 && (iblockdata2.getLightBlock(this, pos) != iblockdata1.getLightBlock(this, pos) || iblockdata2.getLightEmission() != iblockdata1.getLightEmission() || iblockdata2.useShapeForLightOcclusion() || iblockdata1.useShapeForLightOcclusion())) {
++                if (checkLight && (flags & 128) == 0 && iblockdata2 != iblockdata1 && (iblockdata2.getLightBlock(this, pos) != iblockdata1.getLightBlock(this, pos) || iblockdata2.getLightEmission() != iblockdata1.getLightEmission() || iblockdata2.useShapeForLightOcclusion() || iblockdata1.useShapeForLightOcclusion())) { // Slice
+                     this.getProfiler().push("queueCheckLight");
+                     this.getChunkSource().getLightEngine().checkBlock(pos);
+                     this.getProfiler().pop();
+@@ -841,7 +841,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
+                 Block.dropResources(iblockdata, this, pos, tileentity, breakingEntity, ItemStack.EMPTY);
+             }
+ 
+-            boolean flag1 = this.setBlock(pos, fluid.createLegacyBlock(), 3, maxUpdateDepth);
++            boolean flag1 = this.setBlock(pos, fluid.createLegacyBlock(), 3, maxUpdateDepth, true); // Slice
+ 
+             if (flag1) {
+                 this.gameEvent(breakingEntity, GameEvent.BLOCK_DESTROY, pos);
+diff --git a/src/main/java/net/minecraft/world/level/LevelWriter.java b/src/main/java/net/minecraft/world/level/LevelWriter.java
+index 134e5ec79bf2dddd4e31930f8a7cb2c02fa29518..aa005b7a38ca5d2e501365e5038df801e66ddb81 100644
+--- a/src/main/java/net/minecraft/world/level/LevelWriter.java
++++ b/src/main/java/net/minecraft/world/level/LevelWriter.java
+@@ -7,12 +7,18 @@ import net.minecraft.world.level.block.state.BlockState;
+ 
+ public interface LevelWriter {
+ 
+-    boolean setBlock(BlockPos pos, BlockState state, int flags, int maxUpdateDepth);
++    boolean setBlock(BlockPos pos, BlockState state, int flags, int maxUpdateDepth, boolean checkLight); // Slice
+ 
+     default boolean setBlock(BlockPos pos, BlockState state, int flags) {
+-        return this.setBlock(pos, state, flags, 512);
++        return this.setBlock(pos, state, flags, 512, true); // Slice
+     }
+ 
++    // Slice start
++    default boolean setBlock(BlockPos pos, BlockState state, int flags, boolean checkLight) {
++        return this.setBlock(pos, state, flags, 512, checkLight);
++    }
++    // Slice end
++
+     boolean removeBlock(BlockPos pos, boolean move);
+ 
+     default boolean destroyBlock(BlockPos pos, boolean drop) {
+diff --git a/src/main/java/net/minecraft/world/level/block/Block.java b/src/main/java/net/minecraft/world/level/block/Block.java
+index ab5b9f00123e2ede2931ffc520684e482aac49b4..06497f4f4f76d31573c8c7a9603ead6f0bf86742 100644
+--- a/src/main/java/net/minecraft/world/level/block/Block.java
++++ b/src/main/java/net/minecraft/world/level/block/Block.java
+@@ -195,7 +195,7 @@ public class Block extends BlockBehaviour implements ItemLike {
+                     world.destroyBlock(pos, (flags & 32) == 0, (Entity) null, maxUpdateDepth);
+                 }
+             } else {
+-                world.setBlock(pos, newState, flags & -33, maxUpdateDepth);
++                world.setBlock(pos, newState, flags & -33, maxUpdateDepth, true); // Slice
+             }
+         }
+ 
+diff --git a/src/main/java/org/bukkit/craftbukkit/block/CraftBlock.java b/src/main/java/org/bukkit/craftbukkit/block/CraftBlock.java
+index ca320ef8a28fe15b32197669419981c4c2fcafd9..3112a3c7bd92c5a5aaebc1e188ddff3dc8370760 100644
+--- a/src/main/java/org/bukkit/craftbukkit/block/CraftBlock.java
++++ b/src/main/java/org/bukkit/craftbukkit/block/CraftBlock.java
+@@ -176,17 +176,31 @@ public class CraftBlock implements Block {
+         this.setBlockData(data, true);
+     }
+ 
++    // Slice start
+     @Override
+     public void setBlockData(BlockData data, boolean applyPhysics) {
++        setBlockData(data, applyPhysics, true);
++    }
++
++    @Override
++    public void setBlockData(BlockData data, boolean applyPhysics, boolean checkLight) {
+         Preconditions.checkArgument(data != null, "BlockData cannot be null");
+-        this.setTypeAndData(((CraftBlockData) data).getState(), applyPhysics);
++        this.setTypeAndData(((CraftBlockData) data).getState(), applyPhysics, checkLight);
+     }
+ 
+     boolean setTypeAndData(final net.minecraft.world.level.block.state.BlockState blockData, final boolean applyPhysics) {
+         return CraftBlock.setTypeAndData(this.world, this.position, this.getNMS(), blockData, applyPhysics);
+     }
+ 
++    boolean setTypeAndData(final net.minecraft.world.level.block.state.BlockState blockData, final boolean applyPhysics, boolean checkLight) {
++        return CraftBlock.setTypeAndData(this.world, this.position, this.getNMS(), blockData, applyPhysics, checkLight);
++    }
++
+     public static boolean setTypeAndData(LevelAccessor world, BlockPos position, net.minecraft.world.level.block.state.BlockState old, net.minecraft.world.level.block.state.BlockState blockData, boolean applyPhysics) {
++        return CraftBlock.setTypeAndData(world, position, old, blockData, applyPhysics, true);
++    }
++    // Slice end
++    public static boolean setTypeAndData(LevelAccessor world, BlockPos position, net.minecraft.world.level.block.state.BlockState old, net.minecraft.world.level.block.state.BlockState blockData, boolean applyPhysics, boolean checkLight) { // Slice
+         // SPIGOT-611: need to do this to prevent glitchiness. Easier to handle this here (like /setblock) than to fix weirdness in tile entity cleanup
+         if (old.hasBlockEntity() && blockData.getBlock() != old.getBlock()) { // SPIGOT-3725 remove old tile entity if block changes
+             // SPIGOT-4612: faster - just clear tile
+@@ -200,7 +214,7 @@ public class CraftBlock implements Block {
+         if (applyPhysics) {
+             return world.setBlock(position, blockData, 3);
+         } else {
+-            boolean success = world.setBlock(position, blockData, 2 | 16 | 1024); // NOTIFY | NO_OBSERVER | NO_PLACE (custom)
++            boolean success = world.setBlock(position, blockData, 2 | 16 | 1024, checkLight); // NOTIFY | NO_OBSERVER | NO_PLACE (custom) // Slice
+             if (success && world instanceof net.minecraft.world.level.Level) {
+                 world.getMinecraftWorld().sendBlockUpdated(
+                         position,
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 index c6cd4a5790384811f3171ce740afb9459f3d6fc0..572d567e7f5dfa32b74b35d9da765104d53e2739 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
@@ -203,3 +360,16 @@ index c6cd4a5790384811f3171ce740afb9459f3d6fc0..572d567e7f5dfa32b74b35d9da765104
  
          this.getHandle().maxHealthCache = getMaxHealth();
      }
+diff --git a/src/main/java/org/bukkit/craftbukkit/util/DummyGeneratorAccess.java b/src/main/java/org/bukkit/craftbukkit/util/DummyGeneratorAccess.java
+index 4c6cbfbcb5a7876e6b556b59c54e9a4cedf7843e..fbee5a55aa4eb65bb4453ed890c81a7a7d49add7 100644
+--- a/src/main/java/org/bukkit/craftbukkit/util/DummyGeneratorAccess.java
++++ b/src/main/java/org/bukkit/craftbukkit/util/DummyGeneratorAccess.java
+@@ -245,7 +245,7 @@ public class DummyGeneratorAccess implements WorldGenLevel {
+     }
+ 
+     @Override
+-    public boolean setBlock(BlockPos pos, BlockState state, int flags, int maxUpdateDepth) {
++    public boolean setBlock(BlockPos pos, BlockState state, int flags, int maxUpdateDepth, boolean checkLight) { // Slice - Set BlockData without light update
+         return false;
+     }
+ 
