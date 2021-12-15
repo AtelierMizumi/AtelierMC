@@ -1,0 +1,111 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: JustMangoT <minetuan2@gmail.com>
+Date: Wed, 15 Dec 2021 20:05:17 +0700
+Subject: [PATCH] Enderchest 6 rows
+
+
+diff --git a/src/main/java/net/minecraft/world/inventory/ChestMenu.java b/src/main/java/net/minecraft/world/inventory/ChestMenu.java
+index e9d9245f7efaaeefc8f107b8016a462ce173816a..cc5c792ec805c62f8c666c5bbaf78d5841d5c903 100644
+--- a/src/main/java/net/minecraft/world/inventory/ChestMenu.java
++++ b/src/main/java/net/minecraft/world/inventory/ChestMenu.java
+@@ -67,10 +67,30 @@ public class ChestMenu extends AbstractContainerMenu {
+         return new ChestMenu(MenuType.GENERIC_9x6, syncId, playerInventory, 6);
+     }
+ 
++    // AtelierMC start
++    public static ChestMenu oneRow(int syncId, Inventory playerInventory, Container inventory) {
++        return new ChestMenu(MenuType.GENERIC_9x1, syncId, playerInventory, inventory, 1);
++    }
++
++    public static ChestMenu twoRows(int syncId, Inventory playerInventory, Container inventory) {
++        return new ChestMenu(MenuType.GENERIC_9x2, syncId, playerInventory, inventory, 2);
++    }
++    // AtelierMC end
++
+     public static ChestMenu threeRows(int syncId, Inventory playerInventory, Container inventory) {
+         return new ChestMenu(MenuType.GENERIC_9x3, syncId, playerInventory, inventory, 3);
+     }
+ 
++    // AtelierMC start
++    public static ChestMenu fourRows(int syncId, Inventory playerInventory, Container inventory) {
++        return new ChestMenu(MenuType.GENERIC_9x4, syncId, playerInventory, inventory, 4);
++    }
++
++    public static ChestMenu fiveRows(int syncId, Inventory playerInventory, Container inventory) {
++        return new ChestMenu(MenuType.GENERIC_9x5, syncId, playerInventory, inventory, 5);
++    }
++    // AtelierMC end
++
+     public static ChestMenu sixRows(int syncId, Inventory playerInventory, Container inventory) {
+         return new ChestMenu(MenuType.GENERIC_9x6, syncId, playerInventory, inventory, 6);
+     }
+diff --git a/src/main/java/net/minecraft/world/inventory/PlayerEnderChestContainer.java b/src/main/java/net/minecraft/world/inventory/PlayerEnderChestContainer.java
+index 59acb1aab21e2dce0f046942f124b50ac1cb8d0f..95415583c21b4074eedcc15f97269b7941a76c96 100644
+--- a/src/main/java/net/minecraft/world/inventory/PlayerEnderChestContainer.java
++++ b/src/main/java/net/minecraft/world/inventory/PlayerEnderChestContainer.java
+@@ -29,11 +29,28 @@ public class PlayerEnderChestContainer extends SimpleContainer {
+     }
+ 
+     public PlayerEnderChestContainer(Player owner) {
+-        super(27);
++        super(54); // AtelierMC
+         this.owner = owner;
+         // CraftBukkit end
+     }
+ 
++    // AtelierMC start
++    @Override
++    public int getContainerSize() {
++        if (owner != null && owner.getGameProfile() != null) {
++            org.bukkit.craftbukkit.entity.CraftHumanEntity bukkit = owner.getBukkitEntity();
++            if (bukkit.hasPermission("ateliermc.enderchest.rows.six")) {
++                return 54;
++            } else if (bukkit.hasPermission("ateliermc.enderchest.rows.five")) {
++                return 45;
++            } else if (bukkit.hasPermission("ateliermc.enderchest.rows.four")) {
++                return 36;
++            }
++        }
++        return 27;
++    }
++    // AtelierMC end
++
+     public void setActiveChest(EnderChestBlockEntity blockEntity) {
+         this.activeChest = blockEntity;
+     }
+diff --git a/src/main/java/net/minecraft/world/level/block/EnderChestBlock.java b/src/main/java/net/minecraft/world/level/block/EnderChestBlock.java
+index 16d677234616daec24e7250ff3e93aa3a83e9715..1e36f169cd06a4214397d1ddbef29380c92d3f0b 100644
+--- a/src/main/java/net/minecraft/world/level/block/EnderChestBlock.java
++++ b/src/main/java/net/minecraft/world/level/block/EnderChestBlock.java
+@@ -86,7 +86,17 @@ public class EnderChestBlock extends AbstractChestBlock<EnderChestBlockEntity> i
+                 EnderChestBlockEntity enderChestBlockEntity = (EnderChestBlockEntity)blockEntity;
+                 playerEnderChestContainer.setActiveChest(enderChestBlockEntity);
+                 player.openMenu(new SimpleMenuProvider((syncId, inventory, playerx) -> {
+-                    return ChestMenu.threeRows(syncId, inventory, playerEnderChestContainer);
++                    // AtelierMC start
++                    org.bukkit.craftbukkit.entity.CraftHumanEntity bukkitPlayer = player.getBukkitEntity();
++                    if (bukkitPlayer.hasPermission("ateliermc.enderchest.rows.six")) {
++                        return ChestMenu.sixRows(syncId, inventory, playerEnderChestContainer);
++                    } else if (bukkitPlayer.hasPermission("ateliermc.enderchest.rows.five")) {
++                        return ChestMenu.fiveRows(syncId, inventory, playerEnderChestContainer);
++                    } else if (bukkitPlayer.hasPermission("ateliermc.enderchest.rows.four")) {
++                        return ChestMenu.fourRows(syncId, inventory, playerEnderChestContainer);
++                    } else
++                        return ChestMenu.threeRows(syncId, inventory, playerEnderChestContainer);
++                    // AtelierMC end
+                 }, CONTAINER_TITLE));
+                 player.awardStat(Stats.OPEN_ENDERCHEST);
+                 PiglinAi.angerNearbyPiglins(player, true);
+diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftInventory.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftInventory.java
+index 396a4ae3d5a829eda78ef98561333aea300aa722..59baacb22a3efe008eb02409bf08e982a62daebe 100644
+--- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftInventory.java
++++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftInventory.java
+@@ -81,7 +81,7 @@ public class CraftInventory implements Inventory {
+ 
+     @Override
+     public void setContents(ItemStack[] items) {
+-        if (this.getSize() < items.length) {
++        if (false && this.getSize() < items.length) { // AtelierMC
+             throw new IllegalArgumentException("Invalid inventory size; expected " + this.getSize() + " or less");
+         }
+ 
