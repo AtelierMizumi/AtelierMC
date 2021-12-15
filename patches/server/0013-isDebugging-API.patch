@@ -1,0 +1,50 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: JustMangoT <minetuan2@gmail.com>
+Date: Wed, 15 Dec 2021 10:30:14 +0700
+Subject: [PATCH] isDebugging API
+
+
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index b8c8dd784f1d429635a9487e14bc083be5d66ba9..391f42afe448ed14e8a870d1131533b04fafc45d 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -2500,7 +2500,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
+     }
+ 
+     public boolean isDebugging() {
+-        return false;
++        return SharedConstants.IS_RUNNING_IN_IDE; // AtelierMC
+     }
+ 
+     @Deprecated
+diff --git a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
+index 0dc8b6e779ebfa5394485fea445c9da7713ed018..bcce3725070ef4493047fb7c1f07368759fd71d7 100644
+--- a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
++++ b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
+@@ -864,7 +864,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
+ 
+     // CraftBukkit start
+     public boolean isDebugging() {
+-        return this.getProperties().debug;
++        return this.getProperties().debug || SharedConstants.IS_RUNNING_IN_IDE;
+     }
+ 
+     @Override
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 6475a2f82b5fe244b106fac9b2f8a9a9502f59e2..fa0e4fa176799fab9279700337ad60693d5a7e85 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -2783,6 +2783,13 @@ public final class CraftServer implements Server {
+         return net.minecraft.server.MinecraftServer.currentTick;
+     }
+ 
++    // AtelierMC start
++    @Override
++    public boolean isDebugging() {
++        return net.minecraft.server.MinecraftServer.getServer().isDebugging();
++    }
++    // AtelierMC end
++
+     @Override
+     public boolean isStopping() {
+         return net.minecraft.server.MinecraftServer.getServer().hasStopped();

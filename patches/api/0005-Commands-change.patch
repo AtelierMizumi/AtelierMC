@@ -5,18 +5,20 @@ Subject: [PATCH] Commands change
 
 
 diff --git a/src/main/java/org/bukkit/command/SimpleCommandMap.java b/src/main/java/org/bukkit/command/SimpleCommandMap.java
-index 74252236b138969560e6513f24e7ecc6dc4a4127..6cf43cc4516f8150ea58fe7f470c0fe6d6d13782 100644
+index 74252236b138969560e6513f24e7ecc6dc4a4127..023f7c9874bd178ee8dc47a1c3bff688fb9b5063 100644
 --- a/src/main/java/org/bukkit/command/SimpleCommandMap.java
 +++ b/src/main/java/org/bukkit/command/SimpleCommandMap.java
 @@ -36,8 +36,12 @@ public class SimpleCommandMap implements CommandMap {
  
      private void setDefaultCommands() {
          register("bukkit", new VersionCommand("version"));
+-        register("bukkit", new ReloadCommand("reload"));
+-        register("bukkit", new PluginsCommand("plugins"));
 +        // Atelier start - Useless commands
-+        /*
-         register("bukkit", new ReloadCommand("reload"));
-         register("bukkit", new PluginsCommand("plugins"));
-+        */
++        if (server.isDebugging()) {
++            register("bukkit", new ReloadCommand("reload"));
++            register("bukkit", new PluginsCommand("plugins"));
++        }
 +        // Atelier end
          register("bukkit", new co.aikar.timings.TimingsCommand("timings")); // Paper
      }

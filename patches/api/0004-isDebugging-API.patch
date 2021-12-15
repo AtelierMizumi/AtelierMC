@@ -1,0 +1,46 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: JustMangoT <minetuan2@gmail.com>
+Date: Wed, 15 Dec 2021 10:28:57 +0700
+Subject: [PATCH] isDebugging API
+
+
+diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
+index b7c45aa5d5f79fd16e59401acfa9c2bed0a5d78c..1fa21be4ebc6ad26bb9d395463a8100b833937af 100644
+--- a/src/main/java/org/bukkit/Bukkit.java
++++ b/src/main/java/org/bukkit/Bukkit.java
+@@ -2106,6 +2106,16 @@ public final class Bukkit {
+         return server.getCurrentTick();
+     }
+ 
++    // AtelierMC start
++    /**
++     * Checks if the server is in debugging mode.
++     *
++     * @return true if the server is in debugging mode
++     */
++    public static boolean isDebugging() {
++        return server.isDebugging();
++    }
++    // AtelierMC end
+     /**
+      * Checks if the server is in the process of being shutdown.
+      *
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index 6996a61534bbdd34729f1dcd988ae2666bfad2c4..7fe4ea9762203ec20cce16a7aef84d551ba9e33a 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -1832,6 +1832,14 @@ public interface Server extends PluginMessageRecipient, net.kyori.adventure.audi
+      */
+     int getCurrentTick();
+ 
++    // AtelierMC start
++    /**
++     * Checks if the server is in debugging mode.
++     *
++     * @return true if the server is in debugging mode
++     */
++    boolean isDebugging();
++    // AtelierMC end
+     /**
+      * Checks if the server is in the process of being shutdown.
+      *
