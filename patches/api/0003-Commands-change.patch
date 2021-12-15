@@ -1,0 +1,55 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: JustMangoT <minetuan2@gmail.com>
+Date: Thu, 9 Dec 2021 20:21:23 +0700
+Subject: [PATCH] Commands change
+
+
+diff --git a/src/main/java/org/bukkit/command/SimpleCommandMap.java b/src/main/java/org/bukkit/command/SimpleCommandMap.java
+index 74252236b138969560e6513f24e7ecc6dc4a4127..6cf43cc4516f8150ea58fe7f470c0fe6d6d13782 100644
+--- a/src/main/java/org/bukkit/command/SimpleCommandMap.java
++++ b/src/main/java/org/bukkit/command/SimpleCommandMap.java
+@@ -36,8 +36,12 @@ public class SimpleCommandMap implements CommandMap {
+ 
+     private void setDefaultCommands() {
+         register("bukkit", new VersionCommand("version"));
++        // Atelier start - Useless commands
++        /*
+         register("bukkit", new ReloadCommand("reload"));
+         register("bukkit", new PluginsCommand("plugins"));
++        */
++        // Atelier end
+         register("bukkit", new co.aikar.timings.TimingsCommand("timings")); // Paper
+     }
+ 
+diff --git a/src/main/java/org/bukkit/command/defaults/VersionCommand.java b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
+index 57a21495843f3a144cd73473cdc8781d6129b7ca..82108891e2c30630e367c155f1fb1227d4573ce9 100644
+--- a/src/main/java/org/bukkit/command/defaults/VersionCommand.java
++++ b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
+@@ -41,7 +41,7 @@ public class VersionCommand extends BukkitCommand {
+         super(name);
+ 
+         this.description = "Gets the version of this server including any plugins in use";
+-        this.usageMessage = "/version [plugin name]";
++        this.usageMessage = "/version"; // Atelier - remove plugin section
+         this.setPermission("bukkit.command.version");
+         this.setAliases(Arrays.asList("ver", "about"));
+     }
+@@ -50,6 +50,9 @@ public class VersionCommand extends BukkitCommand {
+     public boolean execute(@NotNull CommandSender sender, @NotNull String currentAlias, @NotNull String[] args) {
+         if (!testPermission(sender)) return true;
+ 
++        // Atelier start - Replace
++        sender.sendMessage("This server is running " + Bukkit.getName() + " made by AtelierSMP");
++        /*
+         if (args.length == 0) {
+             //sender.sendMessage("This server is running " + Bukkit.getName() + " version " + Bukkit.getVersion() + " (Implementing API version " + Bukkit.getBukkitVersion() + ")"); // Paper - moved to setVersionMessage
+             sendVersion(sender);
+@@ -85,6 +88,8 @@ public class VersionCommand extends BukkitCommand {
+                 sender.sendMessage("Use /plugins to get a list of plugins.");
+             }
+         }
++        */
++        // Atelier end
+         return true;
+     }
+ 

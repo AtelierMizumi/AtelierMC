@@ -1,0 +1,411 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: JustMangoT <minetuan2@gmail.com>
+Date: Fri, 10 Dec 2021 11:27:27 +0700
+Subject: [PATCH] Jettpack patches
+
+
+diff --git a/src/main/java/net/minecraft/Util.java b/src/main/java/net/minecraft/Util.java
+index e33265ff8793eae1075dc6dcb5630b83c09ae336..f992299dca87a3ae42e438338ad6ff7697e06450 100644
+--- a/src/main/java/net/minecraft/Util.java
++++ b/src/main/java/net/minecraft/Util.java
+@@ -67,6 +67,12 @@ import org.apache.logging.log4j.core.LoggerContext;
+ import org.apache.logging.log4j.core.config.Configuration;
+ import org.apache.logging.log4j.core.lookup.StrLookup;
+ import org.apache.logging.log4j.core.lookup.StrSubstitutor;
++// Jettpack start
++import java.util.concurrent.AbstractExecutorService;
++import net.minecraft.server.ServerWorkerWrapper;
++import net.minecraft.server.MCUtil;
++import java.util.Collections;
++// Jettpack end
+ 
+ public class Util {
+     static final Logger LOGGER = LogManager.getLogger();
+@@ -151,7 +157,45 @@ public class Util {
+         if (i <= 0) {
+             executorService = MoreExecutors.newDirectExecutorService();
+         } else {
+-            executorService = new java.util.concurrent.ThreadPoolExecutor(i, i,0L, TimeUnit.MILLISECONDS, new java.util.concurrent.LinkedBlockingQueue<Runnable>(), target -> new net.minecraft.server.ServerWorkerThread(target, s, priorityModifier));
++            // Jettpack start
++            // executorService = new java.util.concurrent.ThreadPoolExecutor(i, i,0L, TimeUnit.MILLISECONDS, new java.util.concurrent.LinkedBlockingQueue<Runnable>(), target -> new net.minecraft.server.ServerWorkerThread(target, s, priorityModifier));
++            executorService = Integer.getInteger("Paper.WorkerThreadCount", i) <= 0 ? MoreExecutors.newDirectExecutorService() : new AbstractExecutorService(){
++                private volatile boolean shutdown = false;
++                @Override
++                public final List<Runnable> shutdownNow() {
++                    this.shutdown = true;
++                    return Collections.emptyList();
++                }
++
++                @Override
++                public final void shutdown() {
++                    this.shutdown = true;
++                }
++
++                @Override
++                public final boolean isShutdown() {
++                    return this.shutdown;
++                }
++
++                @Override
++                public final boolean isTerminated() {
++                    return this.shutdown;
++                }
++
++                @Override
++                public final boolean awaitTermination(long l2, TimeUnit timeUnit) throws InterruptedException {
++                    if (!this.shutdown) {
++                        throw new UnsupportedOperationException();
++                    }
++                    return true;
++                }
++
++                @Override
++                public final void execute(Runnable runnable) {
++                    MCUtil.asyncExecutor.execute(new ServerWorkerWrapper(runnable));
++                }
++            };
++            // Jettpack end
+         }
+         /*
+                     @Override
+diff --git a/src/main/java/net/minecraft/server/MCUtil.java b/src/main/java/net/minecraft/server/MCUtil.java
+index 74003e8887624736b154807e07835c315e836cf3..ec3d3e3e3497eeb921125ace1d336c13b7f183a9 100644
+--- a/src/main/java/net/minecraft/server/MCUtil.java
++++ b/src/main/java/net/minecraft/server/MCUtil.java
+@@ -53,13 +53,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
+ import java.util.function.BiConsumer;
+ import java.util.function.Consumer;
+ import java.util.function.Supplier;
++// Jettpack start
++import java.util.concurrent.SynchronousQueue;
++import java.util.concurrent.ConcurrentLinkedQueue;
++// Jettpack end
+ 
+ public final class MCUtil {
++    // Jettpack start
++    public static final ConcurrentLinkedQueue smallAsyncTasks = new ConcurrentLinkedQueue();
+     public static final ThreadPoolExecutor asyncExecutor = new ThreadPoolExecutor(
+-        0, 2, 60L, TimeUnit.SECONDS,
+-        new LinkedBlockingQueue<Runnable>(),
++        4, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS,
++        new SynchronousQueue<Runnable>(),
+         new ThreadFactoryBuilder().setNameFormat("Paper Async Task Handler Thread - %1$d").build()
+     );
++    // Jettpack end
+     public static final ThreadPoolExecutor cleanerExecutor = new ThreadPoolExecutor(
+         1, 1, 0L, TimeUnit.SECONDS,
+         new LinkedBlockingQueue<Runnable>(),
+@@ -68,6 +75,29 @@ public final class MCUtil {
+ 
+     public static final long INVALID_CHUNK_KEY = getCoordinateKey(Integer.MAX_VALUE, Integer.MAX_VALUE);
+ 
++    // Jettpack start
++    public static void flushAsyncTasks() {
++        if (!smallAsyncTasks.isEmpty()) {
++            asyncExecutor.submit(() -> {
++                Runnable runnable;
++                while((runnable = (Runnable)smallAsyncTasks.poll()) != null) {
++                    runnable.run();
++                }
++            });
++        }
++    }
++
++    public static void flushAsyncTasksMidTick() {
++        if (smallAsyncTasks.size() <= 16) {
++            asyncExecutor.submit(() -> {
++                Runnable runnable;
++                while((runnable = (Runnable)smallAsyncTasks.poll()) != null) {
++                    runnable.run();
++                }
++            });
++        }
++    }
++    // Jettpack end
+ 
+     public static Runnable once(Runnable run) {
+         AtomicBoolean ran = new AtomicBoolean(false);
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 3b8c741ce6c22658b4b6b3dcd091130a41a76551..bfcde65302acf0c7c5b27063b0061003ce757848 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -373,6 +373,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
+             return;
+         }
+ 
++        MCUtil.flushAsyncTasksMidTick(); // Jettpack
+         co.aikar.timings.MinecraftTimings.midTickChunkTasks.startTiming();
+         try {
+             for (;;) {
+@@ -1099,6 +1100,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
+         LOGGER.info("Flushing Chunk IO");
+         com.destroystokyo.paper.io.PaperFileIOThread.Holder.INSTANCE.close(true, true); // Paper
+         LOGGER.info("Closing Thread Pool");
++        MCUtil.flushAsyncTasks(); // Jettpack
+         Util.shutdownExecutors(); // Paper
+         LOGGER.info("Closing Server");
+         try {
+@@ -1528,6 +1530,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
+         io.papermc.paper.util.CachedLists.reset(); // Paper
+         // Paper start - move executeAll() into full server tick timing
+         try (co.aikar.timings.Timing ignored = MinecraftTimings.processTasksTimer.startTiming()) {
++            MCUtil.flushAsyncTasks(); // Jettpack
+             this.runAllTasks();
+         }
+         // Paper end
+diff --git a/src/main/java/net/minecraft/server/ServerWorkerWrapper.java b/src/main/java/net/minecraft/server/ServerWorkerWrapper.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..e641609e92f3dc6b1918a04e45d8f3cd60603ea6
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/ServerWorkerWrapper.java
+@@ -0,0 +1,25 @@
++package net.minecraft.server;
++
++import com.google.common.base.Preconditions;
++import net.minecraft.Util;
++
++/**
++ * @author Jettpack
++ */
++public final class ServerWorkerWrapper implements Runnable {
++    private final Runnable internalRunnable;
++
++    public ServerWorkerWrapper(Runnable runnable) {
++        this.internalRunnable = Preconditions.checkNotNull(runnable, "internalRunnable");
++    }
++
++    @Override
++    public final void run() {
++        try {
++            this.internalRunnable.run();
++        } catch (Throwable throwable) {
++            Util.onThreadException(Thread.currentThread(), throwable);
++        }
++    }
++}
++
+diff --git a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
+index 6006911c5a307d757fee5a0a8ab3772df845e43b..0dc8b6e779ebfa5394485fea445c9da7713ed018 100644
+--- a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
++++ b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
+@@ -426,7 +426,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
+         BufferedWriter bufferedwriter = Files.newBufferedWriter(file);
+ 
+         try {
+-            bufferedwriter.write(String.format("sync-chunk-writes=%s%n", dedicatedserverproperties.syncChunkWrites));
++            // bufferedwriter.write(String.format("sync-chunk-writes=%s%n", dedicatedserverproperties.syncChunkWrites)); // Jettpack - remove 'sync-chunk-writes' in server.properties
+             bufferedwriter.write(String.format("gamemode=%s%n", dedicatedserverproperties.gamemode));
+             bufferedwriter.write(String.format("spawn-monsters=%s%n", dedicatedserverproperties.spawnMonsters));
+             bufferedwriter.write(String.format("entity-broadcast-range-percentage=%d%n", dedicatedserverproperties.entityBroadcastRangePercentage));
+diff --git a/src/main/java/net/minecraft/server/dedicated/DedicatedServerProperties.java b/src/main/java/net/minecraft/server/dedicated/DedicatedServerProperties.java
+index f944e6beafc7876ed9c6923a22f58d82967b77cb..0d71d5c4af27f96e5a642bdb4fdb71e3f1b81b99 100644
+--- a/src/main/java/net/minecraft/server/dedicated/DedicatedServerProperties.java
++++ b/src/main/java/net/minecraft/server/dedicated/DedicatedServerProperties.java
+@@ -107,7 +107,7 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
+         this.maxWorldSize = this.get("max-world-size", (integer) -> {
+             return Mth.clamp(integer, (int) 1, 29999984);
+         }, 29999984);
+-        this.syncChunkWrites = this.get("sync-chunk-writes", true) && Boolean.getBoolean("Paper.enable-sync-chunk-writes"); // Paper - hide behind flag
++        this.syncChunkWrites = Boolean.getBoolean("Paper.enable-sync-chunk-writes"); // Paper - hide behind flag // JettPack - remove 'sync-chunk-writes' in server.properties
+         this.enableJmxMonitoring = this.get("enable-jmx-monitoring", false);
+         this.enableStatus = this.get("enable-status", true);
+         this.hideOnlinePlayers = this.get("hide-online-players", false);
+diff --git a/src/main/java/net/minecraft/server/network/ServerLoginPacketListenerImpl.java b/src/main/java/net/minecraft/server/network/ServerLoginPacketListenerImpl.java
+index 33a29890435d6065a2cc4f8e8bf8209c01d5d114..9ed425a0a9258d349475dbcc4420a95d141036f7 100644
+--- a/src/main/java/net/minecraft/server/network/ServerLoginPacketListenerImpl.java
++++ b/src/main/java/net/minecraft/server/network/ServerLoginPacketListenerImpl.java
+@@ -31,6 +31,7 @@ import net.minecraft.network.protocol.login.ServerLoginPacketListener;
+ import net.minecraft.network.protocol.login.ServerboundCustomQueryPacket;
+ import net.minecraft.network.protocol.login.ServerboundHelloPacket;
+ import net.minecraft.network.protocol.login.ServerboundKeyPacket;
++import net.minecraft.server.MCUtil; // Jettpack
+ import net.minecraft.server.MinecraftServer;
+ import net.minecraft.server.level.ServerPlayer;
+ import net.minecraft.util.Crypt;
+@@ -126,6 +127,8 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener
+ 
+     }
+ 
++    // Jettpack start
++    /*
+     // Paper start - Cache authenticator threads
+     private static final AtomicInteger threadId = new AtomicInteger(0);
+     private static final java.util.concurrent.ExecutorService authenticatorPool = java.util.concurrent.Executors.newCachedThreadPool(
+@@ -138,6 +141,8 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener
+             }
+     );
+     // Paper end
++    */
++    // Jettpack end
+     // Spigot start
+     public void initUUID()
+     {
+@@ -248,7 +253,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener
+             // Paper end
+             // Spigot start
+             // Paper start - Cache authenticator threads
+-            authenticatorPool.execute(new Runnable() {
++            MCUtil.asyncExecutor.execute(new Runnable() { // Jettpack
+                 @Override
+                 public void run() {
+                     try {
+@@ -292,7 +297,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener
+         }
+ 
+         // Paper start - Cache authenticator threads
+-        authenticatorPool.execute(new Runnable() {
++        MCUtil.asyncExecutor.execute(new Runnable() { // Jettpack
+             public void run() {
+                 GameProfile gameprofile = ServerLoginPacketListenerImpl.this.gameProfile;
+ 
+@@ -426,7 +431,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener
+             this.gameProfile = com.destroystokyo.paper.proxy.VelocityProxy.createProfile(buf);
+ 
+             // Proceed with login
+-            authenticatorPool.execute(() -> {
++            MCUtil.asyncExecutor.execute(() -> { // Jettpack
+                 try {
+                     new LoginHandler().fireEvents();
+                 } catch (Exception ex) {
+diff --git a/src/main/java/net/minecraft/util/thread/BlockableEventLoop.java b/src/main/java/net/minecraft/util/thread/BlockableEventLoop.java
+index 10d40f5601b665ca7768e99dab37410b891c5f87..46d5b429122a87481ee9d55ba5dd00c4ce256bbb 100644
+--- a/src/main/java/net/minecraft/util/thread/BlockableEventLoop.java
++++ b/src/main/java/net/minecraft/util/thread/BlockableEventLoop.java
+@@ -15,12 +15,20 @@ import net.minecraft.util.profiling.metrics.MetricsRegistry;
+ import net.minecraft.util.profiling.metrics.ProfilerMeasured;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++// Jettpack start
++import java.util.concurrent.LinkedBlockingDeque;
++import java.util.concurrent.TimeUnit;
++// Jettpack end
+ 
+ public abstract class BlockableEventLoop<R extends Runnable> implements ProfilerMeasured, ProcessorHandle<R>, Executor {
+     private final String name;
+     private static final Logger LOGGER = LogManager.getLogger();
+-    private final Queue<R> pendingRunnables = Queues.newConcurrentLinkedQueue();
++    // Jettpack start
++    //private final Queue<R> pendingRunnables = Queues.newConcurrentLinkedQueue();
++    private final LinkedBlockingDeque<R> pendingRunnables = new LinkedBlockingDeque();
+     private int blockingCount;
++    private R next = null;
++    // Jettpack end
+ 
+     protected BlockableEventLoop(String name) {
+         this.name = name;
+@@ -89,7 +97,7 @@ public abstract class BlockableEventLoop<R extends Runnable> implements Profiler
+     @Override
+     public void tell(R runnable) {
+         this.pendingRunnables.add(runnable);
+-        LockSupport.unpark(this.getRunningThread());
++        // LockSupport.unpark(this.getRunningThread()); // Jettpack
+     }
+ 
+     @Override
+@@ -113,15 +121,26 @@ public abstract class BlockableEventLoop<R extends Runnable> implements Profiler
+     }
+ 
+     public boolean pollTask() {
++        // Jettpack start
++        /*
+         R runnable = this.pendingRunnables.peek();
+         if (runnable == null) {
+             return false;
+-        } else if (this.blockingCount == 0 && false /*!this.shouldRun(runnable)*/) { // Patina
++        } else if (this.blockingCount == 0 && false !this.shouldRun(runnable)) { // Patina
++        */
++        if (this.next == null && !this.pendingRunnables.isEmpty()) {
++            this.waitForTasks();
++        }
++        if (this.next == null) {
+             return false;
+         } else {
+-            this.doRunTask(this.pendingRunnables.remove());
++            // this.doRunTask(this.pendingRunnables.remove());
++            R r2 = this.next;
++            this.next = null;
++            this.doRunTask(r2);
+             return true;
+         }
++        // Jettpack end
+     }
+ 
+     public void managedBlock(BooleanSupplier stopCondition) {
+@@ -140,8 +159,18 @@ public abstract class BlockableEventLoop<R extends Runnable> implements Profiler
+     }
+ 
+     protected void waitForTasks() {
++        // Jettpack start/
++        /*
+         Thread.yield();
+         LockSupport.parkNanos("waiting for tasks", 100000L);
++        */
++        if (this.next != null) {
++            throw new IllegalStateException("next != null");
++        }
++        try {
++            this.next = this.pendingRunnables.poll(100L, TimeUnit.MICROSECONDS);
++        } catch (InterruptedException ignored) { }
++        // Jettpack end
+     }
+ 
+     protected void doRunTask(R task) {
+diff --git a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftAsyncScheduler.java b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftAsyncScheduler.java
+index 3c1992e212a6d6f1db4d5b807b38d71913619fc0..aad864af71e61f39de6a4dcfd0d9f7c0c0a4139d 100644
+--- a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftAsyncScheduler.java
++++ b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftAsyncScheduler.java
+@@ -25,6 +25,7 @@ package org.bukkit.craftbukkit.scheduler;
+ 
+ import com.destroystokyo.paper.ServerSchedulerReportingWrapper;
+ import com.google.common.util.concurrent.ThreadFactoryBuilder;
++import net.minecraft.server.MCUtil; // Jettpack
+ import org.bukkit.plugin.Plugin;
+ 
+ import java.util.ArrayList;
+@@ -38,18 +39,25 @@ import java.util.concurrent.TimeUnit;
+ 
+ public class CraftAsyncScheduler extends CraftScheduler {
+ 
++    // Jettpack start
++    /*
+     private final ThreadPoolExecutor executor = new ThreadPoolExecutor(
+             4, Integer.MAX_VALUE,30L, TimeUnit.SECONDS, new SynchronousQueue<>(),
+             new ThreadFactoryBuilder().setNameFormat("Craft Scheduler Thread - %1$d").build());
++        */
++
+     private final Executor management = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
+             .setNameFormat("Craft Async Scheduler Management Thread").build());
+     private final List<CraftTask> temp = new ArrayList<>();
+ 
+     CraftAsyncScheduler() {
+         super(true);
++        /*
+         executor.allowCoreThreadTimeOut(true);
+         executor.prestartAllCoreThreads();
++        */
+     }
++    // Jettpack end
+ 
+     @Override
+     public void cancelTask(int taskId) {
+@@ -93,7 +101,7 @@ public class CraftAsyncScheduler extends CraftScheduler {
+     private boolean executeTask(CraftTask task) {
+         if (isValid(task)) {
+             this.runners.put(task.getTaskId(), task);
+-            this.executor.execute(new ServerSchedulerReportingWrapper(task));
++            MCUtil.asyncExecutor.execute(new ServerSchedulerReportingWrapper(task)); // Jettpack
+             return true;
+         }
+         return false;
+diff --git a/src/main/java/org/spigotmc/WatchdogThread.java b/src/main/java/org/spigotmc/WatchdogThread.java
+index bee38307494188800886a1622fed229b88dbd8f1..a45c2c569e0ab7205b8c180c3e150f3d421f648a 100644
+--- a/src/main/java/org/spigotmc/WatchdogThread.java
++++ b/src/main/java/org/spigotmc/WatchdogThread.java
+@@ -141,6 +141,7 @@ public class WatchdogThread extends Thread
+     {
+         while ( !this.stopping )
+         {
++            net.minecraft.server.MCUtil.flushAsyncTasks(); // Jettpack
+             //
+             // Paper start
+             Logger log = Bukkit.getServer().getLogger();

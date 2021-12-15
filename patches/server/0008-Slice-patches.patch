@@ -1,0 +1,375 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: JustMangoT <minetuan2@gmail.com>
+Date: Wed, 15 Dec 2021 00:51:10 +0700
+Subject: [PATCH] Slice patches
+
+
+diff --git a/src/main/java/net/minecraft/network/protocol/game/ClientboundSetEntityDataPacket.java b/src/main/java/net/minecraft/network/protocol/game/ClientboundSetEntityDataPacket.java
+index 3e17f6131bf590d7c4a16b79c1c145cb4f565bc9..e1233fa58d068448d0accef7a7f6725fcb902848 100644
+--- a/src/main/java/net/minecraft/network/protocol/game/ClientboundSetEntityDataPacket.java
++++ b/src/main/java/net/minecraft/network/protocol/game/ClientboundSetEntityDataPacket.java
+@@ -22,6 +22,13 @@ public class ClientboundSetEntityDataPacket implements Packet<ClientGamePacketLi
+ 
+     }
+ 
++    // Slice start
++    public ClientboundSetEntityDataPacket(int id, List<SynchedEntityData.DataItem<?>> packedItems) {
++        this.id = id;
++        this.packedItems = packedItems;
++    }
++    // Slice end
++
+     public ClientboundSetEntityDataPacket(FriendlyByteBuf buf) {
+         this.id = buf.readVarInt();
+         this.packedItems = SynchedEntityData.unpack(buf);
+diff --git a/src/main/java/net/minecraft/network/syncher/SynchedEntityData.java b/src/main/java/net/minecraft/network/syncher/SynchedEntityData.java
+index 2e2bfccfc6cec6582a5b595e0343c27be5267b7a..6b3ba1d72d5af0fa0d1b3eda54003e10b19b6cee 100644
+--- a/src/main/java/net/minecraft/network/syncher/SynchedEntityData.java
++++ b/src/main/java/net/minecraft/network/syncher/SynchedEntityData.java
+@@ -135,7 +135,12 @@ public class SynchedEntityData {
+         return this.getItem(data).getValue();
+     }
+ 
++    // Slice start
+     public <T> void set(EntityDataAccessor<T> key, T value) {
++        set(key, value, null);
++    }
++
++    public <T> void set(EntityDataAccessor<T> key, T value, T foreignValue) {
+         SynchedEntityData.DataItem<T> datawatcher_item = this.getItem(key);
+ 
+         if (ObjectUtils.notEqual(value, datawatcher_item.getValue())) {
+@@ -145,7 +150,11 @@ public class SynchedEntityData {
+             this.isDirty = true;
+         }
+ 
++        if (foreignValue != null && ObjectUtils.notEqual(foreignValue, datawatcher_item.getForeignValue())) {
++            datawatcher_item.setForeignValue(foreignValue);
++        }
+     }
++    // Slice end
+ 
+     // CraftBukkit start - add method from above
+     public <T> void markDirty(EntityDataAccessor<T> datawatcherobject) {
+@@ -200,6 +209,24 @@ public class SynchedEntityData {
+         return list;
+     }
+ 
++    // Slice start
++    @Nullable
++    public List<SynchedEntityData.DataItem<?>> packForeignDirty(List<DataItem<?>> unpackedData) {
++        List<SynchedEntityData.DataItem<?>> list = null;
++        for (DataItem<?> dataItem : unpackedData) {
++            DataItem<?> item = itemsById.get(dataItem.accessor.getId());
++            if (item.isDirty(true)) {
++                item.setForeignDirty(false);
++                if (list == null) {
++                    list = Lists.newArrayList();
++                }
++                list.add(item.copy(true));
++            }
++        }
++        return list;
++    }
++    // Slice end
++
+     @Nullable
+     public List<SynchedEntityData.DataItem<?>> getAll() {
+         List<SynchedEntityData.DataItem<?>> list = null;
+@@ -313,11 +340,14 @@ public class SynchedEntityData {
+         final EntityDataAccessor<T> accessor;
+         T value;
+         private boolean dirty;
++        @Nullable T foreignValue = null; // Slice
++        private boolean foreignDirty; // Slice
+ 
+         public DataItem(EntityDataAccessor<T> data, T value) {
+             this.accessor = data;
+             this.value = value;
+             this.dirty = true;
++            this.foreignDirty = true; // Slice
+         }
+ 
+         public EntityDataAccessor<T> getAccessor() {
+@@ -343,5 +373,32 @@ public class SynchedEntityData {
+         public SynchedEntityData.DataItem<T> copy() {
+             return new SynchedEntityData.DataItem<>(this.accessor, this.accessor.getSerializer().copy(this.value));
+         }
++        // Slice start
++        public void setForeignValue(T foreignValue) {
++            this.foreignValue = foreignValue;
++            this.foreignDirty = true;
++        }
++
++        public @Nullable T getForeignValue() {
++            return foreignValue;
++        }
++
++        public boolean isDirty(boolean foreign) {
++            if (foreign) {
++                //There must be a foreign value in order for this to be dirty, otherwise we consider this a normal
++                //value and check the normal dirty flag.
++                return foreignValue == null || this.foreignDirty;
++            }
++            return this.dirty;
++        }
++
++        public void setForeignDirty(boolean dirty) {
++            this.foreignDirty = dirty;
++        }
++
++        public SynchedEntityData.DataItem<T> copy(boolean foreign) {
++            return new SynchedEntityData.DataItem<>(this.accessor, this.accessor.getSerializer().copy((foreign && this.foreignValue != null ? this.foreignValue : this.value)));
++        }
++        // Slice end
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/level/ServerEntity.java b/src/main/java/net/minecraft/server/level/ServerEntity.java
+index 96e5d68f405d748f8b35b415642b84739bc5e6d7..c71f56cd178f3328df1f7b9f8845853f77630b5d 100644
+--- a/src/main/java/net/minecraft/server/level/ServerEntity.java
++++ b/src/main/java/net/minecraft/server/level/ServerEntity.java
+@@ -389,7 +389,19 @@ public class ServerEntity {
+         SynchedEntityData datawatcher = this.entity.getEntityData();
+ 
+         if (datawatcher.isDirty()) {
+-            this.broadcastAndSend(new ClientboundSetEntityDataPacket(this.entity.getId(), datawatcher, false));
++            // Slice start
++            ClientboundSetEntityDataPacket dataPacket = new ClientboundSetEntityDataPacket(this.entity.getId(), datawatcher, false);
++            if (this.entity instanceof ServerPlayer serverPlayer) {
++                serverPlayer.connection.send(dataPacket);
++            }
++
++            //Get the packedData that the original packet has, and then determine if any of those are changed in
++            //the foreign version. If null, nothing to notify foreign trackers about.
++            List<SynchedEntityData.DataItem<?>> dirtyItems = datawatcher.packForeignDirty(dataPacket.getUnpackedData());
++            if (dirtyItems != null) {
++                this.broadcast(new ClientboundSetEntityDataPacket(this.entity.getId(), dirtyItems));
++            }
++            // Slice end
+         }
+ 
+         if (this.entity instanceof LivingEntity) {
+diff --git a/src/main/java/net/minecraft/server/level/WorldGenRegion.java b/src/main/java/net/minecraft/server/level/WorldGenRegion.java
+index 9b25d36fe5230e287d81b99be31b9eddd8e76002..20235df3239ef941f16c437acb7ee0831da18050 100644
+--- a/src/main/java/net/minecraft/server/level/WorldGenRegion.java
++++ b/src/main/java/net/minecraft/server/level/WorldGenRegion.java
+@@ -226,7 +226,7 @@ public class WorldGenRegion implements WorldGenLevel {
+                 Block.dropResources(iblockdata, this.level, pos, tileentity, breakingEntity, ItemStack.EMPTY);
+             }
+ 
+-            return this.setBlock(pos, Blocks.AIR.defaultBlockState(), 3, maxUpdateDepth);
++            return this.setBlock(pos, Blocks.AIR.defaultBlockState(), 3, maxUpdateDepth, true); // Slice
+         }
+     }
+ 
+@@ -292,7 +292,7 @@ public class WorldGenRegion implements WorldGenLevel {
+     }
+ 
+     @Override
+-    public boolean setBlock(BlockPos pos, BlockState state, int flags, int maxUpdateDepth) {
++    public boolean setBlock(BlockPos pos, BlockState state, int flags, int maxUpdateDepth, boolean checkLight) { // Slice
+         if (!this.ensureCanWrite(pos)) {
+             return false;
+         } else {
+diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
+index 9fdfd567596101d008d13ec93272ec66c884a4cc..22d9f3a07047b70cd51d32cfa41d1e9a2d45b931 100644
+--- a/src/main/java/net/minecraft/world/entity/Entity.java
++++ b/src/main/java/net/minecraft/world/entity/Entity.java
+@@ -796,7 +796,13 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
+ 
+         this.checkOutOfWorld();
+         if (!this.level.isClientSide) {
+-            this.setSharedFlagOnFire(this.remainingFireTicks > 0);
++            // Slice start - Don't send fire packets if player has Fire Resistance
++            if (this instanceof net.minecraft.world.entity.LivingEntity livingEntity) {
++                this.setSharedFlagOnFire(this.remainingFireTicks > 0 && !livingEntity.hasEffect(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE));
++            } else {
++                this.setSharedFlagOnFire(this.remainingFireTicks > 0);
++            }
++            // Slice end
+         }
+ 
+         this.firstTick = false;
+@@ -2976,7 +2982,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
+         if (event.isCancelled()) {
+             return;
+         }
+-        this.entityData.set(Entity.DATA_AIR_SUPPLY_ID, event.getAmount());
++        this.entityData.set(Entity.DATA_AIR_SUPPLY_ID, event.getAmount(), getMaxAirSupply()); // Slice
+         // CraftBukkit end
+     }
+ 
+diff --git a/src/main/java/net/minecraft/world/entity/LivingEntity.java b/src/main/java/net/minecraft/world/entity/LivingEntity.java
+index 66f567145d65e5bb46b6c13250cc439b612abdc2..892fd7608328817888b936b932dbb26e8cad6cf3 100644
+--- a/src/main/java/net/minecraft/world/entity/LivingEntity.java
++++ b/src/main/java/net/minecraft/world/entity/LivingEntity.java
+@@ -3044,7 +3044,7 @@ public abstract class LivingEntity extends Entity {
+ 
+             ItemStack itemstack1 = this.getItemBySlot(enumitemslot);
+ 
+-            if (!ItemStack.matches(itemstack1, itemstack)) {
++            if (!ItemStack.isSameIgnoreDurability(itemstack1, itemstack)) { // Slice - Don't send equipment updates if only durability changed
+                 // Paper start - PlayerArmorChangeEvent
+                 if (this instanceof ServerPlayer && enumitemslot.getType() == EquipmentSlot.Type.ARMOR) {
+                     final org.bukkit.inventory.ItemStack oldItem = CraftItemStack.asBukkitCopy(itemstack);
+diff --git a/src/main/java/net/minecraft/world/entity/player/Player.java b/src/main/java/net/minecraft/world/entity/player/Player.java
+index 2c00a766130a7f682fc6c4c74321e10637ca7932..6eff69877f2f6a20fece578e20a587743c7dd0bd 100644
+--- a/src/main/java/net/minecraft/world/entity/player/Player.java
++++ b/src/main/java/net/minecraft/world/entity/player/Player.java
+@@ -631,7 +631,7 @@ public abstract class Player extends LivingEntity {
+     public void increaseScore(int score) {
+         int j = this.getScore();
+ 
+-        this.entityData.set(Player.DATA_SCORE_ID, j + score);
++        this.entityData.set(Player.DATA_SCORE_ID, j + score, 0); // Slice
+     }
+ 
+     @Override
+diff --git a/src/main/java/net/minecraft/world/level/Level.java b/src/main/java/net/minecraft/world/level/Level.java
+index d3fb3915df05900e855d088f196c36f82b1ed1f4..c15af04acde102dc7eb60deab116f25ce018c094 100644
+--- a/src/main/java/net/minecraft/world/level/Level.java
++++ b/src/main/java/net/minecraft/world/level/Level.java
+@@ -647,12 +647,12 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
+     }
+ 
+     @Override
+-    public final boolean setBlock(BlockPos pos, BlockState state, int flags) { // Paper - final for inline
+-        return this.setBlock(pos, state, flags, 512);
++    public final boolean setBlock(BlockPos pos, BlockState state, int flags, boolean checkLight) { // Paper - final for inline // Slice
++        return this.setBlock(pos, state, flags, 512, checkLight); // Slice
+     }
+ 
+     @Override
+-    public boolean setBlock(BlockPos pos, BlockState state, int flags, int maxUpdateDepth) {
++    public boolean setBlock(BlockPos pos, BlockState state, int flags, int maxUpdateDepth, boolean checkLight) { // Slice
+         // CraftBukkit start - tree generation
+         if (this.captureTreeGeneration) {
+             // Paper start
+@@ -699,7 +699,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
+             } else {
+                 BlockState iblockdata2 = this.getBlockState(pos);
+ 
+-                if ((flags & 128) == 0 && iblockdata2 != iblockdata1 && (iblockdata2.getLightBlock(this, pos) != iblockdata1.getLightBlock(this, pos) || iblockdata2.getLightEmission() != iblockdata1.getLightEmission() || iblockdata2.useShapeForLightOcclusion() || iblockdata1.useShapeForLightOcclusion())) {
++                if (checkLight && (flags & 128) == 0 && iblockdata2 != iblockdata1 && (iblockdata2.getLightBlock(this, pos) != iblockdata1.getLightBlock(this, pos) || iblockdata2.getLightEmission() != iblockdata1.getLightEmission() || iblockdata2.useShapeForLightOcclusion() || iblockdata1.useShapeForLightOcclusion())) { // Slice
+                     this.getProfiler().push("queueCheckLight");
+                     this.getChunkSource().getLightEngine().checkBlock(pos);
+                     this.getProfiler().pop();
+@@ -841,7 +841,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
+                 Block.dropResources(iblockdata, this, pos, tileentity, breakingEntity, ItemStack.EMPTY);
+             }
+ 
+-            boolean flag1 = this.setBlock(pos, fluid.createLegacyBlock(), 3, maxUpdateDepth);
++            boolean flag1 = this.setBlock(pos, fluid.createLegacyBlock(), 3, maxUpdateDepth, true); // Slice
+ 
+             if (flag1) {
+                 this.gameEvent(breakingEntity, GameEvent.BLOCK_DESTROY, pos);
+diff --git a/src/main/java/net/minecraft/world/level/LevelWriter.java b/src/main/java/net/minecraft/world/level/LevelWriter.java
+index 134e5ec79bf2dddd4e31930f8a7cb2c02fa29518..aa005b7a38ca5d2e501365e5038df801e66ddb81 100644
+--- a/src/main/java/net/minecraft/world/level/LevelWriter.java
++++ b/src/main/java/net/minecraft/world/level/LevelWriter.java
+@@ -7,12 +7,18 @@ import net.minecraft.world.level.block.state.BlockState;
+ 
+ public interface LevelWriter {
+ 
+-    boolean setBlock(BlockPos pos, BlockState state, int flags, int maxUpdateDepth);
++    boolean setBlock(BlockPos pos, BlockState state, int flags, int maxUpdateDepth, boolean checkLight); // Slice
+ 
+     default boolean setBlock(BlockPos pos, BlockState state, int flags) {
+-        return this.setBlock(pos, state, flags, 512);
++        return this.setBlock(pos, state, flags, 512, true); // Slice
+     }
+ 
++    // Slice start
++    default boolean setBlock(BlockPos pos, BlockState state, int flags, boolean checkLight) {
++        return this.setBlock(pos, state, flags, 512, checkLight);
++    }
++    // Slice end
++
+     boolean removeBlock(BlockPos pos, boolean move);
+ 
+     default boolean destroyBlock(BlockPos pos, boolean drop) {
+diff --git a/src/main/java/net/minecraft/world/level/block/Block.java b/src/main/java/net/minecraft/world/level/block/Block.java
+index ab5b9f00123e2ede2931ffc520684e482aac49b4..06497f4f4f76d31573c8c7a9603ead6f0bf86742 100644
+--- a/src/main/java/net/minecraft/world/level/block/Block.java
++++ b/src/main/java/net/minecraft/world/level/block/Block.java
+@@ -195,7 +195,7 @@ public class Block extends BlockBehaviour implements ItemLike {
+                     world.destroyBlock(pos, (flags & 32) == 0, (Entity) null, maxUpdateDepth);
+                 }
+             } else {
+-                world.setBlock(pos, newState, flags & -33, maxUpdateDepth);
++                world.setBlock(pos, newState, flags & -33, maxUpdateDepth, true); // Slice
+             }
+         }
+ 
+diff --git a/src/main/java/org/bukkit/craftbukkit/block/CraftBlock.java b/src/main/java/org/bukkit/craftbukkit/block/CraftBlock.java
+index ca320ef8a28fe15b32197669419981c4c2fcafd9..3112a3c7bd92c5a5aaebc1e188ddff3dc8370760 100644
+--- a/src/main/java/org/bukkit/craftbukkit/block/CraftBlock.java
++++ b/src/main/java/org/bukkit/craftbukkit/block/CraftBlock.java
+@@ -176,17 +176,31 @@ public class CraftBlock implements Block {
+         this.setBlockData(data, true);
+     }
+ 
++    // Slice start
+     @Override
+     public void setBlockData(BlockData data, boolean applyPhysics) {
++        setBlockData(data, applyPhysics, true);
++    }
++
++    @Override
++    public void setBlockData(BlockData data, boolean applyPhysics, boolean checkLight) {
+         Preconditions.checkArgument(data != null, "BlockData cannot be null");
+-        this.setTypeAndData(((CraftBlockData) data).getState(), applyPhysics);
++        this.setTypeAndData(((CraftBlockData) data).getState(), applyPhysics, checkLight);
+     }
+ 
+     boolean setTypeAndData(final net.minecraft.world.level.block.state.BlockState blockData, final boolean applyPhysics) {
+         return CraftBlock.setTypeAndData(this.world, this.position, this.getNMS(), blockData, applyPhysics);
+     }
+ 
++    boolean setTypeAndData(final net.minecraft.world.level.block.state.BlockState blockData, final boolean applyPhysics, boolean checkLight) {
++        return CraftBlock.setTypeAndData(this.world, this.position, this.getNMS(), blockData, applyPhysics, checkLight);
++    }
++
+     public static boolean setTypeAndData(LevelAccessor world, BlockPos position, net.minecraft.world.level.block.state.BlockState old, net.minecraft.world.level.block.state.BlockState blockData, boolean applyPhysics) {
++        return CraftBlock.setTypeAndData(world, position, old, blockData, applyPhysics, true);
++    }
++    // Slice end
++    public static boolean setTypeAndData(LevelAccessor world, BlockPos position, net.minecraft.world.level.block.state.BlockState old, net.minecraft.world.level.block.state.BlockState blockData, boolean applyPhysics, boolean checkLight) { // Slice
+         // SPIGOT-611: need to do this to prevent glitchiness. Easier to handle this here (like /setblock) than to fix weirdness in tile entity cleanup
+         if (old.hasBlockEntity() && blockData.getBlock() != old.getBlock()) { // SPIGOT-3725 remove old tile entity if block changes
+             // SPIGOT-4612: faster - just clear tile
+@@ -200,7 +214,7 @@ public class CraftBlock implements Block {
+         if (applyPhysics) {
+             return world.setBlock(position, blockData, 3);
+         } else {
+-            boolean success = world.setBlock(position, blockData, 2 | 16 | 1024); // NOTIFY | NO_OBSERVER | NO_PLACE (custom)
++            boolean success = world.setBlock(position, blockData, 2 | 16 | 1024, checkLight); // NOTIFY | NO_OBSERVER | NO_PLACE (custom) // Slice
+             if (success && world instanceof net.minecraft.world.level.Level) {
+                 world.getMinecraftWorld().sendBlockUpdated(
+                         position,
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+index c6cd4a5790384811f3171ce740afb9459f3d6fc0..572d567e7f5dfa32b74b35d9da765104d53e2739 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+@@ -1976,7 +1976,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+                 this.sendHealthUpdate();
+             }
+         }
+-        this.getHandle().getEntityData().set(net.minecraft.world.entity.LivingEntity.DATA_HEALTH_ID, (float) this.getScaledHealth());
++        this.getHandle().getEntityData().set(net.minecraft.world.entity.LivingEntity.DATA_HEALTH_ID, (float) this.getScaledHealth(), isDead() ? 0f : 20f); // Slice
+ 
+         this.getHandle().maxHealthCache = getMaxHealth();
+     }
+diff --git a/src/main/java/org/bukkit/craftbukkit/util/DummyGeneratorAccess.java b/src/main/java/org/bukkit/craftbukkit/util/DummyGeneratorAccess.java
+index 4c6cbfbcb5a7876e6b556b59c54e9a4cedf7843e..fbee5a55aa4eb65bb4453ed890c81a7a7d49add7 100644
+--- a/src/main/java/org/bukkit/craftbukkit/util/DummyGeneratorAccess.java
++++ b/src/main/java/org/bukkit/craftbukkit/util/DummyGeneratorAccess.java
+@@ -245,7 +245,7 @@ public class DummyGeneratorAccess implements WorldGenLevel {
+     }
+ 
+     @Override
+-    public boolean setBlock(BlockPos pos, BlockState state, int flags, int maxUpdateDepth) {
++    public boolean setBlock(BlockPos pos, BlockState state, int flags, int maxUpdateDepth, boolean checkLight) { // Slice - Set BlockData without light update
+         return false;
+     }
+ 

@@ -1,0 +1,72 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: JustMangoT <minetuan2@gmail.com>
+Date: Wed, 15 Dec 2021 01:19:09 +0700
+Subject: [PATCH] Stolen patches
+
+
+diff --git a/src/main/java/org/bukkit/block/Block.java b/src/main/java/org/bukkit/block/Block.java
+index 0dd0beee6800fb34520dfa2d05e5bdda76624d64..80e7b1fa5b3ab80b2a17d401c554ccbfc028ef80 100644
+--- a/src/main/java/org/bukkit/block/Block.java
++++ b/src/main/java/org/bukkit/block/Block.java
+@@ -266,6 +266,29 @@ public interface Block extends Metadatable, net.kyori.adventure.translation.Tran
+      */
+     void setBlockData(@NotNull BlockData data);
+ 
++
++    /**
++     * Sets the complete data for this block
++     *
++     * <br>
++     * Note that applyPhysics = false is not in general safe. It should only be
++     * used when you need to avoid triggering a physics update of neighboring
++     * blocks, for example when creating a {@link Bisected} block. If you are
++     * using a custom populator, then this parameter may also be required to
++     * prevent triggering infinite chunk loads on border blocks. This method
++     * should NOT be used to "hack" physics by placing blocks in impossible
++     * locations. Such blocks are liable to be removed on various events such as
++     * world upgrades. Furthermore setting large amounts of such blocks in close
++     * proximity may overload the server physics engine if an update is
++     * triggered at a later point. If this occurs, the resulting behavior is
++     * undefined.
++     *
++     * @param data new block specific data
++     * @param applyPhysics false to cancel physics from the changed block
++     * @param checkLight false to prevent a light-check update
++     */
++    void setBlockData(@NotNull BlockData data, boolean applyPhysics, boolean checkLight);
++
+     /**
+      * Sets the complete data for this block
+      *
+diff --git a/src/main/java/org/bukkit/plugin/SimplePluginManager.java b/src/main/java/org/bukkit/plugin/SimplePluginManager.java
+index 05bb388407b5bd8a942478237580a38ffaa388c8..355ad5eea0465e2b7a5c1f61b07feced8d6b46cf 100644
+--- a/src/main/java/org/bukkit/plugin/SimplePluginManager.java
++++ b/src/main/java/org/bukkit/plugin/SimplePluginManager.java
+@@ -611,6 +611,14 @@ public final class SimplePluginManager implements PluginManager {
+      */
+     @Override
+     public void callEvent(@NotNull Event event) {
++        // JettPack start - Skip event if no listeners
++        HandlerList handlers = event.getHandlers();
++        RegisteredListener[] listeners = handlers.getRegisteredListeners();
++        if (listeners.length == 0) {
++            return;
++        }
++        // JettPack end
++
+         // Paper - replace callEvent by merging to below method
+         if (event.isAsynchronous() && server.isPrimaryThread()) {
+             throw new IllegalStateException(event.getEventName() + " may only be triggered asynchronously.");
+@@ -618,8 +626,12 @@ public final class SimplePluginManager implements PluginManager {
+             throw new IllegalStateException(event.getEventName() + " may only be triggered synchronously.");
+         }
+ 
++        // Jettpack start - Moved on
++        /*
+         HandlerList handlers = event.getHandlers();
+         RegisteredListener[] listeners = handlers.getRegisteredListeners();
++        */
++        // Jettpack end
+ 
+         for (RegisteredListener registration : listeners) {
+             if (!registration.getPlugin().isEnabled()) {
