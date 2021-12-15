@@ -325,8 +325,47 @@ index 6d883db5c04cbcf454952c0f361029ecbfe4f037..72c83e3439eb6dc4ac57e4be0125940f
      }
  
      public static Direction getNearest(double x, double y, double z) {
+diff --git a/src/main/java/net/minecraft/server/level/ServerChunkCache.java b/src/main/java/net/minecraft/server/level/ServerChunkCache.java
+index 406bfe20a7b8786bbc6bee46151be91dadec6180..b0e12f9f85ecfb33febf3ca44b5b2d453bc8e856 100644
+--- a/src/main/java/net/minecraft/server/level/ServerChunkCache.java
++++ b/src/main/java/net/minecraft/server/level/ServerChunkCache.java
+@@ -76,6 +76,8 @@ public class ServerChunkCache extends ChunkSource {
+     final com.destroystokyo.paper.util.concurrent.WeakSeqLock loadedChunkMapSeqLock = new com.destroystokyo.paper.util.concurrent.WeakSeqLock();
+     final Long2ObjectOpenHashMap<LevelChunk> loadedChunkMap = new Long2ObjectOpenHashMap<>(8192, 0.5f);
+ 
++    private final java.util.ArrayList<LevelChunk> cachedChunkList = new java.util.ArrayList<>(); // Lithium: reduce allocs
++
+     private final LevelChunk[] lastLoadedChunks = new LevelChunk[4 * 4];
+     
+     public boolean firstRunSpawnCounts = true; // Pufferfish
+@@ -933,6 +935,16 @@ public class ServerChunkCache extends ChunkSource {
+         this.clearCache();
+     }
+ 
++    // Lithium start - : reduce allocs
++    private java.util.ArrayList<LevelChunk> redirectChunksListClone(int initialArraySize) {
++        java.util.ArrayList<LevelChunk> list = this.cachedChunkList;
++        list.clear(); // Ensure the list is empty before re-using it
++        list.ensureCapacity(initialArraySize);
++        return list;
++    }
++    // Lithium end
++
++
+     private void tickChunks() {
+         long i = this.level.getGameTime();
+         long j = i - this.lastInhabitedUpdate;
+@@ -1028,7 +1040,7 @@ public class ServerChunkCache extends ChunkSource {
+                 iterator1 = this.entityTickingChunks.iterator();
+             } else {
+                 iterator1 = this.entityTickingChunks.unsafeIterator();
+-                List<LevelChunk> shuffled = Lists.newArrayListWithCapacity(this.entityTickingChunks.size());
++                java.util.ArrayList<LevelChunk> shuffled = this.redirectChunksListClone(this.entityTickingChunks.size()); // Lithium: reduce alloc
+                 while (iterator1.hasNext()) {
+                     shuffled.add(iterator1.next());
+                 }
 diff --git a/src/main/java/net/minecraft/world/entity/LivingEntity.java b/src/main/java/net/minecraft/world/entity/LivingEntity.java
-index af9c58944b38e8aeeca5dca75c9f97e49f2895f2..273ddb0b728acf24ad2c884ef9cf40ae8d6c8a0e 100644
+index c4d54dfd88f8de90ccba52a0ad4f50f076d8461b..66f567145d65e5bb46b6c13250cc439b612abdc2 100644
 --- a/src/main/java/net/minecraft/world/entity/LivingEntity.java
 +++ b/src/main/java/net/minecraft/world/entity/LivingEntity.java
 @@ -3019,10 +3019,12 @@ public abstract class LivingEntity extends Entity {
@@ -343,6 +382,27 @@ index af9c58944b38e8aeeca5dca75c9f97e49f2895f2..273ddb0b728acf24ad2c884ef9cf40ae
          int i = aenumitemslot.length;
  
          for (int j = 0; j < i; ++j) {
+diff --git a/src/main/java/net/minecraft/world/entity/ai/goal/GoalSelector.java b/src/main/java/net/minecraft/world/entity/ai/goal/GoalSelector.java
+index 02f44b5682b99417f3cd6d6b25dc46cdc2a09093..be73217319150546e0f1f170881163477a59ec96 100644
+--- a/src/main/java/net/minecraft/world/entity/ai/goal/GoalSelector.java
++++ b/src/main/java/net/minecraft/world/entity/ai/goal/GoalSelector.java
+@@ -13,6 +13,7 @@ import java.util.stream.Stream;
+ import net.minecraft.util.profiling.ProfilerFiller;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet; // Lithium
+ 
+ public class GoalSelector {
+     private static final Logger LOGGER = LogManager.getLogger();
+@@ -28,7 +29,7 @@ public class GoalSelector {
+         }
+     };
+     private final Map<Goal.Flag, WrappedGoal> lockedFlags = new EnumMap<>(Goal.Flag.class);
+-    public final Set<WrappedGoal> availableGoals = Sets.newLinkedHashSet();
++    public final Set<WrappedGoal> availableGoals = new ObjectLinkedOpenHashSet<>(); // Lithium: replace AI goal set with optimized collection
+     private final Supplier<ProfilerFiller> profiler;
+     private final EnumSet<Goal.Flag> disabledFlags = EnumSet.noneOf(Goal.Flag.class); // Paper unused, but dummy to prevent plugins from crashing as hard. Theyll need to support paper in a special case if this is super important, but really doesn't seem like it would be.
+     private final com.destroystokyo.paper.util.set.OptimizedSmallEnumSet<net.minecraft.world.entity.ai.goal.Goal.Flag> goalTypes = new com.destroystokyo.paper.util.set.OptimizedSmallEnumSet<>(Goal.Flag.class); // Paper - remove streams from pathfindergoalselector
 diff --git a/src/main/java/net/minecraft/world/level/EntityBasedExplosionDamageCalculator.java b/src/main/java/net/minecraft/world/level/EntityBasedExplosionDamageCalculator.java
 index 2f9f15d99f8b31e9f13f7f32378b2a9e09bcb5e5..d19a3de92ea12807344bf91fc7eba36b324f6be3 100644
 --- a/src/main/java/net/minecraft/world/level/EntityBasedExplosionDamageCalculator.java
@@ -369,7 +429,7 @@ index 2f9f15d99f8b31e9f13f7f32378b2a9e09bcb5e5..d19a3de92ea12807344bf91fc7eba36b
  
      @Override
 diff --git a/src/main/java/net/minecraft/world/level/Level.java b/src/main/java/net/minecraft/world/level/Level.java
-index 90aa1d75b5c23e5ee27ceae9f6ef90de913a6601..9605600b287a80db8cea56c330332835f092d387 100644
+index 1a7188b8b756b7fe625582b8e7144141cf9ed6dd..7bb5a24ddc658bf4f126a9e2dd7901277ff7606c 100644
 --- a/src/main/java/net/minecraft/world/level/Level.java
 +++ b/src/main/java/net/minecraft/world/level/Level.java
 @@ -116,8 +116,14 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
@@ -493,3 +553,66 @@ index 74210dc2eef63da7360b1f833bb59b278419fb2b..35871a988c88d18749c1e5feb643946a
      }
  
      public LongStream getExistingSectionPositionsInChunk(long chunkPos) {
+diff --git a/src/main/java/net/minecraft/world/phys/AABB.java b/src/main/java/net/minecraft/world/phys/AABB.java
+index 68cc6f2a78a06293a29317fda72ab3ee79b3533a..dd60c64079cd86401c4b8f6c08fe12b40532db87 100644
+--- a/src/main/java/net/minecraft/world/phys/AABB.java
++++ b/src/main/java/net/minecraft/world/phys/AABB.java
+@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Direction;
+ import net.minecraft.util.Mth;
+ import net.minecraft.world.level.levelgen.structure.BoundingBox;
++import net.minecraft.core.Direction; // Lithium
+ 
+ public class AABB {
+     private static final double EPSILON = 1.0E-7D;
+@@ -16,6 +17,16 @@ public class AABB {
+     public final double maxY;
+     public final double maxZ;
+ 
++    // Lithium start: fast_util
++    static {
++        assert Direction.Axis.X.ordinal() == 0;
++        assert Direction.Axis.Y.ordinal() == 1;
++        assert Direction.Axis.Z.ordinal() == 2;
++        assert Direction.Axis.values().length == 3;
++    }
++    // Lithium end
++
++
+     public AABB(double x1, double y1, double z1, double x2, double y2, double z2) {
+         this.minX = Math.min(x1, x2);
+         this.minY = Math.min(y1, y2);
+@@ -81,11 +92,31 @@ public class AABB {
+     }
+ 
+     public double min(Direction.Axis axis) {
+-        return axis.choose(this.minX, this.minY, this.minZ);
++        // Lithium start - : fast_util
++        switch (axis.ordinal()) {
++            case 0: //X
++                return this.minX;
++            case 1: //Y
++                return this.minY;
++            case 2: //Z
++                return this.minZ;
++        }
++        throw new IllegalArgumentException();
++        // Lithium end
+     }
+ 
+     public double max(Direction.Axis axis) {
+-        return axis.choose(this.maxX, this.maxY, this.maxZ);
++        // Lithium start - : fast_util
++        switch (axis.ordinal()) {
++            case 0: //X
++                return this.maxX;
++            case 1: //Y
++                return this.maxY;
++            case 2: //Z
++                return this.maxZ;
++        }
++        throw new IllegalArgumentException();
++        // Lithium end
+     }
+ 
+     @Override

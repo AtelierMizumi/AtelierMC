@@ -172,7 +172,7 @@ index 9b25d36fe5230e287d81b99be31b9eddd8e76002..20235df3239ef941f16c437acb7ee083
              return false;
          } else {
 diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
-index 9fdfd567596101d008d13ec93272ec66c884a4cc..22d9f3a07047b70cd51d32cfa41d1e9a2d45b931 100644
+index 7cc8b0182aba3e04e31c340651d7063ec2fb83b5..13e4da6ddc4239a105f3f5d83ad54ec31fb0e924 100644
 --- a/src/main/java/net/minecraft/world/entity/Entity.java
 +++ b/src/main/java/net/minecraft/world/entity/Entity.java
 @@ -796,7 +796,13 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
@@ -190,7 +190,7 @@ index 9fdfd567596101d008d13ec93272ec66c884a4cc..22d9f3a07047b70cd51d32cfa41d1e9a
          }
  
          this.firstTick = false;
-@@ -2976,7 +2982,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
+@@ -2977,7 +2983,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
          if (event.isCancelled()) {
              return;
          }

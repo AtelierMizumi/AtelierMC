@@ -350,6 +350,18 @@ index 10d40f5601b665ca7768e99dab37410b891c5f87..46d5b429122a87481ee9d55ba5dd00c4
      }
  
      protected void doRunTask(R task) {
+diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
+index 9fdfd567596101d008d13ec93272ec66c884a4cc..7cc8b0182aba3e04e31c340651d7063ec2fb83b5 100644
+--- a/src/main/java/net/minecraft/world/entity/Entity.java
++++ b/src/main/java/net/minecraft/world/entity/Entity.java
+@@ -951,6 +951,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
+     // Paper end - detailed watchdog information
+ 
+     public void move(MoverType movementType, Vec3 movement) {
++        if (movement.equals(Vec3.ZERO)) return; // JettPack - skip if movement is zero
+         // Paper start - detailed watchdog information
+         io.papermc.paper.util.TickThread.ensureTickThread("Cannot move an entity off-main");
+         synchronized (this.posLock) {
 diff --git a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftAsyncScheduler.java b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftAsyncScheduler.java
 index 3c1992e212a6d6f1db4d5b807b38d71913619fc0..aad864af71e61f39de6a4dcfd0d9f7c0c0a4139d 100644
 --- a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftAsyncScheduler.java
