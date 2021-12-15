@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: JustMangoT <minetuan2@gmail.com>
+Date: Wed, 15 Dec 2021 09:29:37 +0700
+Subject: [PATCH] Shutdown server if Atelier does not load
+
+
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 522ef905239a7f7e263bffa3ee874253493b804d..b8c8dd784f1d429635a9487e14bc083be5d66ba9 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -729,6 +729,13 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
+         // Paper end
+ 
+         this.server.enablePlugins(org.bukkit.plugin.PluginLoadOrder.POSTWORLD);
++        // AtelierMC start
++        org.bukkit.plugin.Plugin atelier = server.getPluginManager().getPlugin("Atelier"); // EMC
++        if (atelier == null || !atelier.isEnabled()) {
++            System.err.println("CRITICAL - Atelier did not load. ABORT ABORT ABORT!");
++            org.bukkit.Bukkit.getServer().shutdown();
++        }
++        // AtelierMC end
+         this.server.getPluginManager().callEvent(new ServerLoadEvent(ServerLoadEvent.LoadType.STARTUP));
+         this.connection.acceptConnections();
+     }
