@@ -5,7 +5,7 @@ Subject: [PATCH] Remove Pufferfish features
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 719a3483979fe98bde1e097911eb1b2b24cf6f82..0091946e2edcb3eb7582a179b851bd74d9cf3c33 100644
+index fc91b0c4a1952658a122082da399466dab7def14..eca7e36b2fa49a05c7c1ac0f959e70e617b11692 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -61,7 +61,7 @@ dependencies {
@@ -18,7 +18,7 @@ index 719a3483979fe98bde1e097911eb1b2b24cf6f82..0091946e2edcb3eb7582a179b851bd74
      testImplementation("io.github.classgraph:classgraph:4.8.47") // Paper - mob goal test
      testImplementation("junit:junit:4.13.1")
 diff --git a/src/main/java/gg/pufferfish/pufferfish/PufferfishConfig.java b/src/main/java/gg/pufferfish/pufferfish/PufferfishConfig.java
-index e78a41b9e19e78faa0fc25911e89c5fb32a0795f..0a0c8483caa570f46a0ac01800fafe1cb073c48a 100644
+index c32f284b5ce200c0f4dc7e22b986c10edee5a66f..9545316d76de4a23246a19a2a374d421a64ec0c0 100644
 --- a/src/main/java/gg/pufferfish/pufferfish/PufferfishConfig.java
 +++ b/src/main/java/gg/pufferfish/pufferfish/PufferfishConfig.java
 @@ -11,7 +11,6 @@ import net.minecraft.world.entity.EntityType;
@@ -39,8 +39,8 @@ index e78a41b9e19e78faa0fc25911e89c5fb32a0795f..0a0c8483caa570f46a0ac01800fafe1c
 +    /*
  	public static String sentryDsn;
  	private static void sentry() {
- 		sentryDsn = getString("sentry-dsn", "", "Sentry DSN for improved error logging, leave blank to disable", "Obtain from https://sentry.io/");
-@@ -153,6 +154,8 @@ public class PufferfishConfig {
+ 		String sentryEnvironment = System.getenv("SENTRY_DSN");
+@@ -156,6 +157,8 @@ public class PufferfishConfig {
  			gg.pufferfish.pufferfish.sentry.SentryManager.init();
  		}
  	}
@@ -49,7 +49,7 @@ index e78a41b9e19e78faa0fc25911e89c5fb32a0795f..0a0c8483caa570f46a0ac01800fafe1c
  	
  	public static boolean enableBooks;
  	private static void books() {
-@@ -229,6 +232,8 @@ public class PufferfishConfig {
+@@ -232,6 +235,8 @@ public class PufferfishConfig {
  				"This can improve performance by a few percent, but has minor gameplay implications.");
  	}
  
@@ -58,7 +58,7 @@ index e78a41b9e19e78faa0fc25911e89c5fb32a0795f..0a0c8483caa570f46a0ac01800fafe1c
      public static URI profileWebUrl;
      private static void profilerOptions() {
          profileWebUrl = URI.create(getString("flare.url", "https://flare.airplane.gg", "Sets the server to use for profiles."));
-@@ -252,7 +257,8 @@ public class PufferfishConfig {
+@@ -255,7 +260,8 @@ public class PufferfishConfig {
          setComment("web-services", "Options for connecting to Pufferfish/Airplane's online utilities");
  
      }
