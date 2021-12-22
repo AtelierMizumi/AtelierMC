@@ -5,10 +5,10 @@ Subject: [PATCH] isDebugging API
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index b8c8dd784f1d429635a9487e14bc083be5d66ba9..391f42afe448ed14e8a870d1131533b04fafc45d 100644
+index 21f741cd8c439a3b815455b4442e575dae51edac..7c06979f5316224529d678419876ada1e6e9ea4f 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -2500,7 +2500,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
+@@ -2493,7 +2493,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
      }
  
      public boolean isDebugging() {
@@ -18,7 +18,7 @@ index b8c8dd784f1d429635a9487e14bc083be5d66ba9..391f42afe448ed14e8a870d1131533b0
  
      @Deprecated
 diff --git a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
-index 0dc8b6e779ebfa5394485fea445c9da7713ed018..bcce3725070ef4493047fb7c1f07368759fd71d7 100644
+index 9d4e872cf49407ec9968d9ecab4a6707f6b2d539..7e5bf2ceaa257d236fda121c6398bb1ec1184280 100644
 --- a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
 @@ -864,7 +864,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
@@ -31,7 +31,7 @@ index 0dc8b6e779ebfa5394485fea445c9da7713ed018..bcce3725070ef4493047fb7c1f073687
  
      @Override
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 6475a2f82b5fe244b106fac9b2f8a9a9502f59e2..fa0e4fa176799fab9279700337ad60693d5a7e85 100644
+index 0368d1f8cf4e8cafd82bec2789e7347c18c8db28..de49f3d53e34dab92336166de5b33c655b3f49d8 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -2783,6 +2783,13 @@ public final class CraftServer implements Server {

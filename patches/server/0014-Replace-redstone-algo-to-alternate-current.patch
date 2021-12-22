@@ -3051,7 +3051,7 @@ index 2036006b934ba1f27da606320b4c456af019a361..5f4d0bfbf80a3cca81eb2718d18b1069
          return 20;
      }
 diff --git a/src/main/java/net/minecraft/world/level/block/Block.java b/src/main/java/net/minecraft/world/level/block/Block.java
-index 06497f4f4f76d31573c8c7a9603ead6f0bf86742..23f56db0f08a57d9c76710a80272a6fd3f307de1 100644
+index d5229c01ebda14ae9e3a2b4ee95207d630bbb030..434e4851a4b85adb80d3904cf33f4390bb67f4c2 100644
 --- a/src/main/java/net/minecraft/world/level/block/Block.java
 +++ b/src/main/java/net/minecraft/world/level/block/Block.java
 @@ -62,8 +62,9 @@ import net.minecraft.world.phys.shapes.Shapes;
@@ -3101,7 +3101,7 @@ index b7f37475192bf79252482314080c9ba08e9aefdb..88a9565f24597ea7a5b585ea997bcb99
      public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
          if ((Boolean) state.getValue(ButtonBlock.POWERED)) {
 diff --git a/src/main/java/net/minecraft/world/level/block/DaylightDetectorBlock.java b/src/main/java/net/minecraft/world/level/block/DaylightDetectorBlock.java
-index 40b0380aa6fd052bf6376a15939c08e603f2f60c..01a916099eb21e9c293c8633a0c0be04f625f1dc 100644
+index 52707d0a9c248bd93258777f346f774d20673af2..8e2227f350362850f02427e2f23c7b50b14e2453 100644
 --- a/src/main/java/net/minecraft/world/level/block/DaylightDetectorBlock.java
 +++ b/src/main/java/net/minecraft/world/level/block/DaylightDetectorBlock.java
 @@ -23,8 +23,9 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
