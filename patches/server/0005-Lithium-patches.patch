@@ -4,6 +4,50 @@ Date: Fri, 10 Dec 2021 00:49:34 +0700
 Subject: [PATCH] Lithium patches
 
 
+diff --git a/src/main/java/com/destroystokyo/paper/PaperCommand.java b/src/main/java/com/destroystokyo/paper/PaperCommand.java
+index c0d123bff1825366c30aadd3ad8a7fde68ef74e4..0ea2bdb78e4d46efb9a7ae917363fe3e6d2c010c 100644
+--- a/src/main/java/com/destroystokyo/paper/PaperCommand.java
++++ b/src/main/java/com/destroystokyo/paper/PaperCommand.java
+@@ -725,12 +725,12 @@ public class PaperCommand extends Command {
+                     ++relitChunks[0];
+                     sender.getBukkitEntity().sendMessage(
+                             ChatColor.BLUE + "Relit chunk " + ChatColor.DARK_AQUA + chunkPos + ChatColor.BLUE +
+-                                    ", progress: " + ChatColor.DARK_AQUA + (int)(Math.round(100.0 * (double)(relitChunks[0])/(double)pending[0])) + "%"
++                                ", progress: " + ChatColor.DARK_AQUA + (int)(me.jellysquid.mods.lithium.common.util.math.FastMath.round(100.0 * (double)(relitChunks[0])/(double)pending[0])) + "%" // Lithium - fast math
+                     );
+                 },
+                 (int totalRelit) -> {
+                     final long end = System.nanoTime();
+-                    final long diff = Math.round(1.0e-6*(end - start));
++                    final long diff = me.jellysquid.mods.lithium.common.util.math.FastMath.round(1.0e-6*(end - start)); // Lithium - fast math
+                     sender.getBukkitEntity().sendMessage(
+                             ChatColor.BLUE + "Relit " + ChatColor.DARK_AQUA + totalRelit + ChatColor.BLUE + " chunks. Took " +
+                                     ChatColor.DARK_AQUA + diff + "ms"
+diff --git a/src/main/java/com/destroystokyo/paper/gui/RAMDetails.java b/src/main/java/com/destroystokyo/paper/gui/RAMDetails.java
+index fa56cd09102a89692b42f1d14257990508c5c720..72df26470249ce11b1f6d9dc8cfa0d86591f6889 100644
+--- a/src/main/java/com/destroystokyo/paper/gui/RAMDetails.java
++++ b/src/main/java/com/destroystokyo/paper/gui/RAMDetails.java
+@@ -81,6 +81,6 @@ public class RAMDetails extends JList<String> {
+     }
+ 
+     private static String format(double tps) {
+-        return ( ( tps > 21.0 ) ? "*" : "" ) + Math.min( Math.round( tps * 100.0 ) / 100.0, 20.0 );
++        return ( ( tps > 21.0 ) ? "*" : "" ) + Math.min( me.jellysquid.mods.lithium.common.util.math.FastMath.round( tps * 100.0 ) / 100.0, 20.0 ); // Lithium - fast math
+     }
+ }
+diff --git a/src/main/java/com/destroystokyo/paper/gui/RAMGraph.java b/src/main/java/com/destroystokyo/paper/gui/RAMGraph.java
+index c3e54da4ab6440811aab2f9dd1e218802ac13285..a636a09924af5cddc3f6ce308d34a8ca0d8addad 100644
+--- a/src/main/java/com/destroystokyo/paper/gui/RAMGraph.java
++++ b/src/main/java/com/destroystokyo/paper/gui/RAMGraph.java
+@@ -128,7 +128,7 @@ public class RAMGraph extends JComponent {
+             graphics.setColor(data.getLineColor());
+             graphics.fillOval(m.x - 2, 100 - used - 2, 5, 5);
+             setToolTipText(String.format("<html><body>Used: %s mb (%s%%)<br/>%s</body></html>",
+-                Math.round(data.getUsedMem() / 1024F / 1024F),
++                me.jellysquid.mods.lithium.common.util.math.FastMath.round(data.getUsedMem() / 1024F / 1024F), // Lithium - fast math
+                 used, getTime(m.x)));
+         }
+     }
 diff --git a/src/main/java/me/jellysquid/mods/lithium/common/util/ArrayConstants.java b/src/main/java/me/jellysquid/mods/lithium/common/util/ArrayConstants.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..1ed3c1fc57ad3e254d5c82ea4c90c3f0732165e2
@@ -303,6 +347,34 @@ index 0000000000000000000000000000000000000000..137a4ea1611fe636c213a6da6f64dd42
 +        return new HashedReferenceList<>(list);
 +    }
 +}
+diff --git a/src/main/java/me/jellysquid/mods/lithium/common/util/math/FastMath.java b/src/main/java/me/jellysquid/mods/lithium/common/util/math/FastMath.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..3b0e7388a15202d41d6b55b5a443eff8a60b43a3
+--- /dev/null
++++ b/src/main/java/me/jellysquid/mods/lithium/common/util/math/FastMath.java
+@@ -0,0 +1,22 @@
++package me.jellysquid.mods.lithium.common.util.math;
++
++public class FastMath {
++    /**
++      * @author FX - PR0CESS
++      * Custom rounding method which is even faster while keeping 100% accuracy
++      * ~1.25x faster than {@link Math#round(float)}
++      */
++    public static int round(float a) {
++        return a > 0F ? (int)(a + .5F) : (int)(a - .5F);
++    }
++
++    /**
++     * @author FX - PR0CESS
++     * Custom rounding method which is even faster while keeping 100% accuracy
++     * ~1.28x faster than {@link Math#round(double)}
++     */
++    public static long round(double a) {
++        return a > 0D ? (long)(a + .5D) : (long)(a - .5D);
++    }
++}
++
 diff --git a/src/main/java/net/minecraft/core/Direction.java b/src/main/java/net/minecraft/core/Direction.java
 index 6d883db5c04cbcf454952c0f361029ecbfe4f037..72c83e3439eb6dc4ac57e4be0125940fcb17a5ed 100644
 --- a/src/main/java/net/minecraft/core/Direction.java
@@ -325,8 +397,34 @@ index 6d883db5c04cbcf454952c0f361029ecbfe4f037..72c83e3439eb6dc4ac57e4be0125940f
      }
  
      public static Direction getNearest(double x, double y, double z) {
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 2d061d5ebf58a2e08e294e0eb9ffb89305c240e6..e88e631a32fdf263efb6ebf93e06362db3f4f0c9 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -393,7 +393,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+                     }
+ 
+                     double overuseCount = (double)overuse/(double)MAX_CHUNK_EXEC_TIME;
+-                    long extraSleep = (long)Math.round(overuseCount*CHUNK_TASK_QUEUE_BACKOFF_MIN_TIME);
++                    long extraSleep = (long)me.jellysquid.mods.lithium.common.util.math.FastMath.round(overuseCount*CHUNK_TASK_QUEUE_BACKOFF_MIN_TIME); // Lithium - fast math
+ 
+                     lastMidTickExecute = currTime + extraSleep;
+                     return;
+diff --git a/src/main/java/net/minecraft/server/gui/StatsComponent.java b/src/main/java/net/minecraft/server/gui/StatsComponent.java
+index 88f10d729aa1e0a01790521821d691a0ecd373a2..eba510e825f51e2e9d1e9886c8e2fac6ad74bf7d 100644
+--- a/src/main/java/net/minecraft/server/gui/StatsComponent.java
++++ b/src/main/java/net/minecraft/server/gui/StatsComponent.java
+@@ -88,7 +88,7 @@ public class StatsComponent extends JComponent {
+ 
+     // Paper - start Add tps entry
+     private static String format(double tps) {
+-        return (( tps > 21.0 ) ? "*" : "") + Math.min(Math.round(tps * 100.0) / 100.0, 20.0); // only print * at 21, we commonly peak to 20.02 as the tick sleep is not accurate enough, stop the noise
++        return (( tps > 21.0 ) ? "*" : "") + Math.min(me.jellysquid.mods.lithium.common.util.math.FastMath.round(tps * 100.0) / 100.0, 20.0); // only print * at 21, we commonly peak to 20.02 as the tick sleep is not accurate enough, stop the noise // Lithium - fast math
+     }
+     // Paper end
+ }
 diff --git a/src/main/java/net/minecraft/server/level/ServerChunkCache.java b/src/main/java/net/minecraft/server/level/ServerChunkCache.java
-index 406bfe20a7b8786bbc6bee46151be91dadec6180..b0e12f9f85ecfb33febf3ca44b5b2d453bc8e856 100644
+index 406bfe20a7b8786bbc6bee46151be91dadec6180..e5a2ae9b72874bc97d3166de026b1362ffbe87ec 100644
 --- a/src/main/java/net/minecraft/server/level/ServerChunkCache.java
 +++ b/src/main/java/net/minecraft/server/level/ServerChunkCache.java
 @@ -76,6 +76,8 @@ public class ServerChunkCache extends ChunkSource {
@@ -342,7 +440,7 @@ index 406bfe20a7b8786bbc6bee46151be91dadec6180..b0e12f9f85ecfb33febf3ca44b5b2d45
          this.clearCache();
      }
  
-+    // Lithium start - : reduce allocs
++    // Lithium start - reduce allocs
 +    private java.util.ArrayList<LevelChunk> redirectChunksListClone(int initialArraySize) {
 +        java.util.ArrayList<LevelChunk> list = this.cachedChunkList;
 +        list.clear(); // Ensure the list is empty before re-using it
@@ -365,9 +463,73 @@ index 406bfe20a7b8786bbc6bee46151be91dadec6180..b0e12f9f85ecfb33febf3ca44b5b2d45
                      shuffled.add(iterator1.next());
                  }
 diff --git a/src/main/java/net/minecraft/world/entity/LivingEntity.java b/src/main/java/net/minecraft/world/entity/LivingEntity.java
-index c4d54dfd88f8de90ccba52a0ad4f50f076d8461b..66f567145d65e5bb46b6c13250cc439b612abdc2 100644
+index c4d54dfd88f8de90ccba52a0ad4f50f076d8461b..bad3bb880624567d52be28006f938d888913464c 100644
 --- a/src/main/java/net/minecraft/world/entity/LivingEntity.java
 +++ b/src/main/java/net/minecraft/world/entity/LivingEntity.java
+@@ -1472,7 +1472,7 @@ public abstract class LivingEntity extends Entity {
+             if (this instanceof ServerPlayer) {
+                 CriteriaTriggers.ENTITY_HURT_PLAYER.trigger((ServerPlayer) this, source, f1, amount, flag);
+                 if (f2 > 0.0F && f2 < 3.4028235E37F) {
+-                    ((ServerPlayer) this).awardStat(Stats.DAMAGE_BLOCKED_BY_SHIELD, Math.round(f2 * 10.0F));
++                    ((ServerPlayer) this).awardStat(Stats.DAMAGE_BLOCKED_BY_SHIELD, me.jellysquid.mods.lithium.common.util.math.FastMath.round(f2 * 10.0F)); // Lithium - fast math
+                 }
+             }
+ 
+@@ -1985,9 +1985,9 @@ public abstract class LivingEntity extends Entity {
+ 
+                 if (f3 > 0.0F && f3 < 3.4028235E37F) {
+                     if (this instanceof ServerPlayer) {
+-                        ((ServerPlayer) this).awardStat(Stats.DAMAGE_RESISTED, Math.round(f3 * 10.0F));
++                        ((ServerPlayer) this).awardStat(Stats.DAMAGE_RESISTED, me.jellysquid.mods.lithium.common.util.math.FastMath.round(f3 * 10.0F)); // Lithium - fast math
+                     } else if (source.getEntity() instanceof ServerPlayer) {
+-                        ((ServerPlayer) source.getEntity()).awardStat(Stats.DAMAGE_DEALT_RESISTED, Math.round(f3 * 10.0F));
++                        ((ServerPlayer) source.getEntity()).awardStat(Stats.DAMAGE_DEALT_RESISTED, me.jellysquid.mods.lithium.common.util.math.FastMath.round(f3 * 10.0F)); // Lithium - fast math
+                     }
+                 }
+             }
+@@ -2097,9 +2097,9 @@ public abstract class LivingEntity extends Entity {
+                 float f3 = (float) -event.getDamage(DamageModifier.RESISTANCE);
+                 if (f3 > 0.0F && f3 < 3.4028235E37F) {
+                     if (this instanceof ServerPlayer) {
+-                        ((ServerPlayer) this).awardStat(Stats.DAMAGE_RESISTED, Math.round(f3 * 10.0F));
++                        ((ServerPlayer) this).awardStat(Stats.DAMAGE_RESISTED, me.jellysquid.mods.lithium.common.util.math.FastMath.round(f3 * 10.0F)); // Lithium - fast math
+                     } else if (damagesource.getEntity() instanceof ServerPlayer) {
+-                        ((ServerPlayer) damagesource.getEntity()).awardStat(Stats.DAMAGE_DEALT_RESISTED, Math.round(f3 * 10.0F));
++                        ((ServerPlayer) damagesource.getEntity()).awardStat(Stats.DAMAGE_DEALT_RESISTED, me.jellysquid.mods.lithium.common.util.math.FastMath.round(f3 * 10.0F)); // Lithium - fast math
+                     }
+                 }
+             }
+@@ -2131,10 +2131,10 @@ public abstract class LivingEntity extends Entity {
+             float f2 = absorptionModifier;
+ 
+             if (f2 > 0.0F && f2 < 3.4028235E37F && this instanceof net.minecraft.world.entity.player.Player) {
+-                ((net.minecraft.world.entity.player.Player) this).awardStat(Stats.DAMAGE_ABSORBED, Math.round(f2 * 10.0F));
++                ((net.minecraft.world.entity.player.Player) this).awardStat(Stats.DAMAGE_ABSORBED, me.jellysquid.mods.lithium.common.util.math.FastMath.round(f2 * 10.0F)); // Lithium - fast math
+             }
+             if (f2 > 0.0F && f2 < 3.4028235E37F && damagesource.getEntity() instanceof ServerPlayer) {
+-                ((ServerPlayer) damagesource.getEntity()).awardStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(f2 * 10.0F));
++                ((ServerPlayer) damagesource.getEntity()).awardStat(Stats.DAMAGE_DEALT_ABSORBED, me.jellysquid.mods.lithium.common.util.math.FastMath.round(f2 * 10.0F)); // Lithium - fast math
+             }
+ 
+             if (f > 0 || !human) {
+@@ -2142,7 +2142,7 @@ public abstract class LivingEntity extends Entity {
+                     // PAIL: Be sure to drag all this code from the EntityHuman subclass each update.
+                     ((net.minecraft.world.entity.player.Player) this).causeFoodExhaustion(damagesource.getFoodExhaustion(), org.bukkit.event.entity.EntityExhaustionEvent.ExhaustionReason.DAMAGED); // CraftBukkit - EntityExhaustionEvent
+                     if (f < 3.4028235E37F) {
+-                        ((net.minecraft.world.entity.player.Player) this).awardStat(Stats.DAMAGE_TAKEN, Math.round(f * 10.0F));
++                        ((net.minecraft.world.entity.player.Player) this).awardStat(Stats.DAMAGE_TAKEN, me.jellysquid.mods.lithium.common.util.math.FastMath.round(f * 10.0F)); // Lithium - fast math
+                     }
+                 }
+                 // CraftBukkit end
+@@ -2164,7 +2164,7 @@ public abstract class LivingEntity extends Entity {
+                         CriteriaTriggers.ENTITY_HURT_PLAYER.trigger((ServerPlayer) this, damagesource, f, originalDamage, true);
+                         f2 = (float) -event.getDamage(DamageModifier.BLOCKING);
+                         if (f2 > 0.0F && f2 < 3.4028235E37F) {
+-                            ((ServerPlayer) this).awardStat(Stats.DAMAGE_BLOCKED_BY_SHIELD, Math.round(originalDamage * 10.0F));
++                            ((ServerPlayer) this).awardStat(Stats.DAMAGE_BLOCKED_BY_SHIELD, me.jellysquid.mods.lithium.common.util.math.FastMath.round(originalDamage * 10.0F)); // Lithium - fast math
+                         }
+                     }
+ 
 @@ -3019,10 +3019,12 @@ public abstract class LivingEntity extends Entity {
  
      }
@@ -382,6 +544,151 @@ index c4d54dfd88f8de90ccba52a0ad4f50f076d8461b..66f567145d65e5bb46b6c13250cc439b
          int i = aenumitemslot.length;
  
          for (int j = 0; j < i; ++j) {
+diff --git a/src/main/java/net/minecraft/world/entity/ai/behavior/LongJumpToRandomPos.java b/src/main/java/net/minecraft/world/entity/ai/behavior/LongJumpToRandomPos.java
+index 76e4258b13482d081a0e7452d39edae00b348add..8b75240f3bb1328602db5698b63bf37e0b653f6f 100644
+--- a/src/main/java/net/minecraft/world/entity/ai/behavior/LongJumpToRandomPos.java
++++ b/src/main/java/net/minecraft/world/entity/ai/behavior/LongJumpToRandomPos.java
+@@ -25,6 +25,10 @@ import net.minecraft.world.level.pathfinder.Path;
+ import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
+ import net.minecraft.world.phys.AABB;
+ import net.minecraft.world.phys.Vec3;
++// Lithium start
++import it.unimi.dsi.fastutil.longs.LongArrayList;
++import it.unimi.dsi.fastutil.shorts.ShortArrayList;
++// Lithium end
+ 
+ public class LongJumpToRandomPos<E extends Mob> extends Behavior<E> {
+     private static final int FIND_JUMP_TRIES = 20;
+@@ -41,15 +45,31 @@ public class LongJumpToRandomPos<E extends Mob> extends Behavior<E> {
+     private int findJumpTries;
+     private long prepareJumpStart;
+     private Function<E, SoundEvent> getJumpSound;
++    // Lithium start
++    private final LongArrayList potentialTargets = new LongArrayList();
++    private final ShortArrayList potentialWeights = new ShortArrayList();
++    // Lithium end
+ 
+-    public LongJumpToRandomPos(UniformInt cooldownRange, int verticalRange, int horizontalRange, float maxRange, Function<E, SoundEvent> entityToSound) {
++    // Lithium start
++    private static int findIndex(ShortArrayList weights, int weightedIndex) {
++        for (int i = 0; i < weights.size(); i++) {
++            weightedIndex -= weights.getShort(i);
++            if (weightedIndex < 0) {
++                return i;
++            }
++        }
++        return -1;
++    }
++
++    public LongJumpToRandomPos(UniformInt cooldownRange, int maxLongJumpHeight, int maxLongJumpWidth, float maxRange, Function<E, SoundEvent> entityToSound) {
+         super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LONG_JUMP_COOLDOWN_TICKS, MemoryStatus.VALUE_ABSENT, MemoryModuleType.LONG_JUMP_MID_JUMP, MemoryStatus.VALUE_ABSENT), 200);
+         this.timeBetweenLongJumps = cooldownRange;
+-        this.maxLongJumpHeight = verticalRange;
+-        this.maxLongJumpWidth = horizontalRange;
++        this.maxLongJumpHeight = maxLongJumpHeight;
++        this.maxLongJumpWidth = maxLongJumpWidth;
+         this.maxJumpVelocity = maxRange;
+         this.getJumpSound = entityToSound;
+     }
++    // Lithium end
+ 
+     @Override
+     protected boolean checkExtraStartConditions(ServerLevel world, Mob entity) {
+@@ -66,30 +86,62 @@ public class LongJumpToRandomPos<E extends Mob> extends Behavior<E> {
+         return bl;
+     }
+ 
++    // Lithium start
++    /**
++     * @author 2No2Name
++     * @reason only evaluate 20+ instead of ~100 possible jumps without affecting behavior
++     * [VanillaCopy] the whole method, commented changes
++     */
+     @Override
+     protected void start(ServerLevel serverLevel, Mob mob, long l) {
++        this.potentialTargets.clear();
++        this.potentialWeights.clear();
++        int potentialTotalWeight = 0;
+         this.chosenJump = Optional.empty();
+-        this.findJumpTries = 20;
++        this.findJumpTries = FIND_JUMP_TRIES;
+         this.jumpCandidates.clear();
+         this.initialPosition = Optional.of(mob.position());
+-        BlockPos blockPos = mob.blockPosition();
+-        int i = blockPos.getX();
+-        int j = blockPos.getY();
+-        int k = blockPos.getZ();
+-        Iterable<BlockPos> iterable = BlockPos.betweenClosed(i - this.maxLongJumpWidth, j - this.maxLongJumpHeight, k - this.maxLongJumpWidth, i + this.maxLongJumpWidth, j + this.maxLongJumpHeight, k + this.maxLongJumpWidth);
+-        PathNavigation pathNavigation = mob.getNavigation();
+-
+-        for(BlockPos blockPos2 : iterable) {
+-            double d = blockPos2.distSqr(blockPos);
+-            if ((i != blockPos2.getX() || k != blockPos2.getZ()) && pathNavigation.isStableDestination(blockPos2) && mob.getPathfindingMalus(WalkNodeEvaluator.getBlockPathTypeStatic(mob.level, blockPos2.mutable())) == 0.0F) {
+-                Optional<Vec3> optional = this.calculateOptimalJumpVector(mob, Vec3.atCenterOf(blockPos2));
+-                optional.ifPresent((vel) -> {
+-                    this.jumpCandidates.add(new LongJumpToRandomPos.PossibleJump(new BlockPos(blockPos2), vel, Mth.ceil(d)));
+-                });
++        BlockPos goatPos = mob.blockPosition();
++        int goatX = goatPos.getX();
++        int goatY = goatPos.getY();
++        int goatZ = goatPos.getZ();
++        Iterable<BlockPos> iterable = BlockPos.betweenClosed(goatX - this.maxLongJumpWidth, goatY - this.maxLongJumpHeight, goatZ - this.maxLongJumpWidth, goatX + this.maxLongJumpWidth, goatY + this.maxLongJumpHeight, goatZ + this.maxLongJumpWidth);
++        PathNavigation entityNavigation = mob.getNavigation();
++
++        BlockPos.MutableBlockPos targetPosCopy = new BlockPos.MutableBlockPos();
++        for (BlockPos targetPos : iterable) {
++            if (goatX == targetPos.getX() && goatZ == targetPos.getZ()) {
++                continue;
++            }
++            double squaredDistance = targetPos.distSqr(goatPos);
++            //Optimization: Evaluate the flight path check later (after random selection, but before world can be modified)
++            if (entityNavigation.isStableDestination(targetPos) && mob.getPathfindingMalus(WalkNodeEvaluator.getBlockPathTypeStatic(mob.level, targetPosCopy.set(targetPos))) == 0.0F) {
++                this.potentialTargets.add(targetPos.asLong());
++                int weight = Mth.ceil(squaredDistance);
++                this.potentialWeights.add((short) weight);
++                potentialTotalWeight += weight;
++            }
++        }
++        // Optimization: Do the random picking of positions before doing the expensive the jump flight path validity check.
++        // up to FIND_JUMP_TRIES random jumpCandidates can be selected in keepRunning, so only this number of jumpCandidates needs to be generated
++        while (this.jumpCandidates.size() < FIND_JUMP_TRIES) {
++            // the number of random calls will be different from vanilla, but this is not reasonably detectable (not affecting world generation)
++            if (potentialTotalWeight == 0) {
++                return; // collection is empty/fully consumed, no more possible jumpCandidates available
++            }
++            int chosenIndex = findIndex(this.potentialWeights, serverLevel.random.nextInt(potentialTotalWeight));
++            long chosenPos = this.potentialTargets.getLong(chosenIndex);
++            short chosenWeight = this.potentialWeights.set(chosenIndex, (short) 0);
++            potentialTotalWeight -= chosenWeight;
++            // Very expensive method call, it shifts bounding boxes around and checks for collisions with them
++            Optional<Vec3> optional = this.calculateOptimalJumpVector(mob, Vec3.atCenterOf(targetPosCopy.set(chosenPos)));
++            if (optional.isPresent()) {
++                //the weight in Target should be unused, as the random selection already took place
++                this.jumpCandidates.add(new LongJumpToRandomPos.PossibleJump(new BlockPos(targetPosCopy), optional.get(), chosenWeight));
+             }
+         }
+-
+     }
++    // Lithium end
+ 
+     @Override
+     protected void tick(ServerLevel serverLevel, E mob, long l) {
+@@ -106,7 +158,14 @@ public class LongJumpToRandomPos<E extends Mob> extends Behavior<E> {
+             }
+         } else {
+             --this.findJumpTries;
+-            Optional<LongJumpToRandomPos.PossibleJump> optional = WeightedRandom.getRandomItem(serverLevel.random, this.jumpCandidates);
++            // Lithium start
++            Optional<LongJumpToRandomPos.PossibleJump> optional;
++            if (this.jumpCandidates.isEmpty()) {
++                optional = Optional.empty();
++            } else {
++                optional = Optional.of(this.jumpCandidates.get(0));
++            }
++            // Lithium end
+             if (optional.isPresent()) {
+                 this.jumpCandidates.remove(optional.get());
+                 mob.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(optional.get().getJumpTarget()));
 diff --git a/src/main/java/net/minecraft/world/entity/ai/goal/GoalSelector.java b/src/main/java/net/minecraft/world/entity/ai/goal/GoalSelector.java
 index 02f44b5682b99417f3cd6d6b25dc46cdc2a09093..be73217319150546e0f1f170881163477a59ec96 100644
 --- a/src/main/java/net/minecraft/world/entity/ai/goal/GoalSelector.java
@@ -403,6 +710,116 @@ index 02f44b5682b99417f3cd6d6b25dc46cdc2a09093..be73217319150546e0f1f17088116347
      private final Supplier<ProfilerFiller> profiler;
      private final EnumSet<Goal.Flag> disabledFlags = EnumSet.noneOf(Goal.Flag.class); // Paper unused, but dummy to prevent plugins from crashing as hard. Theyll need to support paper in a special case if this is super important, but really doesn't seem like it would be.
      private final com.destroystokyo.paper.util.set.OptimizedSmallEnumSet<net.minecraft.world.entity.ai.goal.Goal.Flag> goalTypes = new com.destroystokyo.paper.util.set.OptimizedSmallEnumSet<>(Goal.Flag.class); // Paper - remove streams from pathfindergoalselector
+diff --git a/src/main/java/net/minecraft/world/entity/player/Player.java b/src/main/java/net/minecraft/world/entity/player/Player.java
+index 2c00a766130a7f682fc6c4c74321e10637ca7932..de08ef6c87415fd0690dba731ce3f78927292b1a 100644
+--- a/src/main/java/net/minecraft/world/entity/player/Player.java
++++ b/src/main/java/net/minecraft/world/entity/player/Player.java
+@@ -1026,7 +1026,7 @@ public abstract class Player extends LivingEntity {
+             float f2 = f1 - f;
+ 
+             if (f2 > 0.0F && f2 < 3.4028235E37F) {
+-                this.awardStat(Stats.DAMAGE_ABSORBED, Math.round(f2 * 10.0F));
++                this.awardStat(Stats.DAMAGE_ABSORBED, me.jellysquid.mods.lithium.common.util.math.FastMath.round(f2 * 10.0F)); // Lithium - fast math
+             }
+ 
+             if (f != 0.0F) {
+@@ -1036,7 +1036,7 @@ public abstract class Player extends LivingEntity {
+                 this.setHealth(this.getHealth() - f);
+                 this.getCombatTracker().recordDamage(damagesource, f3, f);
+                 if (f < 3.4028235E37F) {
+-                    this.awardStat(Stats.DAMAGE_TAKEN, Math.round(f * 10.0F));
++                    this.awardStat(Stats.DAMAGE_TAKEN, me.jellysquid.mods.lithium.common.util.math.FastMath.round(f * 10.0F)); // Lithium - fast math
+                 }
+ 
+             }
+@@ -1362,7 +1362,7 @@ public abstract class Player extends LivingEntity {
+                         if (target instanceof LivingEntity) {
+                             float f5 = f3 - ((LivingEntity) target).getHealth();
+ 
+-                            this.awardStat(Stats.DAMAGE_DEALT, Math.round(f5 * 10.0F));
++                            this.awardStat(Stats.DAMAGE_DEALT, me.jellysquid.mods.lithium.common.util.math.FastMath.round(f5 * 10.0F)); // Lithium - fast math
+                             if (j > 0) {
+                                 // CraftBukkit start - Call a combust event when somebody hits with a fire enchanted item
+                                 EntityCombustByEntityEvent combustEvent = new EntityCombustByEntityEvent(this.getBukkitEntity(), target.getBukkitEntity(), j * 4);
+@@ -1626,29 +1626,29 @@ public abstract class Player extends LivingEntity {
+             int i;
+ 
+             if (this.isSwimming()) {
+-                i = Math.round((float) Math.sqrt(dx * dx + dy * dy + dz * dz) * 100.0F);
++                i = me.jellysquid.mods.lithium.common.util.math.FastMath.round((float) Math.sqrt(dx * dx + dy * dy + dz * dz) * 100.0F); // Lithium - fast math
+                 if (i > 0) {
+                     this.awardStat(Stats.SWIM_ONE_CM, i);
+                     this.causeFoodExhaustion(level.spigotConfig.swimMultiplier * (float) i * 0.01F, EntityExhaustionEvent.ExhaustionReason.SWIM); // CraftBukkit - EntityExhaustionEvent // Spigot
+                 }
+             } else if (this.isEyeInFluid(FluidTags.WATER)) {
+-                i = Math.round((float) Math.sqrt(dx * dx + dy * dy + dz * dz) * 100.0F);
++                i = me.jellysquid.mods.lithium.common.util.math.FastMath.round((float) Math.sqrt(dx * dx + dy * dy + dz * dz) * 100.0F); // Lithium - fast math
+                 if (i > 0) {
+                     this.awardStat(Stats.WALK_UNDER_WATER_ONE_CM, i);
+                     this.causeFoodExhaustion(level.spigotConfig.swimMultiplier * (float) i * 0.01F, EntityExhaustionEvent.ExhaustionReason.WALK_UNDERWATER); // CraftBukkit - EntityExhaustionEvent // Spigot
+                 }
+             } else if (this.isInWater()) {
+-                i = Math.round((float) Math.sqrt(dx * dx + dz * dz) * 100.0F);
++                i = me.jellysquid.mods.lithium.common.util.math.FastMath.round((float) Math.sqrt(dx * dx + dz * dz) * 100.0F); // Lithium - fast math
+                 if (i > 0) {
+                     this.awardStat(Stats.WALK_ON_WATER_ONE_CM, i);
+                     this.causeFoodExhaustion(level.spigotConfig.swimMultiplier * (float) i * 0.01F, EntityExhaustionEvent.ExhaustionReason.WALK_ON_WATER); // CraftBukkit - EntityExhaustionEvent // Spigot
+                 }
+             } else if (this.onClimbable()) {
+                 if (dy > 0.0D) {
+-                    this.awardStat(Stats.CLIMB_ONE_CM, (int) Math.round(dy * 100.0D));
++                    this.awardStat(Stats.CLIMB_ONE_CM, (int) me.jellysquid.mods.lithium.common.util.math.FastMath.round(dy * 100.0D)); // Lithium - fast math
+                 }
+             } else if (this.onGround) {
+-                i = Math.round((float) Math.sqrt(dx * dx + dz * dz) * 100.0F);
++                i = me.jellysquid.mods.lithium.common.util.math.FastMath.round((float) Math.sqrt(dx * dx + dz * dz) * 100.0F); // Lithium - fast math
+                 if (i > 0) {
+                     if (this.isSprinting()) {
+                         this.awardStat(Stats.SPRINT_ONE_CM, i);
+@@ -1662,10 +1662,10 @@ public abstract class Player extends LivingEntity {
+                     }
+                 }
+             } else if (this.isFallFlying()) {
+-                i = Math.round((float) Math.sqrt(dx * dx + dy * dy + dz * dz) * 100.0F);
++                i = me.jellysquid.mods.lithium.common.util.math.FastMath.round((float) Math.sqrt(dx * dx + dy * dy + dz * dz) * 100.0F); // Lithium - fast math
+                 this.awardStat(Stats.AVIATE_ONE_CM, i);
+             } else {
+-                i = Math.round((float) Math.sqrt(dx * dx + dz * dz) * 100.0F);
++                i = me.jellysquid.mods.lithium.common.util.math.FastMath.round((float) Math.sqrt(dx * dx + dz * dz) * 100.0F); // Lithium - fast math
+                 if (i > 25) {
+                     this.awardStat(Stats.FLY_ONE_CM, i);
+                 }
+@@ -1676,7 +1676,7 @@ public abstract class Player extends LivingEntity {
+ 
+     private void checkRidingStatistics(double dx, double dy, double dz) {
+         if (this.isPassenger()) {
+-            int i = Math.round((float) Math.sqrt(dx * dx + dy * dy + dz * dz) * 100.0F);
++            int i = me.jellysquid.mods.lithium.common.util.math.FastMath.round((float) Math.sqrt(dx * dx + dy * dy + dz * dz) * 100.0F); // Lithium - fast math
+ 
+             if (i > 0) {
+                 Entity entity = this.getVehicle();
+@@ -1703,7 +1703,7 @@ public abstract class Player extends LivingEntity {
+             return false;
+         } else {
+             if (fallDistance >= 2.0F) {
+-                this.awardStat(Stats.FALL_ONE_CM, (int) Math.round((double) fallDistance * 100.0D));
++                this.awardStat(Stats.FALL_ONE_CM, (int) me.jellysquid.mods.lithium.common.util.math.FastMath.round((double) fallDistance * 100.0D)); // Lithium - fast math
+             }
+ 
+             return super.causeFallDamage(fallDistance, damageMultiplier, damageSource);
+diff --git a/src/main/java/net/minecraft/world/item/enchantment/EnchantmentHelper.java b/src/main/java/net/minecraft/world/item/enchantment/EnchantmentHelper.java
+index 7bc5aa35b52de0027cf58a6127a9903464ccaf47..b3a8e2e79823bd8461dc40df0d3154f648d6e888 100644
+--- a/src/main/java/net/minecraft/world/item/enchantment/EnchantmentHelper.java
++++ b/src/main/java/net/minecraft/world/item/enchantment/EnchantmentHelper.java
+@@ -345,7 +345,7 @@ public class EnchantmentHelper {
+         } else {
+             level += 1 + random.nextInt(i / 4 + 1) + random.nextInt(i / 4 + 1);
+             float f = (random.nextFloat() + random.nextFloat() - 1.0F) * 0.15F;
+-            level = Mth.clamp(Math.round((float)level + (float)level * f), 1, Integer.MAX_VALUE);
++            level = Mth.clamp(me.jellysquid.mods.lithium.common.util.math.FastMath.round((float)level + (float)level * f), 1, Integer.MAX_VALUE); // Lithium - fast math
+             List<EnchantmentInstance> list2 = getAvailableEnchantmentResults(level, stack, treasureAllowed);
+             if (!list2.isEmpty()) {
+                 WeightedRandom.getRandomItem(random, list2).ifPresent(list::add);
 diff --git a/src/main/java/net/minecraft/world/level/EntityBasedExplosionDamageCalculator.java b/src/main/java/net/minecraft/world/level/EntityBasedExplosionDamageCalculator.java
 index 2f9f15d99f8b31e9f13f7f32378b2a9e09bcb5e5..d19a3de92ea12807344bf91fc7eba36b324f6be3 100644
 --- a/src/main/java/net/minecraft/world/level/EntityBasedExplosionDamageCalculator.java
@@ -428,6 +845,27 @@ index 2f9f15d99f8b31e9f13f7f32378b2a9e09bcb5e5..d19a3de92ea12807344bf91fc7eba36b
      }
  
      @Override
+diff --git a/src/main/java/net/minecraft/world/level/GameRules.java b/src/main/java/net/minecraft/world/level/GameRules.java
+index 6c9e574851b518242dbbee9bce954b44dbaeecb6..53a6624adf2b7eba8f2e3342e9ca321d4ef074c8 100644
+--- a/src/main/java/net/minecraft/world/level/GameRules.java
++++ b/src/main/java/net/minecraft/world/level/GameRules.java
+@@ -27,6 +27,7 @@ import net.minecraft.server.MinecraftServer;
+ import net.minecraft.server.level.ServerPlayer;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap; // Lithium
+ 
+ public class GameRules {
+ 
+@@ -117,7 +118,7 @@ public class GameRules {
+     }
+ 
+     private GameRules(Map<GameRules.Key<?>, GameRules.Value<?>> rules) {
+-        this.rules = rules;
++        this.rules = new Object2ObjectOpenHashMap<>(rules); // Lithium - store gamerules in fastutil hashmap
+ 
+         // Pufferfish start
+         int arraySize = rules.keySet().stream().mapToInt(key -> key.gameRuleIndex).max().orElse(-1) + 1;
 diff --git a/src/main/java/net/minecraft/world/level/Level.java b/src/main/java/net/minecraft/world/level/Level.java
 index 1a7188b8b756b7fe625582b8e7144141cf9ed6dd..7bb5a24ddc658bf4f126a9e2dd7901277ff7606c 100644
 --- a/src/main/java/net/minecraft/world/level/Level.java
@@ -447,6 +885,156 @@ index 1a7188b8b756b7fe625582b8e7144141cf9ed6dd..7bb5a24ddc658bf4f126a9e2dd790127
      private boolean tickingBlockEntities;
      public final Thread thread;
      private final boolean isDebug;
+diff --git a/src/main/java/net/minecraft/world/level/biome/BiomeManager.java b/src/main/java/net/minecraft/world/level/biome/BiomeManager.java
+index 0e5a87a84379bb4ab47d1068cf89e7e834fd8c9d..c30e218d76c90406bcbca1114361f4fe427f768c 100644
+--- a/src/main/java/net/minecraft/world/level/biome/BiomeManager.java
++++ b/src/main/java/net/minecraft/world/level/biome/BiomeManager.java
+@@ -11,6 +11,7 @@ public class BiomeManager {
+     private static final int ZOOM_BITS = 2;
+     private static final int ZOOM = 4;
+     private static final int ZOOM_MASK = 3;
++    private static final double maxOffset = 0.4500000001D; // Lithium
+     private final BiomeManager.NoiseBiomeSource noiseBiomeSource;
+     private final long biomeZoomSeed;
+ 
+@@ -28,39 +29,71 @@ public class BiomeManager {
+     }
+ 
+     public Biome getBiome(BlockPos pos) {
+-        int i = pos.getX() - 2;
+-        int j = pos.getY() - 2;
+-        int k = pos.getZ() - 2;
+-        int l = i >> 2;
+-        int m = j >> 2;
+-        int n = k >> 2;
+-        double d = (double)(i & 3) / 4.0D;
+-        double e = (double)(j & 3) / 4.0D;
+-        double f = (double)(k & 3) / 4.0D;
+-        int o = 0;
+-        double g = Double.POSITIVE_INFINITY;
+-
+-        for(int p = 0; p < 8; ++p) {
+-            boolean bl = (p & 4) == 0;
+-            boolean bl2 = (p & 2) == 0;
+-            boolean bl3 = (p & 1) == 0;
+-            int q = bl ? l : l + 1;
+-            int r = bl2 ? m : m + 1;
+-            int s = bl3 ? n : n + 1;
+-            double h = bl ? d : d - 1.0D;
+-            double t = bl2 ? e : e - 1.0D;
+-            double u = bl3 ? f : f - 1.0D;
+-            double v = getFiddledDistance(this.biomeZoomSeed, q, r, s, h, t, u);
+-            if (g > v) {
+-                o = p;
+-                g = v;
++        // lithium start - skipping steps in voronoi using prediction
++        int xMinus2 = pos.getX() - 2;
++        int yMinus2 = pos.getY() - 2;
++        int zMinus2 = pos.getZ() - 2;
++        int x = xMinus2 >> 2; // BlockPos to BiomePos
++        int y = yMinus2 >> 2;
++        int z = zMinus2 >> 2;
++        double quartX = (double)(xMinus2 & 3) / 4.0D; // quartLocal divided by 4
++        double quartY = (double)(yMinus2 & 3) / 4.0D; // 0/4, 1/4, 2/4, 3/4
++        double quartZ = (double)(zMinus2 & 3) / 4.0D; // [0, 0.25, 0.5, 0.75]
++        int smallestX = 0;
++        double smallestDist = Double.POSITIVE_INFINITY;
++        for(int biomeX = 0; biomeX < 8; ++biomeX) {
++            boolean everyOtherQuad = (biomeX & 4) == 0; // 1 1 1 1 0 0 0 0
++            boolean everyOtherPair = (biomeX & 2) == 0; // 1 1 0 0 1 1 0 0
++            boolean everyOther =     (biomeX & 1) == 0; // 1 0 1 0 1 0 1 0
++            double quartXX = everyOtherQuad ? quartX : quartX - 1.0D; //[-1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75]
++            double quartYY = everyOtherPair ? quartY : quartY - 1.0D;
++            double quartZZ = everyOther     ? quartZ : quartZ - 1.0D;
++            //This code block is new
++            double maxQuartYY = 0.0D,maxQuartZZ = 0.0D;
++            if (biomeX != 0) {
++                maxQuartYY = Mth.square(Math.max(quartYY + maxOffset, Math.abs(quartYY - maxOffset)));
++                maxQuartZZ = Mth.square(Math.max(quartZZ + maxOffset, Math.abs(quartZZ - maxOffset)));
++                double maxQuartXX = Mth.square(Math.max(quartXX + maxOffset, Math.abs(quartXX - maxOffset)));
++                if (smallestDist < maxQuartXX + maxQuartYY + maxQuartZZ) {
++                    continue;
++                }
++            }
++            int xx = everyOtherQuad ? x : x + 1;
++            int yy = everyOtherPair ? y : y + 1;
++            int zz = everyOther ? z : z + 1;
++            //I transferred the code from method_38106 to here, so I could call continue halfway through
++            long seed = LinearCongruentialGenerator.next(this.biomeZoomSeed, xx);
++            seed = LinearCongruentialGenerator.next(seed, yy);
++            seed = LinearCongruentialGenerator.next(seed, zz);
++            seed = LinearCongruentialGenerator.next(seed, xx);
++            seed = LinearCongruentialGenerator.next(seed, yy);
++            seed = LinearCongruentialGenerator.next(seed, zz);
++            double offsetX = getFiddle(seed);
++            double sqrX = Mth.square(quartXX + offsetX);
++            if (biomeX != 0 && smallestDist < sqrX + maxQuartYY + maxQuartZZ) {
++                continue; // skip the rest of the loop
++            }
++            seed = LinearCongruentialGenerator.next(seed, this.biomeZoomSeed);
++            double offsetY = getFiddle(seed);
++            double sqrY = Mth.square(quartYY + offsetY);
++            if (biomeX != 0 && smallestDist < sqrX + sqrY + maxQuartZZ) {
++                continue; // skip the rest of the loop
++            }
++            seed = LinearCongruentialGenerator.next(seed, this.biomeZoomSeed);
++            double offsetZ = getFiddle(seed);
++            double biomeDist = sqrX + sqrY + Mth.square(quartZZ + offsetZ);
++            if (smallestDist > biomeDist) {
++                smallestX = biomeX;
++                smallestDist = biomeDist;
+             }
+         }
+ 
+-        int w = (o & 4) == 0 ? l : l + 1;
+-        int x = (o & 2) == 0 ? m : m + 1;
+-        int y = (o & 1) == 0 ? n : n + 1;
+-        return this.noiseBiomeSource.getNoiseBiome(w, x, y);
++        //Back to the orignal code
++        int biomeX = (smallestX & 4) == 0 ? x : x + 1;
++        int biomeY = (smallestX & 2) == 0 ? y : y + 1;
++        int biomeZ = (smallestX & 1) == 0 ? z : z + 1;
++        return this.noiseBiomeSource.getNoiseBiome(biomeX, biomeY, biomeZ);
++        // Lithium end
+     }
+ 
+     public Biome getNoiseBiomeAtPosition(double x, double y, double z) {
+diff --git a/src/main/java/net/minecraft/world/level/block/Block.java b/src/main/java/net/minecraft/world/level/block/Block.java
+index ab5b9f00123e2ede2931ffc520684e482aac49b4..a9d518e8a2849b7b9f5a027303cab1884cdcde20 100644
+--- a/src/main/java/net/minecraft/world/level/block/Block.java
++++ b/src/main/java/net/minecraft/world/level/block/Block.java
+@@ -589,11 +589,18 @@ public class Block extends BlockBehaviour implements ItemLike {
+         private final BlockState first;
+         private final BlockState second;
+         private final Direction direction;
++        private int hash; // Lithium - cached_hashcode
+ 
+         public BlockStatePairKey(BlockState self, BlockState other, Direction facing) {
+             this.first = self;
+             this.second = other;
+             this.direction = facing;
++            // Lithium start - cached_hashcode
++            int hash = this.first.hashCode();
++            hash = 31 * hash + this.second.hashCode();
++            hash = 31 * hash + this.direction.hashCode();
++            this.hash = hash;
++            // Lithium end
+         }
+ 
+         public boolean equals(Object object) {
+@@ -609,11 +616,7 @@ public class Block extends BlockBehaviour implements ItemLike {
+         }
+ 
+         public int hashCode() {
+-            int i = this.first.hashCode();
+-
+-            i = 31 * i + this.second.hashCode();
+-            i = 31 * i + this.direction.hashCode();
+-            return i;
++            return this.hash; // Lithium - cached_hashcode
+         }
+     }
+ }
 diff --git a/src/main/java/net/minecraft/world/level/block/ComposterBlock.java b/src/main/java/net/minecraft/world/level/block/ComposterBlock.java
 index fb8b8a9733ac50096d8406487ab1ae167ef5f7b1..0695c276099d8bdde74e1dacf4aa00b3861dee58 100644
 --- a/src/main/java/net/minecraft/world/level/block/ComposterBlock.java
@@ -486,6 +1074,19 @@ index fb8b8a9733ac50096d8406487ab1ae167ef5f7b1..0695c276099d8bdde74e1dacf4aa00b3
          }
  
          @Override
+diff --git a/src/main/java/net/minecraft/world/level/block/DaylightDetectorBlock.java b/src/main/java/net/minecraft/world/level/block/DaylightDetectorBlock.java
+index 40b0380aa6fd052bf6376a15939c08e603f2f60c..52707d0a9c248bd93258777f346f774d20673af2 100644
+--- a/src/main/java/net/minecraft/world/level/block/DaylightDetectorBlock.java
++++ b/src/main/java/net/minecraft/world/level/block/DaylightDetectorBlock.java
+@@ -61,7 +61,7 @@ public class DaylightDetectorBlock extends BaseEntityBlock {
+             float f1 = f < 3.1415927F ? 0.0F : 6.2831855F;
+ 
+             f += (f1 - f) * 0.2F;
+-            i = Math.round((float) i * Mth.cos(f));
++            i = me.jellysquid.mods.lithium.common.util.math.FastMath.round((float) i * Mth.cos(f)); // Lithium - fast math
+         }
+ 
+         i = Mth.clamp(i, (int) 0, (int) 15);
 diff --git a/src/main/java/net/minecraft/world/level/block/piston/PistonBaseBlock.java b/src/main/java/net/minecraft/world/level/block/piston/PistonBaseBlock.java
 index 28256f1f0aeb7718a5866add4ec40ce0198c36b9..02d9382937e4a1af37db21a2fc6b2a41379c433e 100644
 --- a/src/main/java/net/minecraft/world/level/block/piston/PistonBaseBlock.java
@@ -502,13 +1103,170 @@ index 28256f1f0aeb7718a5866add4ec40ce0198c36b9..02d9382937e4a1af37db21a2fc6b2a41
          int i = aenumdirection.length;
  
          int j;
-diff --git a/src/main/java/net/minecraft/world/level/entity/EntitySectionStorage.java b/src/main/java/net/minecraft/world/level/entity/EntitySectionStorage.java
-index 74210dc2eef63da7360b1f833bb59b278419fb2b..35871a988c88d18749c1e5feb643946ae11a40d7 100644
---- a/src/main/java/net/minecraft/world/level/entity/EntitySectionStorage.java
-+++ b/src/main/java/net/minecraft/world/level/entity/EntitySectionStorage.java
-@@ -33,31 +33,25 @@ public class EntitySectionStorage<T extends EntityAccess> {
+diff --git a/src/main/java/net/minecraft/world/level/chunk/ChunkAccess.java b/src/main/java/net/minecraft/world/level/chunk/ChunkAccess.java
+index 5aeaaae6f15050a2da271fe196d0a234ecafc8a1..fea7a05b55f21512018e6998158258785c33a212 100644
+--- a/src/main/java/net/minecraft/world/level/chunk/ChunkAccess.java
++++ b/src/main/java/net/minecraft/world/level/chunk/ChunkAccess.java
+@@ -51,6 +51,10 @@ import net.minecraft.world.ticks.SerializableTickContainer;
+ import net.minecraft.world.ticks.TickContainerAccess;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++// Lithium start
++import java.util.HashMap;
++import it.unimi.dsi.fastutil.longs.LongSets;
++// Lithium end
+ 
+ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiomeSource, FeatureAccess {
+ 
+@@ -258,6 +262,11 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
      }
  
+     public void setAllStarts(Map<StructureFeature<?>, StructureStart<?>> structureStarts) {
++        // Lithium start - chunk.structure_storage
++        if (structureStarts instanceof HashMap && !structureStarts.isEmpty()) {
++            structureStarts.values().removeIf(structureStart -> structureStart == null || structureStart == StructureStart.INVALID_START);
++        }
++        // Lithium end
+         this.structureStarts.clear();
+         this.structureStarts.putAll(structureStarts);
+         this.unsaved = true;
+@@ -265,9 +274,7 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
+ 
+     @Override
+     public LongSet getReferencesForFeature(StructureFeature<?> structure) {
+-        return (LongSet) this.structuresRefences.computeIfAbsent(structure, (structuregenerator1) -> {
+-            return new LongOpenHashSet();
+-        });
++        return this.structuresRefences.getOrDefault(structure, LongSets.EMPTY_SET); // Lithium: chunk.structure_storage
+     }
+ 
+     @Override
+@@ -280,11 +287,23 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
+ 
+     @Override
+     public Map<StructureFeature<?>, LongSet> getAllReferences() {
+-        return Collections.unmodifiableMap(this.structuresRefences);
++        // Lithium start - chunk.structure_storage
++        Map<StructureFeature<?>, LongSet> structureReferences = this.structuresRefences;
++        if (structureReferences.isEmpty()) {
++            return Collections.emptyMap();
++        }
++        return Collections.unmodifiableMap(structureReferences);
++        // Lithium end
++
+     }
+ 
+     @Override
+     public void setAllReferences(Map<StructureFeature<?>, LongSet> structureReferences) {
++        // Lithium start - chunk.structure_storage
++        if (structureReferences instanceof HashMap && !structureReferences.isEmpty()) {
++            structureReferences.values().removeIf(longs -> longs == null || longs.isEmpty());
++        }
++        // Lithium end
+         this.structuresRefences.clear();
+         this.structuresRefences.putAll(structureReferences);
+         this.unsaved = true;
+diff --git a/src/main/java/net/minecraft/world/level/chunk/ChunkGenerator.java b/src/main/java/net/minecraft/world/level/chunk/ChunkGenerator.java
+index e4591c0b3c8547cc6f4e2a0891fc378ee4334d9e..9187d8b1b3a4c0e46512da561095ce3ede42b74d 100644
+--- a/src/main/java/net/minecraft/world/level/chunk/ChunkGenerator.java
++++ b/src/main/java/net/minecraft/world/level/chunk/ChunkGenerator.java
+@@ -118,8 +118,10 @@ public abstract class ChunkGenerator implements BiomeManager.NoiseBiomeSource {
+ 
+                 for (int j1 = 0; j1 < j; ++j1) {
+                     double d1 = (double) (4 * i + i * i1 * 6) + (random.nextDouble() - 0.5D) * (double) i * 2.5D;
+-                    int k1 = (int) Math.round(Math.cos(d0) * d1);
+-                    int l1 = (int) Math.round(Math.sin(d0) * d1);
++                    // Lithium start - fast math
++                    int k1 = (int) me.jellysquid.mods.lithium.common.util.math.FastMath.round(Math.cos(d0) * d1);
++                    int l1 = (int) me.jellysquid.mods.lithium.common.util.math.FastMath.round(Math.sin(d0) * d1);
++                    // Lithium end
+                     BiomeSource worldchunkmanager = this.biomeSource;
+                     int i2 = SectionPos.sectionToBlockCoord(k1, 8);
+                     int j2 = SectionPos.sectionToBlockCoord(l1, 8);
+diff --git a/src/main/java/net/minecraft/world/level/chunk/storage/ChunkSerializer.java b/src/main/java/net/minecraft/world/level/chunk/storage/ChunkSerializer.java
+index 300c95a3839954b9e631aa4d76c131a5c2d96394..ff3bc537188df535c9dd6887634f851072aeb1e1 100644
+--- a/src/main/java/net/minecraft/world/level/chunk/storage/ChunkSerializer.java
++++ b/src/main/java/net/minecraft/world/level/chunk/storage/ChunkSerializer.java
+@@ -64,6 +64,12 @@ import net.minecraft.world.ticks.LevelChunkTicks;
+ import net.minecraft.world.ticks.ProtoChunkTicks;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++// Lithium start
++import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
++import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
++import it.unimi.dsi.fastutil.longs.LongSets;
++// Lithium end
++
+ 
+ public class ChunkSerializer {
+     // Paper start
+@@ -73,6 +79,48 @@ public class ChunkSerializer {
+     }
+     // Paper end
+ 
++    // Lithium start - chunk.structure_storage
++    private static final Object2ObjectOpenHashMap<StructureFeature<?>, StructureStart<?>> DEFAULT_STRUCTURE_STARTS;
++    private static final Map<StructureFeature<?>, StructureStart<?>> DEFAULT_STRUCTURE_STARTS_READONLY;
++    private static final Object2ObjectOpenHashMap<StructureFeature<?>, LongSet> DEFAULT_STRUCTURE_REFERENCES;
++    private static final Map<StructureFeature<?>, LongSet> DEFAULT_STRUCTURE_REFERENCES_READONLY;
++
++    static {
++        Object2ObjectOpenHashMap<StructureFeature<?>, StructureStart<?>> structureStarts = new Object2ObjectOpenHashMap<>();
++        Object2ObjectOpenHashMap<StructureFeature<?>, LongSet> structureReferences = new Object2ObjectOpenHashMap<>();
++        for (StructureFeature<?> structureFeature : Registry.STRUCTURE_FEATURE) {
++            structureStarts.put(structureFeature, StructureStart.INVALID_START);
++            structureReferences.put(structureFeature, LongSets.emptySet());
++        }
++        structureStarts.trim();
++        structureReferences.trim();
++        DEFAULT_STRUCTURE_STARTS = structureStarts;
++        DEFAULT_STRUCTURE_REFERENCES = structureReferences;
++        DEFAULT_STRUCTURE_STARTS_READONLY = Object2ObjectMaps.unmodifiable(structureStarts);
++        DEFAULT_STRUCTURE_REFERENCES_READONLY = Object2ObjectMaps.unmodifiable(structureReferences);
++    }
++
++    private static Map<StructureFeature<?>, StructureStart<?>> getCompleteStructureStarts(ChunkAccess chunk) {
++        Map<StructureFeature<?>, StructureStart<?>> structureStarts = chunk.getAllStarts();
++        if (structureStarts.isEmpty()) {
++            return DEFAULT_STRUCTURE_STARTS_READONLY;
++        }
++        Object2ObjectOpenHashMap<StructureFeature<?>, StructureStart<?>> completeStructureStarts = DEFAULT_STRUCTURE_STARTS.clone();
++        completeStructureStarts.putAll(structureStarts);
++        return completeStructureStarts;
++    }
++
++    private static Map<StructureFeature<?>, LongSet> getCompleteStructureReferences(ChunkAccess chunk) {
++        Map<StructureFeature<?>, LongSet> structureReferences = chunk.getAllReferences();
++        if (structureReferences.isEmpty()) {
++            return DEFAULT_STRUCTURE_REFERENCES_READONLY;
++        }
++        Object2ObjectOpenHashMap<StructureFeature<?>, LongSet> completeStructureReferences = DEFAULT_STRUCTURE_REFERENCES.clone();
++        completeStructureReferences.putAll(structureReferences);
++        return completeStructureReferences;
++    }
++    // Lithium end
++
+     public static final Codec<PalettedContainer<BlockState>> BLOCK_STATE_CODEC = PalettedContainer.codec(Block.BLOCK_STATE_REGISTRY, BlockState.CODEC, PalettedContainer.Strategy.SECTION_STATES, Blocks.AIR.defaultBlockState(), null); // Paper - Anti-Xray - Add preset block states
+     private static final Logger LOGGER = LogManager.getLogger();
+     private static final String TAG_UPGRADE_DATA = "UpgradeData";
+@@ -676,7 +724,7 @@ public class ChunkSerializer {
+         }
+ 
+         nbttagcompound.put("Heightmaps", nbttagcompound3);
+-        nbttagcompound.put("structures", ChunkSerializer.packStructureData(StructurePieceSerializationContext.fromLevel(world), chunkcoordintpair, chunk.getAllStarts(), chunk.getAllReferences()));
++        nbttagcompound.put("structures", ChunkSerializer.packStructureData(StructurePieceSerializationContext.fromLevel(world), chunkcoordintpair, getCompleteStructureStarts(chunk), getCompleteStructureReferences(chunk))); // Lithium: chunk.structure_storage
+         // CraftBukkit start - store chunk persistent data in nbt
+         if (!chunk.persistentDataContainer.isEmpty()) { // SPIGOT-6814: Always save PDC to account for 1.17 to 1.18 chunk upgrading.
+             nbttagcompound.put("ChunkBukkitValues", chunk.persistentDataContainer.toTagCompound());
+diff --git a/src/main/java/net/minecraft/world/level/entity/EntitySectionStorage.java b/src/main/java/net/minecraft/world/level/entity/EntitySectionStorage.java
+index 74210dc2eef63da7360b1f833bb59b278419fb2b..827ede2bc38917b6a6d292f43ef60a0a8a1083be 100644
+--- a/src/main/java/net/minecraft/world/level/entity/EntitySectionStorage.java
++++ b/src/main/java/net/minecraft/world/level/entity/EntitySectionStorage.java
+@@ -32,33 +32,43 @@ public class EntitySectionStorage<T extends EntityAccess> {
+         this.intialSectionVisibility = chunkStatusDiscriminator;
+     }
+ 
++    // Lithium start - fast_retrieval
      public void forEachAccessibleNonEmptySection(AABB box, Consumer<EntitySection<T>> action) {
 -        int i = SectionPos.posToSectionCoord(box.minX - 2.0D);
 -        int j = SectionPos.posToSectionCoord(box.minY - 2.0D);
@@ -530,7 +1288,8 @@ index 74210dc2eef63da7360b1f833bb59b278419fb2b..35871a988c88d18749c1e5feb643946a
 -                    EntitySection<T> entitySection = this.sections.get(r);
 -                    if (entitySection != null && !entitySection.isEmpty() && entitySection.getStatus().isAccessible()) {
 -                        action.accept(entitySection);
-+        // Lithium start
+-                    }
+-                }
 +        int minX = SectionPos.posToSectionCoord(box.minX - 2.0D);
 +        int minY = SectionPos.posToSectionCoord(box.minY - 2.0D);
 +        int minZ = SectionPos.posToSectionCoord(box.minZ - 2.0D);
@@ -539,20 +1298,49 @@ index 74210dc2eef63da7360b1f833bb59b278419fb2b..35871a988c88d18749c1e5feb643946a
 +        int maxZ = SectionPos.posToSectionCoord(box.maxZ + 2.0D);
 +
 +        for (int x = minX; x <= maxX; x++) {
-+            for (int z = minZ; z <= maxZ; z++) {
-+                for (int y = minY; y <= maxY; y++) {
-+                    EntitySection<T> section = this.getSection(SectionPos.asLong(x, y, z));
-+                    if (section != null && section.getStatus().isAccessible()) {
-+                        action.accept(section);
-                     }
-                 }
++            for (int z = Math.max(minZ, 0); z <= maxZ; z++) {
++                this.forEachInColumn(x, minY, maxY, z, action);
++            }
++            int bound = Math.min(-1, maxZ);
++            for (int z = minZ; z <= bound; z++) {
++                this.forEachInColumn(x, minY, maxY, z, action);
              }
          }
--
-+        // Lithium end
++    }
+ 
++    private void forEachInColumn(int x, int minY, int maxY, int z, Consumer<EntitySection<T>> action) {
++        for (int y = Math.max(minY, 0); y <= maxY; y++) {
++            this.consumeSection(x, y, z, action);
++        }
++        int bound = Math.min(-1, maxY);
++        for (int y = minY; y <= bound; y++) {
++            this.consumeSection(x, y, z, action);
++        }
++    }
++
++    private void consumeSection(int x, int y, int z, Consumer<EntitySection<T>> action) {
++        EntitySection<T> section = this.getSection(SectionPos.asLong(x, y, z));
++        if (section != null && section.getStatus().isAccessible()) {
++            action.accept(section);
++        }
      }
++    // Lithium end
  
      public LongStream getExistingSectionPositionsInChunk(long chunkPos) {
+         int i = ChunkPos.getX(chunkPos);
+diff --git a/src/main/java/net/minecraft/world/level/storage/loot/functions/LootingEnchantFunction.java b/src/main/java/net/minecraft/world/level/storage/loot/functions/LootingEnchantFunction.java
+index 31918fa2eb38e42a5ea5366e559f25ea9d7d59ae..5024d7b8a95925aca68ceba9d7a97529684fb280 100644
+--- a/src/main/java/net/minecraft/world/level/storage/loot/functions/LootingEnchantFunction.java
++++ b/src/main/java/net/minecraft/world/level/storage/loot/functions/LootingEnchantFunction.java
+@@ -61,7 +61,7 @@ public class LootingEnchantFunction extends LootItemConditionalFunction {
+ 
+             float f = (float) i * this.value.getFloat(context);
+ 
+-            stack.grow(Math.round(f));
++            stack.grow(me.jellysquid.mods.lithium.common.util.math.FastMath.round(f)); // Lithium - fast math
+             if (this.hasLimit() && stack.getCount() > this.limit) {
+                 stack.setCount(this.limit);
+             }
 diff --git a/src/main/java/net/minecraft/world/phys/AABB.java b/src/main/java/net/minecraft/world/phys/AABB.java
 index 68cc6f2a78a06293a29317fda72ab3ee79b3533a..dd60c64079cd86401c4b8f6c08fe12b40532db87 100644
 --- a/src/main/java/net/minecraft/world/phys/AABB.java
@@ -616,3 +1404,32 @@ index 68cc6f2a78a06293a29317fda72ab3ee79b3533a..dd60c64079cd86401c4b8f6c08fe12b4
      }
  
      @Override
+diff --git a/src/main/java/net/minecraft/world/phys/shapes/Shapes.java b/src/main/java/net/minecraft/world/phys/shapes/Shapes.java
+index 731c7dd15f131dc124be6af8f342b122cb89491b..464dc93d07f3b3c3cb340a84d8fce14498114f40 100644
+--- a/src/main/java/net/minecraft/world/phys/shapes/Shapes.java
++++ b/src/main/java/net/minecraft/world/phys/shapes/Shapes.java
+@@ -59,8 +59,10 @@ public final class Shapes {
+                 int j = 1 << i;
+                 double d = min * (double)j;
+                 double e = max * (double)j;
+-                boolean bl = Math.abs(d - (double)Math.round(d)) < 1.0E-7D * (double)j;
+-                boolean bl2 = Math.abs(e - (double)Math.round(e)) < 1.0E-7D * (double)j;
++                // Lithium start - fast math
++                boolean bl = Math.abs(d - (double)me.jellysquid.mods.lithium.common.util.math.FastMath.round(d)) < 1.0E-7D * (double)j;
++                boolean bl2 = Math.abs(e - (double)me.jellysquid.mods.lithium.common.util.math.FastMath.round(e)) < 1.0E-7D * (double)j;
++                // Lithium end
+                 if (bl && bl2) {
+                     return i;
+                 }
+diff --git a/src/main/java/org/spigotmc/TicksPerSecondCommand.java b/src/main/java/org/spigotmc/TicksPerSecondCommand.java
+index 9bede6a26c08ede063c7a38f1149c811df14b258..e99b92c3181562e76613bcad7a82c71b320e564b 100644
+--- a/src/main/java/org/spigotmc/TicksPerSecondCommand.java
++++ b/src/main/java/org/spigotmc/TicksPerSecondCommand.java
+@@ -48,6 +48,6 @@ public class TicksPerSecondCommand extends Command
+     private static String format(double tps) // Paper - Made static
+     {
+         return ( ( tps > 18.0 ) ? ChatColor.GREEN : ( tps > 16.0 ) ? ChatColor.YELLOW : ChatColor.RED ).toString()
+-                + ( ( tps > 21.0 ) ? "*" : "" ) + Math.min( Math.round( tps * 100.0 ) / 100.0, 20.0 ); // Paper - only print * at 21, we commonly peak to 20.02 as the tick sleep is not accurate enough, stop the noise
++            + ( ( tps > 21.0 ) ? "*" : "" ) + Math.min( me.jellysquid.mods.lithium.common.util.math.FastMath.round( tps * 100.0 ) / 100.0, 20.0 ); // Paper - only print * at 21, we commonly peak to 20.02 as the tick sleep is not accurate enough, stop the noise // Lithium - fast math
+     }
+ }
