@@ -5,11 +5,11 @@ Subject: [PATCH] AtelierMC depdencies
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 5348de94335b1210b06e9084a2d3152a17ff9958..fbe3f36d33598b32f989e75f5c45668c99d9b87b 100644
+index 1d2d60d25a1167cd1163804837b2049093a9063b..f2e98b0fad8f5ad09722662cbbf2ef12482df921 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -41,6 +41,7 @@ dependencies {
-     api("org.apache.logging.log4j:log4j-api:2.14.1")
+     api("org.apache.logging.log4j:log4j-api:2.17.0")
      api("org.slf4j:slf4j-api:1.8.0-beta4")
      // api("io.sentry:sentry:5.4.0") // Pufferfish // AtelierMC - remove Sentry
 +    api("net.kyori:adventure-text-minimessage:4.1.0-SNAPSHOT") // AtelierMC

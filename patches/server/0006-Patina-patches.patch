@@ -45,7 +45,7 @@ index cb0045fc4ddd738c45dee89d57b213a633b9a136..680075da2705a1fd928166612a89a18f
      public CommandSourceStack(CommandSource output, Vec3 pos, Vec2 rot, ServerLevel world, int level, String name, Component displayName, MinecraftServer server, @Nullable Entity entity) {
          this(output, pos, rot, world, level, name, displayName, server, entity, false, (commandcontext, flag, j) -> {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 2d061d5ebf58a2e08e294e0eb9ffb89305c240e6..3b8c741ce6c22658b4b6b3dcd091130a41a76551 100644
+index e88e631a32fdf263efb6ebf93e06362db3f4f0c9..8796dc1a59bd31eb351eefbbba1c542b1c2de3c7 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -186,7 +186,7 @@ import org.bukkit.event.server.ServerLoadEvent;
@@ -110,7 +110,7 @@ index 2d061d5ebf58a2e08e294e0eb9ffb89305c240e6..3b8c741ce6c22658b4b6b3dcd091130a
      private void updateStatusIcon(ServerStatus metadata) {
          Optional<File> optional = Optional.of(this.getFile("server-icon.png")).filter(File::isFile);
 diff --git a/src/main/java/net/minecraft/server/level/ServerChunkCache.java b/src/main/java/net/minecraft/server/level/ServerChunkCache.java
-index b0e12f9f85ecfb33febf3ca44b5b2d453bc8e856..8d48f547354e218c091c4f55c1e7df0c29ccf773 100644
+index e5a2ae9b72874bc97d3166de026b1362ffbe87ec..4d58c3d09c4801961daa847a8a4d9c73a54b8612 100644
 --- a/src/main/java/net/minecraft/server/level/ServerChunkCache.java
 +++ b/src/main/java/net/minecraft/server/level/ServerChunkCache.java
 @@ -1274,10 +1274,14 @@ public class ServerChunkCache extends ChunkSource {
@@ -213,7 +213,7 @@ index dcce05d2f4ab16424db4ab103a12188e207a457b..10d40f5601b665ca7768e99dab37410b
          } else {
              this.doRunTask(this.pendingRunnables.remove());
 diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
-index 6da22c91c97d6b30c734b1f2a167f714958ae7a5..9fdfd567596101d008d13ec93272ec66c884a4cc 100644
+index f965d65affb8b4243ca910401d635a22e1303e06..209fdcfc98e391e39b0da60c9085027a5247b691 100644
 --- a/src/main/java/net/minecraft/world/entity/Entity.java
 +++ b/src/main/java/net/minecraft/world/entity/Entity.java
 @@ -163,7 +163,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
@@ -277,10 +277,10 @@ index 286c75989282c6d370ca64ac714ab15d784210ab..a580c191a0450c1088c32344b30a3f45
          if (!s1.isEmpty()) {
              try {
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index d9644ee8a94dd1246b8e21e5d1b29440c62dca0a..6475a2f82b5fe244b106fac9b2f8a9a9502f59e2 100644
+index ade428e1485306a91c1d491aeb109418cec42559..8bc6fb6b578792a3f4583ae194cc16179009bbf1 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -1215,7 +1215,7 @@ public final class CraftServer implements Server {
+@@ -1236,7 +1236,7 @@ public final class CraftServer implements Server {
  
          if (worlddimension == null) {
              dimensionmanager = (DimensionType) console.registryHolder.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getOrThrow(DimensionType.OVERWORLD_LOCATION);

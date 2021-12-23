@@ -5,12 +5,12 @@ Subject: [PATCH] Remove Pufferfish features
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index f44d9fef297c8f6d4cf42b40f738d704d5207f5f..5348de94335b1210b06e9084a2d3152a17ff9958 100644
+index f00d21bdb0fced241dbbd37784c05f1c3a4598e4..1d2d60d25a1167cd1163804837b2049093a9063b 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -40,7 +40,7 @@ dependencies {
      apiAndDocs("net.kyori:adventure-text-serializer-plain")
-     api("org.apache.logging.log4j:log4j-api:2.14.1")
+     api("org.apache.logging.log4j:log4j-api:2.17.0")
      api("org.slf4j:slf4j-api:1.8.0-beta4")
 -    api("io.sentry:sentry:5.4.0") // Pufferfish
 +    // api("io.sentry:sentry:5.4.0") // Pufferfish // AtelierMC - remove Sentry

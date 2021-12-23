@@ -31,10 +31,10 @@ index 9d4e872cf49407ec9968d9ecab4a6707f6b2d539..7e5bf2ceaa257d236fda121c6398bb1e
  
      @Override
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 0368d1f8cf4e8cafd82bec2789e7347c18c8db28..de49f3d53e34dab92336166de5b33c655b3f49d8 100644
+index 8bc6fb6b578792a3f4583ae194cc16179009bbf1..500cec286758eabcd01145c847af3c9fad954fce 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -2783,6 +2783,13 @@ public final class CraftServer implements Server {
+@@ -2804,6 +2804,13 @@ public final class CraftServer implements Server {
          return net.minecraft.server.MinecraftServer.currentTick;
      }
  

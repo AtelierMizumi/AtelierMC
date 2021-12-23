@@ -5,10 +5,10 @@ Subject: [PATCH] isDebugging API
 
 
 diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
-index b7c45aa5d5f79fd16e59401acfa9c2bed0a5d78c..1fa21be4ebc6ad26bb9d395463a8100b833937af 100644
+index 53c4e5ca208ee17c7c244e416c537c7b63edf194..8c699613b92a49e97f93d4376c22f215c0a6085f 100644
 --- a/src/main/java/org/bukkit/Bukkit.java
 +++ b/src/main/java/org/bukkit/Bukkit.java
-@@ -2106,6 +2106,16 @@ public final class Bukkit {
+@@ -2149,6 +2149,16 @@ public final class Bukkit {
          return server.getCurrentTick();
      }
  
@@ -26,10 +26,10 @@ index b7c45aa5d5f79fd16e59401acfa9c2bed0a5d78c..1fa21be4ebc6ad26bb9d395463a8100b
       * Checks if the server is in the process of being shutdown.
       *
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index 6996a61534bbdd34729f1dcd988ae2666bfad2c4..7fe4ea9762203ec20cce16a7aef84d551ba9e33a 100644
+index e48af3822e9f118399c3a1c9358c56efae12e0da..47b8db94d422ee04745c86e251ef84c3bf52cea2 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
-@@ -1832,6 +1832,14 @@ public interface Server extends PluginMessageRecipient, net.kyori.adventure.audi
+@@ -1867,6 +1867,14 @@ public interface Server extends PluginMessageRecipient, net.kyori.adventure.audi
       */
      int getCurrentTick();
  
