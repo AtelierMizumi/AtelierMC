@@ -69,10 +69,10 @@ index e33265ff8793eae1075dc6dcb5630b83c09ae336..f992299dca87a3ae42e438338ad6ff76
          /*
                      @Override
 diff --git a/src/main/java/net/minecraft/server/MCUtil.java b/src/main/java/net/minecraft/server/MCUtil.java
-index 74003e8887624736b154807e07835c315e836cf3..ec3d3e3e3497eeb921125ace1d336c13b7f183a9 100644
+index f99d189f461921d37581e2fc1382af60921b0660..4979fced2dde240f33be91123100ce31e21117f5 100644
 --- a/src/main/java/net/minecraft/server/MCUtil.java
 +++ b/src/main/java/net/minecraft/server/MCUtil.java
-@@ -53,13 +53,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
+@@ -53,16 +53,23 @@ import java.util.concurrent.atomic.AtomicBoolean;
  import java.util.function.BiConsumer;
  import java.util.function.Consumer;
  import java.util.function.Supplier;
@@ -86,16 +86,19 @@ index 74003e8887624736b154807e07835c315e836cf3..ec3d3e3e3497eeb921125ace1d336c13
 +    public static final ConcurrentLinkedQueue smallAsyncTasks = new ConcurrentLinkedQueue();
      public static final ThreadPoolExecutor asyncExecutor = new ThreadPoolExecutor(
 -        0, 2, 60L, TimeUnit.SECONDS,
--        new LinkedBlockingQueue<Runnable>(),
+-        new LinkedBlockingQueue<>(),
 +        4, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS,
 +        new SynchronousQueue<Runnable>(),
-         new ThreadFactoryBuilder().setNameFormat("Paper Async Task Handler Thread - %1$d").build()
+         new ThreadFactoryBuilder()
+             .setNameFormat("Paper Async Task Handler Thread - %1$d")
+             .setUncaughtExceptionHandler(new net.minecraft.DefaultUncaughtExceptionHandlerWithName(MinecraftServer.LOGGER))
+             .build()
      );
 +    // Jettpack end
      public static final ThreadPoolExecutor cleanerExecutor = new ThreadPoolExecutor(
          1, 1, 0L, TimeUnit.SECONDS,
-         new LinkedBlockingQueue<Runnable>(),
-@@ -68,6 +75,29 @@ public final class MCUtil {
+         new LinkedBlockingQueue<>(),
+@@ -74,6 +81,29 @@ public final class MCUtil {
  
      public static final long INVALID_CHUNK_KEY = getCoordinateKey(Integer.MAX_VALUE, Integer.MAX_VALUE);
  
@@ -126,7 +129,7 @@ index 74003e8887624736b154807e07835c315e836cf3..ec3d3e3e3497eeb921125ace1d336c13
      public static Runnable once(Runnable run) {
          AtomicBoolean ran = new AtomicBoolean(false);
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 3b8c741ce6c22658b4b6b3dcd091130a41a76551..bfcde65302acf0c7c5b27063b0061003ce757848 100644
+index 8796dc1a59bd31eb351eefbbba1c542b1c2de3c7..3557dc09ef789653a409ffd23cf75a222f1aa177 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -373,6 +373,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
@@ -185,7 +188,7 @@ index 0000000000000000000000000000000000000000..e641609e92f3dc6b1918a04e45d8f3cd
 +}
 +
 diff --git a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
-index 6006911c5a307d757fee5a0a8ab3772df845e43b..0dc8b6e779ebfa5394485fea445c9da7713ed018 100644
+index 84d0b6117e8dca0a27019cc5fb7030f63b020435..9d4e872cf49407ec9968d9ecab4a6707f6b2d539 100644
 --- a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
 @@ -426,7 +426,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
@@ -351,7 +354,7 @@ index 10d40f5601b665ca7768e99dab37410b891c5f87..46d5b429122a87481ee9d55ba5dd00c4
  
      protected void doRunTask(R task) {
 diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
-index 9fdfd567596101d008d13ec93272ec66c884a4cc..7cc8b0182aba3e04e31c340651d7063ec2fb83b5 100644
+index 209fdcfc98e391e39b0da60c9085027a5247b691..219d8b92bf5bffb509c6edb06ac82972cb826f44 100644
 --- a/src/main/java/net/minecraft/world/entity/Entity.java
 +++ b/src/main/java/net/minecraft/world/entity/Entity.java
 @@ -951,6 +951,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
@@ -363,7 +366,7 @@ index 9fdfd567596101d008d13ec93272ec66c884a4cc..7cc8b0182aba3e04e31c340651d7063e
          io.papermc.paper.util.TickThread.ensureTickThread("Cannot move an entity off-main");
          synchronized (this.posLock) {
 diff --git a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftAsyncScheduler.java b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftAsyncScheduler.java
-index 3c1992e212a6d6f1db4d5b807b38d71913619fc0..aad864af71e61f39de6a4dcfd0d9f7c0c0a4139d 100644
+index 9c1aff17aabd062640e3f451a2ef8c50a7c62f10..45c21cb369ca34d4819f0d28f0c3bc63f8bc4c43 100644
 --- a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftAsyncScheduler.java
 +++ b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftAsyncScheduler.java
 @@ -25,6 +25,7 @@ package org.bukkit.craftbukkit.scheduler;
@@ -374,7 +377,7 @@ index 3c1992e212a6d6f1db4d5b807b38d71913619fc0..aad864af71e61f39de6a4dcfd0d9f7c0
  import org.bukkit.plugin.Plugin;
  
  import java.util.ArrayList;
-@@ -38,18 +39,25 @@ import java.util.concurrent.TimeUnit;
+@@ -38,18 +39,24 @@ import java.util.concurrent.TimeUnit;
  
  public class CraftAsyncScheduler extends CraftScheduler {
  
@@ -382,11 +385,10 @@ index 3c1992e212a6d6f1db4d5b807b38d71913619fc0..aad864af71e61f39de6a4dcfd0d9f7c0
 +    /*
      private final ThreadPoolExecutor executor = new ThreadPoolExecutor(
              4, Integer.MAX_VALUE,30L, TimeUnit.SECONDS, new SynchronousQueue<>(),
-             new ThreadFactoryBuilder().setNameFormat("Craft Scheduler Thread - %1$d").build());
-+        */
-+
+             new ThreadFactoryBuilder().setNameFormat("Craft Scheduler Thread - %1$d").setUncaughtExceptionHandler(new net.minecraft.DefaultUncaughtExceptionHandlerWithName(net.minecraft.server.MinecraftServer.LOGGER)).build()); // Paper
++    */
      private final Executor management = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
-             .setNameFormat("Craft Async Scheduler Management Thread").build());
+             .setNameFormat("Craft Async Scheduler Management Thread").setUncaughtExceptionHandler(new net.minecraft.DefaultUncaughtExceptionHandlerWithName(net.minecraft.server.MinecraftServer.LOGGER)).build()); // Paper
      private final List<CraftTask> temp = new ArrayList<>();
  
      CraftAsyncScheduler() {
@@ -400,7 +402,7 @@ index 3c1992e212a6d6f1db4d5b807b38d71913619fc0..aad864af71e61f39de6a4dcfd0d9f7c0
  
      @Override
      public void cancelTask(int taskId) {
-@@ -93,7 +101,7 @@ public class CraftAsyncScheduler extends CraftScheduler {
+@@ -93,7 +100,7 @@ public class CraftAsyncScheduler extends CraftScheduler {
      private boolean executeTask(CraftTask task) {
          if (isValid(task)) {
              this.runners.put(task.getTaskId(), task);

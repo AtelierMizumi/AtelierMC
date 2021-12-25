@@ -5,19 +5,19 @@ Subject: [PATCH] EMC and Purpur patches
 
 
 diff --git a/src/main/java/io/papermc/paper/adventure/PaperAdventure.java b/src/main/java/io/papermc/paper/adventure/PaperAdventure.java
-index f763a3ea5796737304e0c1f41349622e1d7adadf..26c5c3c6e7c51ad6ccc9bac05e2af4972658179d 100644
+index 3661ac5e3bfdebb2911cb1b118942b9fc7884140..4622d42221f75206e1a7495c8d4896c3d6f35b34 100644
 --- a/src/main/java/io/papermc/paper/adventure/PaperAdventure.java
 +++ b/src/main/java/io/papermc/paper/adventure/PaperAdventure.java
-@@ -91,6 +91,7 @@ public final class PaperAdventure {
+@@ -92,6 +92,7 @@ public final class PaperAdventure {
          })
          .build();
      public static final LegacyComponentSerializer LEGACY_SECTION_UXRC = LegacyComponentSerializer.builder().flattener(FLATTENER).hexColors().useUnusualXRepeatedCharacterHexFormat().build();
 +    public static final LegacyComponentSerializer LEGACY_AMPERSAND = LegacyComponentSerializer.builder().character(LegacyComponentSerializer.AMPERSAND_CHAR).hexColors().build(); // Purpur
-     public static final PlainComponentSerializer PLAIN = PlainComponentSerializer.builder().flattener(FLATTENER).build();
+     public static final PlainComponentSerializer PLAIN_COMPONENT = PlainComponentSerializer.builder().flattener(FLATTENER).build();
+     public static final PlainTextComponentSerializer PLAIN = PlainTextComponentSerializer.builder().flattener(FLATTENER).build();
      public static final GsonComponentSerializer GSON = GsonComponentSerializer.builder()
-         .legacyHoverEventSerializer(NBTLegacyHoverEventSerializer.INSTANCE)
 diff --git a/src/main/java/net/minecraft/commands/Commands.java b/src/main/java/net/minecraft/commands/Commands.java
-index f6b73f8c6638ddf79e45042f5c8902ea1f271f5c..5a34a501715ef7b5f0abf84878ee90adfed303b6 100644
+index 78603232b62549427401f9d5217d083405cb2659..429c6ca5c7ca8ad98884cc0aed5f94442566dd39 100644
 --- a/src/main/java/net/minecraft/commands/Commands.java
 +++ b/src/main/java/net/minecraft/commands/Commands.java
 @@ -389,18 +389,22 @@ public class Commands {
@@ -195,7 +195,7 @@ index 4fa79d37ff4e70c61672cce7c55257c46232c026..df43d0a0f3d1e34baabae150cbf01a00
              // Paper end
          }
 diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
-index 3fb5d13103aff84ed93b0a0c844f9d1203352896..6da22c91c97d6b30c734b1f2a167f714958ae7a5 100644
+index 33cbe3c68d714dbf38ebacf0b6f90cdc817d5869..f965d65affb8b4243ca910401d635a22e1303e06 100644
 --- a/src/main/java/net/minecraft/world/entity/Entity.java
 +++ b/src/main/java/net/minecraft/world/entity/Entity.java
 @@ -1763,6 +1763,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i

@@ -348,10 +348,10 @@ index 7cf7b845620ab5b118da79f6057c0d80a254585e..061dfa9a18757b4d9913e451626885ab
                  world.getMinecraftWorld().sendBlockUpdated(
                          position,
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-index 74acf429b97476974f844a9621d059c935fcb4bd..d3847a64f01846039478a6666e5753a2d37c7dc4 100644
+index 8de4ad9f2120d22b78202981624abd1d2fc70148..e795c2cd28f37c2f7b005160a9d880ca5639e1af 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-@@ -1993,7 +1993,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+@@ -2008,7 +2008,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
                  this.sendHealthUpdate();
              }
          }
