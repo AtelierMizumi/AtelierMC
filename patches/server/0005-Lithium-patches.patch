@@ -1088,7 +1088,7 @@ index 40b0380aa6fd052bf6376a15939c08e603f2f60c..52707d0a9c248bd93258777f346f774d
  
          i = Mth.clamp(i, (int) 0, (int) 15);
 diff --git a/src/main/java/net/minecraft/world/level/block/piston/PistonBaseBlock.java b/src/main/java/net/minecraft/world/level/block/piston/PistonBaseBlock.java
-index 28256f1f0aeb7718a5866add4ec40ce0198c36b9..02d9382937e4a1af37db21a2fc6b2a41379c433e 100644
+index c9c18cf84e4ee5c253bbc64a4b41e91f9f4c4bc7..c460d6a0a06d16eaa12f370b942111e0f754fd7e 100644
 --- a/src/main/java/net/minecraft/world/level/block/piston/PistonBaseBlock.java
 +++ b/src/main/java/net/minecraft/world/level/block/piston/PistonBaseBlock.java
 @@ -162,8 +162,10 @@ public class PistonBaseBlock extends DirectionalBlock {
@@ -1184,7 +1184,7 @@ index e4591c0b3c8547cc6f4e2a0891fc378ee4334d9e..9187d8b1b3a4c0e46512da561095ce3e
                      int i2 = SectionPos.sectionToBlockCoord(k1, 8);
                      int j2 = SectionPos.sectionToBlockCoord(l1, 8);
 diff --git a/src/main/java/net/minecraft/world/level/chunk/storage/ChunkSerializer.java b/src/main/java/net/minecraft/world/level/chunk/storage/ChunkSerializer.java
-index 300c95a3839954b9e631aa4d76c131a5c2d96394..ff3bc537188df535c9dd6887634f851072aeb1e1 100644
+index 8246204ce5d8f825c7796f87006e658d7a019876..6b9003abe7df95c686c4117ff33e8ad8f3c653cd 100644
 --- a/src/main/java/net/minecraft/world/level/chunk/storage/ChunkSerializer.java
 +++ b/src/main/java/net/minecraft/world/level/chunk/storage/ChunkSerializer.java
 @@ -64,6 +64,12 @@ import net.minecraft.world.ticks.LevelChunkTicks;
@@ -1200,7 +1200,7 @@ index 300c95a3839954b9e631aa4d76c131a5c2d96394..ff3bc537188df535c9dd6887634f8510
  
  public class ChunkSerializer {
      // Paper start
-@@ -73,6 +79,48 @@ public class ChunkSerializer {
+@@ -79,6 +85,48 @@ public class ChunkSerializer {
      }
      // Paper end
  
@@ -1249,7 +1249,7 @@ index 300c95a3839954b9e631aa4d76c131a5c2d96394..ff3bc537188df535c9dd6887634f8510
      public static final Codec<PalettedContainer<BlockState>> BLOCK_STATE_CODEC = PalettedContainer.codec(Block.BLOCK_STATE_REGISTRY, BlockState.CODEC, PalettedContainer.Strategy.SECTION_STATES, Blocks.AIR.defaultBlockState(), null); // Paper - Anti-Xray - Add preset block states
      private static final Logger LOGGER = LogManager.getLogger();
      private static final String TAG_UPGRADE_DATA = "UpgradeData";
-@@ -676,7 +724,7 @@ public class ChunkSerializer {
+@@ -682,7 +730,7 @@ public class ChunkSerializer {
          }
  
          nbttagcompound.put("Heightmaps", nbttagcompound3);
