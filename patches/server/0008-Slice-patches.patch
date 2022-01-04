@@ -125,7 +125,7 @@ index 2e2bfccfc6cec6582a5b595e0343c27be5267b7a..6b3ba1d72d5af0fa0d1b3eda54003e10
      }
  }
 diff --git a/src/main/java/net/minecraft/server/level/ServerEntity.java b/src/main/java/net/minecraft/server/level/ServerEntity.java
-index 96e5d68f405d748f8b35b415642b84739bc5e6d7..c71f56cd178f3328df1f7b9f8845853f77630b5d 100644
+index 6b3726a2aa235772520edfa9ec1481405bc22358..0af18eb21f84d91bc4d170fc58b59d3631ead869 100644
 --- a/src/main/java/net/minecraft/server/level/ServerEntity.java
 +++ b/src/main/java/net/minecraft/server/level/ServerEntity.java
 @@ -389,7 +389,19 @@ public class ServerEntity {
@@ -200,10 +200,10 @@ index 219d8b92bf5bffb509c6edb06ac82972cb826f44..1eb7869cddcb0e36ca18846ec0ec470c
      }
  
 diff --git a/src/main/java/net/minecraft/world/entity/LivingEntity.java b/src/main/java/net/minecraft/world/entity/LivingEntity.java
-index bad3bb880624567d52be28006f938d888913464c..1d20e816a30171fe35703da0c38190ac0ec9ec44 100644
+index ab6a19986c2dd6c84557cba6c8f7fdfdc24a3cba..907d8cd4b43859483bf72b891824a44aaa50c247 100644
 --- a/src/main/java/net/minecraft/world/entity/LivingEntity.java
 +++ b/src/main/java/net/minecraft/world/entity/LivingEntity.java
-@@ -3044,7 +3044,7 @@ public abstract class LivingEntity extends Entity {
+@@ -3042,7 +3042,7 @@ public abstract class LivingEntity extends Entity {
  
              ItemStack itemstack1 = this.getItemBySlot(enumitemslot);
  
@@ -213,7 +213,7 @@ index bad3bb880624567d52be28006f938d888913464c..1d20e816a30171fe35703da0c38190ac
                  if (this instanceof ServerPlayer && enumitemslot.getType() == EquipmentSlot.Type.ARMOR) {
                      final org.bukkit.inventory.ItemStack oldItem = CraftItemStack.asBukkitCopy(itemstack);
 diff --git a/src/main/java/net/minecraft/world/entity/player/Player.java b/src/main/java/net/minecraft/world/entity/player/Player.java
-index de08ef6c87415fd0690dba731ce3f78927292b1a..8d53885d4c30868093e2e95a22dc36455cee313e 100644
+index cc0b38ff99104df445a1ec4cc4be6c2385e96916..69b2a95e76982132045f1b64463437a723371dea 100644
 --- a/src/main/java/net/minecraft/world/entity/player/Player.java
 +++ b/src/main/java/net/minecraft/world/entity/player/Player.java
 @@ -631,7 +631,7 @@ public abstract class Player extends LivingEntity {
@@ -226,10 +226,10 @@ index de08ef6c87415fd0690dba731ce3f78927292b1a..8d53885d4c30868093e2e95a22dc3645
  
      @Override
 diff --git a/src/main/java/net/minecraft/world/level/Level.java b/src/main/java/net/minecraft/world/level/Level.java
-index d3fb3915df05900e855d088f196c36f82b1ed1f4..c15af04acde102dc7eb60deab116f25ce018c094 100644
+index 119a7efb0d340075e175ea9868d9b88f9ee6f22c..d494283ea113f336a00f8f27d6a2a6c08db91240 100644
 --- a/src/main/java/net/minecraft/world/level/Level.java
 +++ b/src/main/java/net/minecraft/world/level/Level.java
-@@ -647,12 +647,12 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
+@@ -646,12 +646,12 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
      }
  
      @Override
@@ -245,7 +245,7 @@ index d3fb3915df05900e855d088f196c36f82b1ed1f4..c15af04acde102dc7eb60deab116f25c
          // CraftBukkit start - tree generation
          if (this.captureTreeGeneration) {
              // Paper start
-@@ -699,7 +699,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
+@@ -698,7 +698,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
              } else {
                  BlockState iblockdata2 = this.getBlockState(pos);
  
@@ -254,7 +254,7 @@ index d3fb3915df05900e855d088f196c36f82b1ed1f4..c15af04acde102dc7eb60deab116f25c
                      this.getProfiler().push("queueCheckLight");
                      this.getChunkSource().getLightEngine().checkBlock(pos);
                      this.getProfiler().pop();
-@@ -841,7 +841,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
+@@ -840,7 +840,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
                  Block.dropResources(iblockdata, this, pos, tileentity, breakingEntity, ItemStack.EMPTY);
              }
  

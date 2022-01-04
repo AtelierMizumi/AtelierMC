@@ -5,10 +5,10 @@ Subject: [PATCH] Stolen patches
 
 
 diff --git a/src/main/java/org/bukkit/block/Block.java b/src/main/java/org/bukkit/block/Block.java
-index 0dd0beee6800fb34520dfa2d05e5bdda76624d64..80e7b1fa5b3ab80b2a17d401c554ccbfc028ef80 100644
+index 5f35ba35f8517ec28c1b21b3007c9a20dea097a7..53245afd547eb4c3b9d936304710cad5a64da7f3 100644
 --- a/src/main/java/org/bukkit/block/Block.java
 +++ b/src/main/java/org/bukkit/block/Block.java
-@@ -266,6 +266,29 @@ public interface Block extends Metadatable, net.kyori.adventure.translation.Tran
+@@ -276,6 +276,29 @@ public interface Block extends Metadatable, net.kyori.adventure.translation.Tran
       */
      void setBlockData(@NotNull BlockData data);
  

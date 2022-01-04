@@ -5,7 +5,7 @@ Subject: [PATCH] Jettpack patches
 
 
 diff --git a/src/main/java/net/minecraft/Util.java b/src/main/java/net/minecraft/Util.java
-index e33265ff8793eae1075dc6dcb5630b83c09ae336..f992299dca87a3ae42e438338ad6ff7697e06450 100644
+index 49c2260ee6287fb4ab982bb7d8e46428fa992933..9883a2ea2e6729ae2873b434a0c275123154d3a3 100644
 --- a/src/main/java/net/minecraft/Util.java
 +++ b/src/main/java/net/minecraft/Util.java
 @@ -67,6 +67,12 @@ import org.apache.logging.log4j.core.LoggerContext;
@@ -214,7 +214,7 @@ index f944e6beafc7876ed9c6923a22f58d82967b77cb..0d71d5c4af27f96e5a642bdb4fdb71e3
          this.enableStatus = this.get("enable-status", true);
          this.hideOnlinePlayers = this.get("hide-online-players", false);
 diff --git a/src/main/java/net/minecraft/server/network/ServerLoginPacketListenerImpl.java b/src/main/java/net/minecraft/server/network/ServerLoginPacketListenerImpl.java
-index 33a29890435d6065a2cc4f8e8bf8209c01d5d114..9ed425a0a9258d349475dbcc4420a95d141036f7 100644
+index 462d8c36166c63a4dc8fa74ac7f82859e6f4b83a..b2f0f32224a6b742c29072011a6603e14d989b54 100644
 --- a/src/main/java/net/minecraft/server/network/ServerLoginPacketListenerImpl.java
 +++ b/src/main/java/net/minecraft/server/network/ServerLoginPacketListenerImpl.java
 @@ -31,6 +31,7 @@ import net.minecraft.network.protocol.login.ServerLoginPacketListener;
@@ -243,7 +243,7 @@ index 33a29890435d6065a2cc4f8e8bf8209c01d5d114..9ed425a0a9258d349475dbcc4420a95d
      // Spigot start
      public void initUUID()
      {
-@@ -248,7 +253,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener
+@@ -276,7 +281,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener
              // Paper end
              // Spigot start
              // Paper start - Cache authenticator threads
@@ -252,7 +252,7 @@ index 33a29890435d6065a2cc4f8e8bf8209c01d5d114..9ed425a0a9258d349475dbcc4420a95d
                  @Override
                  public void run() {
                      try {
-@@ -292,7 +297,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener
+@@ -320,7 +325,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener
          }
  
          // Paper start - Cache authenticator threads
@@ -261,7 +261,7 @@ index 33a29890435d6065a2cc4f8e8bf8209c01d5d114..9ed425a0a9258d349475dbcc4420a95d
              public void run() {
                  GameProfile gameprofile = ServerLoginPacketListenerImpl.this.gameProfile;
  
-@@ -426,7 +431,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener
+@@ -454,7 +459,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener
              this.gameProfile = com.destroystokyo.paper.proxy.VelocityProxy.createProfile(buf);
  
              // Proceed with login
@@ -411,6 +411,41 @@ index 9c1aff17aabd062640e3f451a2ef8c50a7c62f10..45c21cb369ca34d4819f0d28f0c3bc63
              return true;
          }
          return false;
+diff --git a/src/main/java/org/bukkit/craftbukkit/util/Versioning.java b/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
+index f6651b6549abcd8d693a2bc3d55b51a357bc0aa7..72d5085774494da02f5570335f1ddfc8844649ed 100644
+--- a/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
++++ b/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
+@@ -8,8 +8,10 @@ import java.util.logging.Logger;
+ import org.bukkit.Bukkit;
+ 
+ public final class Versioning {
+-    public static String getBukkitVersion() {
+-        String result = "Unknown-Version";
++    // JettPack start - cache getBukkitVersion
++    public static String bukkitVersion;
++    static {
++        bukkitVersion = "Unknown-Version";
+ 
+         InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/ga.caomile.ateliermc/ateliermc-api/pom.properties"); // Pufferfish // AtelierMC
+         Properties properties = new Properties();
+@@ -18,12 +20,15 @@ public final class Versioning {
+             try {
+                 properties.load(stream);
+ 
+-                result = properties.getProperty("version");
++                bukkitVersion = properties.getProperty("version");
+             } catch (IOException ex) {
+                 Logger.getLogger(Versioning.class.getName()).log(Level.SEVERE, "Could not get Bukkit version!", ex);
+             }
+         }
++    }
++    // JettPack end
+ 
+-        return result;
++    public static String getBukkitVersion() {
++        return bukkitVersion; // JettPack
+     }
+ }
 diff --git a/src/main/java/org/spigotmc/WatchdogThread.java b/src/main/java/org/spigotmc/WatchdogThread.java
 index bee38307494188800886a1622fed229b88dbd8f1..a45c2c569e0ab7205b8c180c3e150f3d421f648a 100644
 --- a/src/main/java/org/spigotmc/WatchdogThread.java

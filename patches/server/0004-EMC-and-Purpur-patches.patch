@@ -17,7 +17,7 @@ index 3661ac5e3bfdebb2911cb1b118942b9fc7884140..4622d42221f75206e1a7495c8d4896c3
      public static final PlainTextComponentSerializer PLAIN = PlainTextComponentSerializer.builder().flattener(FLATTENER).build();
      public static final GsonComponentSerializer GSON = GsonComponentSerializer.builder()
 diff --git a/src/main/java/net/minecraft/commands/Commands.java b/src/main/java/net/minecraft/commands/Commands.java
-index 78603232b62549427401f9d5217d083405cb2659..429c6ca5c7ca8ad98884cc0aed5f94442566dd39 100644
+index 1617437515590a32c42687d290dd11bc8fa8edf5..ea9ca58435d05be367b7f7019b63e92163be1799 100644
 --- a/src/main/java/net/minecraft/commands/Commands.java
 +++ b/src/main/java/net/minecraft/commands/Commands.java
 @@ -389,18 +389,22 @@ public class Commands {
@@ -109,10 +109,10 @@ index e80176708db486190dd527e3ade5fc690ceb39f7..96e5d68f405d748f8b35b415642b8473
          this.entity.stopSeenByPlayer(player);
          player.connection.send(new ClientboundRemoveEntitiesPacket(new int[]{this.entity.getId()}));
 diff --git a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
-index 0f7f811510188f2b37443c5d2378a138dbf43b32..784df84250cb98098669631c3fe09341eb8d1125 100644
+index 889a4804eaa128e2f79a4ea48b8aa796336576d1..86d7f14fddf99a0f1bf6e487b268eef3903b238e 100644
 --- a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
 +++ b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
-@@ -227,6 +227,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+@@ -228,6 +228,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
      private long keepAliveTime = Util.getMillis();
      private boolean keepAlivePending;
      private long keepAliveChallenge;
@@ -120,7 +120,7 @@ index 0f7f811510188f2b37443c5d2378a138dbf43b32..784df84250cb98098669631c3fe09341
      // CraftBukkit start - multithreaded fields
      private final AtomicInteger chatSpamTickCount = new AtomicInteger();
      private final java.util.concurrent.atomic.AtomicInteger tabSpamLimiter = new java.util.concurrent.atomic.AtomicInteger(); // Paper - configurable tab spam limits
-@@ -358,6 +359,8 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+@@ -359,6 +360,8 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
          long currentTime = Util.getMillis();
          long elapsedTime = currentTime - this.keepAliveTime;
  
@@ -129,7 +129,7 @@ index 0f7f811510188f2b37443c5d2378a138dbf43b32..784df84250cb98098669631c3fe09341
          if (this.keepAlivePending) {
              if (!this.processedDisconnect && elapsedTime >= KEEPALIVE_LIMIT) { // check keepalive limit, don't fire if already disconnected
                  ServerGamePacketListenerImpl.LOGGER.warn("{} was kicked due to keepalive timeout!", this.player.getScoreboardName()); // more info
-@@ -371,6 +374,18 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+@@ -372,6 +375,18 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
                  this.send(new ClientboundKeepAlivePacket(this.keepAliveChallenge));
              }
          }
@@ -148,7 +148,7 @@ index 0f7f811510188f2b37443c5d2378a138dbf43b32..784df84250cb98098669631c3fe09341
          // Paper end
  
          this.server.getProfiler().pop();
-@@ -2068,7 +2083,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+@@ -2085,7 +2100,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
      private void handleChat(TextFilter.FilteredText message) {
          if (this.player.isRemoved() || this.player.getChatVisibility() == ChatVisiblity.HIDDEN) { // CraftBukkit - dead men tell no tales
              this.send(new ClientboundChatPacket((new TranslatableComponent("chat.disabled.options")).withStyle(ChatFormatting.RED), ChatType.SYSTEM, Util.NIL_UUID));
@@ -157,7 +157,7 @@ index 0f7f811510188f2b37443c5d2378a138dbf43b32..784df84250cb98098669631c3fe09341
              this.player.resetLastActionTime();
              String s = message.getRaw();
  
-@@ -3083,6 +3098,8 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+@@ -3100,6 +3115,8 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
  
      @Override
      public void handleKeepAlive(ServerboundKeepAlivePacket packet) {
@@ -166,7 +166,7 @@ index 0f7f811510188f2b37443c5d2378a138dbf43b32..784df84250cb98098669631c3fe09341
          //PlayerConnectionUtils.ensureMainThread(packetplayinkeepalive, this, this.player.getWorldServer()); // CraftBukkit // Paper - This shouldn't be on the main thread
          if (this.keepAlivePending && packet.getId() == this.keepAliveChallenge) {
              int i = (int) (Util.getMillis() - this.keepAliveTime);
-@@ -3096,7 +3113,14 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+@@ -3113,7 +3130,14 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
              });
              // Paper end
          }
@@ -207,7 +207,7 @@ index 33cbe3c68d714dbf38ebacf0b6f90cdc817d5869..f965d65affb8b4243ca910401d635a22
  
      public void absMoveTo(double x, double y, double z) {
 diff --git a/src/main/java/net/minecraft/world/entity/LivingEntity.java b/src/main/java/net/minecraft/world/entity/LivingEntity.java
-index af9c58944b38e8aeeca5dca75c9f97e49f2895f2..c4d54dfd88f8de90ccba52a0ad4f50f076d8461b 100644
+index 2c988e05299d530d483e21ab452de0a03e5bdcbd..8b1454b552acce8f698bf44f4b2d2cdf9763bf31 100644
 --- a/src/main/java/net/minecraft/world/entity/LivingEntity.java
 +++ b/src/main/java/net/minecraft/world/entity/LivingEntity.java
 @@ -2925,7 +2925,7 @@ public abstract class LivingEntity extends Entity {
@@ -220,7 +220,7 @@ index af9c58944b38e8aeeca5dca75c9f97e49f2895f2..c4d54dfd88f8de90ccba52a0ad4f50f0
          double d1 = this.getZ() - this.zo;
          float f = (float) (d0 * d0 + d1 * d1);
 diff --git a/src/main/java/net/minecraft/world/entity/npc/Villager.java b/src/main/java/net/minecraft/world/entity/npc/Villager.java
-index 7364a50d440b990fd3ec0939b3cde6dae9bdb88b..0d1450b342c741d64959797fd2b3b340fcd66d04 100644
+index 7d6bc3c253a77adfc7c35383caadb37154dc5c0f..993137de1bfcb50ee95654392356eefabe7e54fc 100644
 --- a/src/main/java/net/minecraft/world/entity/npc/Villager.java
 +++ b/src/main/java/net/minecraft/world/entity/npc/Villager.java
 @@ -137,6 +137,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler

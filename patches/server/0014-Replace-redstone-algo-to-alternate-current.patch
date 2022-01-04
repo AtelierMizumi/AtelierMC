@@ -2034,7 +2034,7 @@ index 0000000000000000000000000000000000000000..6d6c1b81b696187add53e744aaffa54d
 +	}
 +}
 diff --git a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
-index d71cd626bcbefc576f9c05b8885acc9fb2a33cd5..dbc9a4f494434bc8e938d8d149d74ee977f78483 100644
+index 5a5db15493cd9b83815c36487c2f38cb8ac76f3a..9cf6a124800cfe9ed88158025b25fbfd46fd420d 100644
 --- a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
 +++ b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
 @@ -77,16 +77,6 @@ public class PaperWorldConfig {
@@ -2974,7 +2974,7 @@ index d4273df8124d9d6d4a122f5ecef6f3d011da5860..00000000000000000000000000000000
 -    }
 -}
 diff --git a/src/main/java/net/minecraft/server/level/ServerLevel.java b/src/main/java/net/minecraft/server/level/ServerLevel.java
-index c7229e120d601619d2ea869d7aa506fb3b78cde4..ecb9cd9e015c03feda778edfde8fcbdae254edcf 100644
+index 7ec7fdb6fbcaff908f540c336079add3a7812bbf..c142330bd25d1bbdb1bbc52e7250995b3d5dda2f 100644
 --- a/src/main/java/net/minecraft/server/level/ServerLevel.java
 +++ b/src/main/java/net/minecraft/server/level/ServerLevel.java
 @@ -161,8 +161,14 @@ import org.bukkit.event.weather.LightningStrikeEvent;
@@ -3129,7 +3129,7 @@ index 52707d0a9c248bd93258777f346f774d20673af2..8e2227f350362850f02427e2f23c7b50
      @Override
      public boolean useShapeForLightOcclusion(BlockState state) {
 diff --git a/src/main/java/net/minecraft/world/level/block/DiodeBlock.java b/src/main/java/net/minecraft/world/level/block/DiodeBlock.java
-index 9c764d2273d70b8dffcaa7f324544cb48f12acc3..8b91cc7a6ebd4015592a101c7792dd5a7063854a 100644
+index b0ee7cc6ef79626032337c413e903eb58f9a22e2..e55fd8071d41a2ca890ff9eb033de04efd4204a7 100644
 --- a/src/main/java/net/minecraft/world/level/block/DiodeBlock.java
 +++ b/src/main/java/net/minecraft/world/level/block/DiodeBlock.java
 @@ -19,8 +19,9 @@ import net.minecraft.world.phys.shapes.CollisionContext;
@@ -3327,7 +3327,7 @@ index 0afffc33f3be221a28c62115f493808aeffb1bd8..e26cec3e361731a273a40ea66596e9dd
      public boolean isSignalSource(BlockState state) {
          return true;
 diff --git a/src/main/java/net/minecraft/world/level/block/RedStoneWireBlock.java b/src/main/java/net/minecraft/world/level/block/RedStoneWireBlock.java
-index 037330bcb10039c013b2ed5fd68dee16ede20fbe..cd73009d128af83ec3fd958fc8163c9c365d8cf4 100644
+index 94b6be3cb10568e1e7b27e9f13c85e0d9a067721..d8f8105826b718997bc17828d5828ebec6de7a87 100644
 --- a/src/main/java/net/minecraft/world/level/block/RedStoneWireBlock.java
 +++ b/src/main/java/net/minecraft/world/level/block/RedStoneWireBlock.java
 @@ -1,7 +1,5 @@
@@ -3609,7 +3609,7 @@ index 037330bcb10039c013b2ed5fd68dee16ede20fbe..cd73009d128af83ec3fd958fc8163c9c
  
      @Override
 diff --git a/src/main/java/net/minecraft/world/level/block/RedstoneTorchBlock.java b/src/main/java/net/minecraft/world/level/block/RedstoneTorchBlock.java
-index 954b86bea345a8e0e3a8dd425f356db6f5cd496f..2ac17b7a0c5dd0fd43ff765c9163999a90ca0100 100644
+index 2cbd5b378a44e3c00d01cfb47b60be13db4c0f25..e9f7fdda84ab6c63b7c430633a078ab4b2237713 100644
 --- a/src/main/java/net/minecraft/world/level/block/RedstoneTorchBlock.java
 +++ b/src/main/java/net/minecraft/world/level/block/RedstoneTorchBlock.java
 @@ -17,8 +17,9 @@ import net.minecraft.world.level.block.state.StateDefinition;
@@ -3642,7 +3642,7 @@ index 954b86bea345a8e0e3a8dd425f356db6f5cd496f..2ac17b7a0c5dd0fd43ff765c9163999a
 +
      @Override
      public void onPlace(BlockState state, Level world, BlockPos pos, BlockState oldState, boolean notify) {
-         Direction[] aenumdirection = Direction.values();
+         Direction[] aenumdirection = tech.ateliermc.Constants.ALL_Direction; // Lithium - reduce allocs
 diff --git a/src/main/java/net/minecraft/world/level/block/RedstoneWallTorchBlock.java b/src/main/java/net/minecraft/world/level/block/RedstoneWallTorchBlock.java
 index 5cf0ae04059533385a19f7b07909a67b57350c09..0e108994705e7b7a14f56298c2845a8083236bfb 100644
 --- a/src/main/java/net/minecraft/world/level/block/RedstoneWallTorchBlock.java
@@ -3737,7 +3737,7 @@ index d609c60c1650a5b7f860154e0a4f4c6d84fa63fc..08bfebde49f4a0f3f0b74de7a1186f17
      public void onProjectileHit(Level world, BlockState state, BlockHitResult hit, Projectile projectile) {
          int i = updateRedstoneOutput(world, state, hit, projectile);
 diff --git a/src/main/java/net/minecraft/world/level/block/TripWireHookBlock.java b/src/main/java/net/minecraft/world/level/block/TripWireHookBlock.java
-index 02a3e1ced592784b9c66927c76376c7ab413367d..fa803780fcf0b538c454e88c53d93c77394d1f79 100644
+index a4344bf2267112e3c1e31c07c9f6b8eae9666947..bf5cdd2c3971084dc16715d7916877bbb30681a4 100644
 --- a/src/main/java/net/minecraft/world/level/block/TripWireHookBlock.java
 +++ b/src/main/java/net/minecraft/world/level/block/TripWireHookBlock.java
 @@ -26,8 +26,12 @@ import net.minecraft.world.level.gameevent.GameEvent;

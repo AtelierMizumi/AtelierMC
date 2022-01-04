@@ -5,7 +5,7 @@ Subject: [PATCH] Patina patches
 
 
 diff --git a/src/main/java/net/minecraft/Util.java b/src/main/java/net/minecraft/Util.java
-index b09c12805771a756c0661d4ffcd7888817056db8..e33265ff8793eae1075dc6dcb5630b83c09ae336 100644
+index 90018506da9e900d448a1fc43b3213ac513686e6..49c2260ee6287fb4ab982bb7d8e46428fa992933 100644
 --- a/src/main/java/net/minecraft/Util.java
 +++ b/src/main/java/net/minecraft/Util.java
 @@ -73,7 +73,7 @@ public class Util {
@@ -32,7 +32,7 @@ index b09c12805771a756c0661d4ffcd7888817056db8..e33265ff8793eae1075dc6dcb5630b83
      public static ExecutorService backgroundExecutor() {
          return BACKGROUND_EXECUTOR;
 diff --git a/src/main/java/net/minecraft/commands/CommandSourceStack.java b/src/main/java/net/minecraft/commands/CommandSourceStack.java
-index cb0045fc4ddd738c45dee89d57b213a633b9a136..680075da2705a1fd928166612a89a18f2ec1107e 100644
+index 098182d2426a25cef0bc285356bc346db0af8172..47ec0d851a6075139fe4f4e0570765514e245f45 100644
 --- a/src/main/java/net/minecraft/commands/CommandSourceStack.java
 +++ b/src/main/java/net/minecraft/commands/CommandSourceStack.java
 @@ -56,7 +56,7 @@ public class CommandSourceStack implements SharedSuggestionProvider, com.destroy
@@ -110,10 +110,10 @@ index e88e631a32fdf263efb6ebf93e06362db3f4f0c9..8796dc1a59bd31eb351eefbbba1c542b
      private void updateStatusIcon(ServerStatus metadata) {
          Optional<File> optional = Optional.of(this.getFile("server-icon.png")).filter(File::isFile);
 diff --git a/src/main/java/net/minecraft/server/level/ServerChunkCache.java b/src/main/java/net/minecraft/server/level/ServerChunkCache.java
-index e5a2ae9b72874bc97d3166de026b1362ffbe87ec..4d58c3d09c4801961daa847a8a4d9c73a54b8612 100644
+index a68d0ea11914aaacdb19ba66fa2736c51fa2f321..98779a5895920bb955b50ad53432761e601cdd09 100644
 --- a/src/main/java/net/minecraft/server/level/ServerChunkCache.java
 +++ b/src/main/java/net/minecraft/server/level/ServerChunkCache.java
-@@ -1274,10 +1274,14 @@ public class ServerChunkCache extends ChunkSource {
+@@ -1269,10 +1269,14 @@ public class ServerChunkCache extends ChunkSource {
              return runnable;
          }
  
@@ -235,10 +235,10 @@ index f965d65affb8b4243ca910401d635a22e1303e06..209fdcfc98e391e39b0da60c9085027a
              }
              if (spawnReason == null) {
 diff --git a/src/main/java/net/minecraft/world/level/Level.java b/src/main/java/net/minecraft/world/level/Level.java
-index 7bb5a24ddc658bf4f126a9e2dd7901277ff7606c..d3fb3915df05900e855d088f196c36f82b1ed1f4 100644
+index 84eeb555dd65498f70d55ee9a7bb197f3f5d8336..119a7efb0d340075e175ea9868d9b88f9ee6f22c 100644
 --- a/src/main/java/net/minecraft/world/level/Level.java
 +++ b/src/main/java/net/minecraft/world/level/Level.java
-@@ -128,13 +128,14 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
+@@ -127,13 +127,14 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
      public final Thread thread;
      private final boolean isDebug;
      private int skyDarken;
