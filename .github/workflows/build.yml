@@ -27,8 +27,13 @@ jobs:
       - name: Get MC Version
         run: echo "::set-output name=mcver::$(grep mcVersion gradle.properties | cut -d "=" -f2)"
         id: mcver
-      - name: Archive Paperclip
-        uses: actions/upload-artifact@v2
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%H:%M %m/%d/%Y')"
+      - uses: "marvinpinto/action-automatic-releases@latest"
         with:
-          name: AtelierMC
-          path: build/libs/ateliermc-paperclip-${{ steps.mcver.outputs.mcver }}-R0.1-SNAPSHOT-reobf.jar
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: false
+          title: "AtelierMC Release ${{ steps.date.outputs.date }}"
+          files: build/libs/ateliermc-paperclip-${{ steps.mcver.outputs.mcver }}-R0.1-SNAPSHOT-reobf.jar
