@@ -190,7 +190,7 @@ index e72e9b748b3f3e34baddf01366c703efba50c67c..183a2ef2bd89a4227aa6916729dda7a6
          this.handleAttributes(f);
 diff --git a/src/main/java/tech/aterliermc/ateliermc/HalloweenChecker.java b/src/main/java/tech/aterliermc/ateliermc/HalloweenChecker.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..d571da54290ec48500da923cc7ba5cdde6c1471e
+index 0000000000000000000000000000000000000000..be0c03e73ccfcff2d21b5977e39227d90aef455c
 --- /dev/null
 +++ b/src/main/java/tech/aterliermc/ateliermc/HalloweenChecker.java
 @@ -0,0 +1,56 @@
@@ -201,16 +201,16 @@ index 0000000000000000000000000000000000000000..d571da54290ec48500da923cc7ba5cdd
 +import net.minecraft.server.MinecraftServer;
 +
 +/**
-+ + * Entity halloween checker
-+ + * <p>
-+ + * Checks whether or not it is halloween at a specific rate rather than every time when
-+ + * a entity is being spawned.
-+ + * <p>
-+ + * The rate changes depending on how much TPS the server has. By default, the rate is every
-+ + * 2 hours, or every 144k ticks (if the server has _that_ much uptime)
-+ + *
-+ + * @author MrIvanPlays
-+ + */
++ * Entity halloween checker
++ * <p>
++ * Checks whether it is halloween at a specific rate rather than every time when
++ * an entity is being spawned.
++ * <p>
++ * The rate changes depending on how much TPS the server has. By default, the rate is every
++ * 2 hours, or every 144k ticks (if the server has _that_ much uptime)
++ *
++ * @author MrIvanPlays
++ */
 +public class HalloweenChecker {
 +    private static boolean halloweenSeason = false;
 +    private static boolean halloweenDay = false;
