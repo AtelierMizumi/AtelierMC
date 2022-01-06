@@ -24,7 +24,7 @@ index 74252236b138969560e6513f24e7ecc6dc4a4127..023f7c9874bd178ee8dc47a1c3bff688
      }
  
 diff --git a/src/main/java/org/bukkit/command/defaults/VersionCommand.java b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
-index 57a21495843f3a144cd73473cdc8781d6129b7ca..fd41b8155418a564e4d9bf5160d6dfba60e0bd40 100644
+index 57a21495843f3a144cd73473cdc8781d6129b7ca..3352785d2d3ac12c41ebf9829ca341c54feb70b9 100644
 --- a/src/main/java/org/bukkit/command/defaults/VersionCommand.java
 +++ b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
 @@ -41,7 +41,7 @@ public class VersionCommand extends BukkitCommand {
@@ -36,17 +36,22 @@ index 57a21495843f3a144cd73473cdc8781d6129b7ca..fd41b8155418a564e4d9bf5160d6dfba
          this.setPermission("bukkit.command.version");
          this.setAliases(Arrays.asList("ver", "about"));
      }
-@@ -50,6 +50,9 @@ public class VersionCommand extends BukkitCommand {
+@@ -50,6 +50,14 @@ public class VersionCommand extends BukkitCommand {
      public boolean execute(@NotNull CommandSender sender, @NotNull String currentAlias, @NotNull String[] args) {
          if (!testPermission(sender)) return true;
  
 +        // Atelier start - Replace
-+        sender.sendMessage("This server is running " + Bukkit.getName() + "(" + Bukkit.getMinecraftVersion() + ") made by AtelierMC x Mango Studio");
++        sender.sendMessage(
++            "&3-----------------------------------------",
++            "&fThis server is running on &b☃ &fAtelierMC &fsoftware",
++            "&fMade with determination by MangoStudio x Atelier",
++            "&3-----------------------------------------"
++        );
 +        /*
          if (args.length == 0) {
              //sender.sendMessage("This server is running " + Bukkit.getName() + " version " + Bukkit.getVersion() + " (Implementing API version " + Bukkit.getBukkitVersion() + ")"); // Paper - moved to setVersionMessage
              sendVersion(sender);
-@@ -85,6 +88,7 @@ public class VersionCommand extends BukkitCommand {
+@@ -85,6 +93,7 @@ public class VersionCommand extends BukkitCommand {
                  sender.sendMessage("Use /plugins to get a list of plugins.");
              }
          }

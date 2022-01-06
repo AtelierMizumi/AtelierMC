@@ -18,10 +18,10 @@ index dd171dc1750a1402fea4f260c09e7d7513465cd5..747cd51b031df94f723f72a945d53d1c
  
      @Deprecated
 diff --git a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
-index 8aaccc7fb7cddfe89e1c123b6f7400c56c5d02e5..654ee1f29b106959c9631c42fea975a9b682a9d5 100644
+index df8dc6f1e10ec95a01578bb9033e33b527a4fb48..71dc6cd1a96872649f6ff9bfa25a7846b0b8cb6d 100644
 --- a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
-@@ -873,7 +873,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
+@@ -877,7 +877,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
  
      // CraftBukkit start
      public boolean isDebugging() {
