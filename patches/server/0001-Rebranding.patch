@@ -5,55 +5,55 @@ Subject: [PATCH] Rebranding
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index f690bf2cd3319e689c80d271ae354f93c70f6baa..d239699705cbb298c590c2c49b5e6a34feb05def 100644
+index 4f4bb7e66a9198552aa6f767bde1b196ae6e0ef5..a005e4731af42ecc327edb04fe2b86033ada5ca8 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -18,7 +18,7 @@ repositories {
  }
  
  dependencies {
--    implementation(project(":pufferfish-api")) // Pufferfish // Paper
-+    implementation(project(":ateliermc-api")) // Pufferfish // Paper // AtelierMC
-     // Pufferfish start
-     implementation("io.papermc.paper:paper-mojangapi:1.18.1-R0.1-SNAPSHOT") {
-         exclude("io.papermc.paper", "paper-api")
-@@ -80,7 +80,7 @@ tasks.jar {
+-    implementation(project(":jettpack-api")) // JettPack
++    implementation(project(":ateliermc-api")) // JettPack // Ateliermc
+     implementation("io.papermc.paper:paper-mojangapi:1.18.1-R0.1-SNAPSHOT") // JettPack
+     // Paper start
+     implementation("org.jline:jline-terminal-jansi:3.21.0")
+@@ -76,7 +76,7 @@ tasks.jar {
          attributes(
              "Main-Class" to "org.bukkit.craftbukkit.Main",
              "Implementation-Title" to "CraftBukkit",
--            "Implementation-Version" to "git-Pufferfish-$implementationVersion", // Pufferfish
-+            "Implementation-Version" to "git-AtelierMC-$implementationVersion", // Pufferfish // AtelierMC
+-            "Implementation-Version" to "git-JettPack-$implementationVersion", // JettPack
++            "Implementation-Version" to "git-AtelierMC-$implementationVersion", // JettPack // AtelierMC
              "Implementation-Vendor" to date, // Paper
              "Specification-Title" to "Bukkit",
              "Specification-Version" to project.version,
 diff --git a/src/main/java/com/destroystokyo/paper/console/PaperConsole.java b/src/main/java/com/destroystokyo/paper/console/PaperConsole.java
-index e0b1f0671d16ddddcb6725acd25a1d1d69e42701..f34ba42f403f39679a7faf316610e7d39005d148 100644
+index 56f176c40d23c333856567afd5c226141e49da2f..ee21d73cdafd49288313a79ce82469b05669ad60 100644
 --- a/src/main/java/com/destroystokyo/paper/console/PaperConsole.java
 +++ b/src/main/java/com/destroystokyo/paper/console/PaperConsole.java
 @@ -17,7 +17,7 @@ public final class PaperConsole extends SimpleTerminalConsole {
      @Override
      protected LineReader buildReader(LineReaderBuilder builder) {
          builder
--                .appName("Paper")
-+                .appName("AtelierMC") // AtelierMC
+-                .appName("JettPack") // JettPack
++                .appName("AtelierMC") // JettPack // AtelierMC
                  .variable(LineReader.HISTORY_FILE, java.nio.file.Paths.get(".console_history"))
                  .completer(new ConsoleCommandCompleter(this.server))
                  .option(LineReader.Option.COMPLETE_IN_WORD, true);
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 1e7ae166a1d53fce28297e2eaebd11ec28a57a55..cec1208aaf12d685b862e9aeb3d9b3062fcf5478 100644
+index f5eea57c8efa20b2e7ab5d5f2e7f64752b2b38af..c6793bc121b5b8e01a3be797a0f9c6a30545d2e3 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -1711,7 +1711,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -1720,7 +1720,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
  
      @DontObfuscate
      public String getServerModName() {
--        return "Pufferfish"; // Pufferfish - Pufferfish > // Paper - Paper > // Spigot - Spigot > // CraftBukkit - cb > vanilla!
-+        return "AtelierMC"; // AtelierMC - AtelierMC // Pufferfish - Pufferfish > // Paper - Paper > // Spigot - Spigot > // CraftBukkit - cb > vanilla!
+-        return "JettPack"; // JettPack // Paper - Paper > // Spigot - Spigot > // CraftBukkit - cb > vanilla!
++        return "AtelierMC"; // AtelierMC // JettPack // Paper - Paper > // Spigot - Spigot > // CraftBukkit - cb > vanilla!
      }
  
      public SystemReport fillSystemReport(SystemReport details) {
 diff --git a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
-index aae2dadabedb075fd1bc712f0226882b85f4551d..84d0b6117e8dca0a27019cc5fb7030f63b020435 100644
+index 901ab68f346fd13f48958dd4c09ddbaceed5b8b5..8aaccc7fb7cddfe89e1c123b6f7400c56c5d02e5 100644
 --- a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
 @@ -228,7 +228,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
@@ -66,41 +66,41 @@ index aae2dadabedb075fd1bc712f0226882b85f4551d..84d0b6117e8dca0a27019cc5fb7030f6
          io.papermc.paper.brigadier.PaperBrigadierProviderImpl.INSTANCE.getClass(); // init PaperBrigadierProvider
          // Paper end
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 041ebfefca8f944f457a269f0e0b450b21949e73..ade428e1485306a91c1d491aeb109418cec42559 100644
+index 0b69647e0193997bf3f7b66a9f447a7ba3ed7e3c..426974113e73ce07704d3e95c3a123f2fc2f7df2 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -254,7 +254,7 @@ import javax.annotation.Nullable; // Paper
  import javax.annotation.Nonnull; // Paper
  
  public final class CraftServer implements Server {
--    private final String serverName = "Pufferfish"; // Paper // Pufferfish
-+    private final String serverName = "AtelierMC"; // Paper // Pufferfish // AtelierMC
+-    private final String serverName = "JettPack"; // Paper // JettPack
++    private final String serverName = "AtelierMC"; // Paper // JettPack // AtelierMC
      private final String serverVersion;
      private final String bukkitVersion = Versioning.getBukkitVersion();
      private final Logger logger = Logger.getLogger("Minecraft");
 diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
-index 55bae3efbc630be6d40d415509de4c3e744a5004..45d8f4bff67e23063ba039b966e6d4b705dc3b51 100644
+index bc26c18535e161d4254b644ffbdaad23e95ff631..647589549f1971cd65d2aa09201777a7199275c0 100644
 --- a/src/main/java/org/bukkit/craftbukkit/Main.java
 +++ b/src/main/java/org/bukkit/craftbukkit/Main.java
-@@ -261,7 +261,7 @@ public class Main {
-                     System.setProperty(TerminalConsoleAppender.JLINE_OVERRIDE_PROPERTY, "false"); // Paper
-                 }
- 
--                if (Main.class.getPackage().getImplementationVendor() != null && System.getProperty("IReallyKnowWhatIAmDoingISwear") == null) {
-+                if (false || Main.class.getPackage().getImplementationVendor() != null && System.getProperty("IReallyKnowWhatIAmDoingISwear") == null) { // AtelierMC - Disable build check
-                     Date buildDate = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z").parse(Main.class.getPackage().getImplementationVendor()); // Paper
- 
-                     Calendar deadline = Calendar.getInstance();
+@@ -277,7 +277,7 @@ public class Main {
+                     if (buildDate.before(deadline.getTime())) {
+                         // Paper start - This is some stupid bullshit
+                         System.err.println("*** Warning, you've not updated in a while! ***");
+-                        System.err.println("*** Please download a new build as per instructions from https://papermc.io/downloads ***"); // Paper
++                        System.err.println("*** Please download a new build as per instructions from https://github.com/AtelierMC/AtelierMC/releases/latest ***"); // Paper // AtelierMC
+                         //System.err.println("*** Server will start in 20 seconds ***");
+                         //Thread.sleep(TimeUnit.SECONDS.toMillis(20));
+                         // Paper End
 diff --git a/src/main/java/org/bukkit/craftbukkit/util/Versioning.java b/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
-index 80553face9c70c2a3d897681e7761df85b22d464..f6651b6549abcd8d693a2bc3d55b51a357bc0aa7 100644
+index ec43a790fdd0c25a69e5fd7259cb77fbcde6a363..9885eecb5e47aaccdbcee64c93434b6343fcdc0f 100644
 --- a/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
 +++ b/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
-@@ -11,7 +11,7 @@ public final class Versioning {
-     public static String getBukkitVersion() {
-         String result = "Unknown-Version";
+@@ -13,7 +13,7 @@ public final class Versioning {
+     static {
+         bukkitVersion = "Unknown-Version";
  
--        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/gg.pufferfish.pufferfish/pufferfish-api/pom.properties"); // Pufferfish
-+        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/ga.caomile.ateliermc/ateliermc-api/pom.properties"); // Pufferfish // AtelierMC
+-        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/me.titaniumtown.jettpack/jettpack-api/pom.properties");
++        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/tech.ateliermc.ateliermc/ateliermc-api/pom.properties");
          Properties properties = new Properties();
  
          if (stream != null) {

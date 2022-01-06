@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: JustMangoT <minetuan2@gmail.com>
-Date: Thu, 9 Dec 2021 20:21:23 +0700
-Subject: [PATCH] Commands change
+Date: Thu, 6 Jan 2022 20:56:59 +0700
+Subject: [PATCH] Default Commands change
 
 
 diff --git a/src/main/java/org/bukkit/command/SimpleCommandMap.java b/src/main/java/org/bukkit/command/SimpleCommandMap.java
@@ -24,7 +24,7 @@ index 74252236b138969560e6513f24e7ecc6dc4a4127..023f7c9874bd178ee8dc47a1c3bff688
      }
  
 diff --git a/src/main/java/org/bukkit/command/defaults/VersionCommand.java b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
-index 57a21495843f3a144cd73473cdc8781d6129b7ca..e28ce9b2e0b32b4323254778fa0d8aad108e71ee 100644
+index 57a21495843f3a144cd73473cdc8781d6129b7ca..fd41b8155418a564e4d9bf5160d6dfba60e0bd40 100644
 --- a/src/main/java/org/bukkit/command/defaults/VersionCommand.java
 +++ b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
 @@ -41,7 +41,7 @@ public class VersionCommand extends BukkitCommand {
@@ -46,12 +46,11 @@ index 57a21495843f3a144cd73473cdc8781d6129b7ca..e28ce9b2e0b32b4323254778fa0d8aad
          if (args.length == 0) {
              //sender.sendMessage("This server is running " + Bukkit.getName() + " version " + Bukkit.getVersion() + " (Implementing API version " + Bukkit.getBukkitVersion() + ")"); // Paper - moved to setVersionMessage
              sendVersion(sender);
-@@ -85,6 +88,8 @@ public class VersionCommand extends BukkitCommand {
+@@ -85,6 +88,7 @@ public class VersionCommand extends BukkitCommand {
                  sender.sendMessage("Use /plugins to get a list of plugins.");
              }
          }
 +        */
-+        // Atelier end
          return true;
      }
  

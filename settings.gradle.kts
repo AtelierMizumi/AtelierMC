@@ -6,4 +6,8 @@ pluginManagement {
 }
 
 rootProject.name = "ateliermc"
-include("ateliermc-api", "ateliermc-server")
+for (name in listOf("AtelierMC-API", "AtelierMC-Server")) {
+    val projName = name.toLowerCase(java.util.Locale.ENGLISH)
+    include(projName)
+    findProject(":$projName")!!.projectDir = file(name)
+}

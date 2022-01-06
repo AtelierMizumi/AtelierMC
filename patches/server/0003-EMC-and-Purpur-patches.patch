@@ -54,10 +54,10 @@ index 1617437515590a32c42687d290dd11bc8fa8edf5..ea9ca58435d05be367b7f7019b63e921
      }
  
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index cec1208aaf12d685b862e9aeb3d9b3062fcf5478..2d061d5ebf58a2e08e294e0eb9ffb89305c240e6 100644
+index c6793bc121b5b8e01a3be797a0f9c6a30545d2e3..13a5483328cf79f2222cb4418a4d8a43acf62230 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -304,6 +304,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -304,6 +304,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
      public static final int TICK_TIME = 1000000000 / MinecraftServer.TPS;
      private static final int SAMPLE_INTERVAL = 20; // Paper
      public final double[] recentTps = new double[ 3 ];
@@ -65,7 +65,7 @@ index cec1208aaf12d685b862e9aeb3d9b3062fcf5478..2d061d5ebf58a2e08e294e0eb9ffb893
      public final SlackActivityAccountant slackActivityAccountant = new SlackActivityAccountant();
      // Spigot end
      public static long currentTickLong = 0L; // Paper
-@@ -1249,6 +1250,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -1253,6 +1254,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
                          this.recentTps[1] = tps5.getAverage();
                          this.recentTps[2] = tps15.getAverage();
                          // Paper end
@@ -74,7 +74,7 @@ index cec1208aaf12d685b862e9aeb3d9b3062fcf5478..2d061d5ebf58a2e08e294e0eb9ffb893
                      }
                      // Spigot end
 diff --git a/src/main/java/net/minecraft/server/level/ServerEntity.java b/src/main/java/net/minecraft/server/level/ServerEntity.java
-index e80176708db486190dd527e3ade5fc690ceb39f7..96e5d68f405d748f8b35b415642b84739bc5e6d7 100644
+index 26b7d6b09065b8f64a34fb6c22c7bd0fa5a14573..04a3e6e682eb9fe932183b062bf05fb775756e2e 100644
 --- a/src/main/java/net/minecraft/server/level/ServerEntity.java
 +++ b/src/main/java/net/minecraft/server/level/ServerEntity.java
 @@ -189,6 +189,7 @@ public class ServerEntity {
@@ -195,10 +195,10 @@ index 4fa79d37ff4e70c61672cce7c55257c46232c026..df43d0a0f3d1e34baabae150cbf01a00
              // Paper end
          }
 diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
-index 33cbe3c68d714dbf38ebacf0b6f90cdc817d5869..f965d65affb8b4243ca910401d635a22e1303e06 100644
+index 777f85d3e0b44d97794858c09d7ded04cd58d87e..e4677995d1d42b4388095a282b4341fabc8daddf 100644
 --- a/src/main/java/net/minecraft/world/entity/Entity.java
 +++ b/src/main/java/net/minecraft/world/entity/Entity.java
-@@ -1763,6 +1763,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
+@@ -1764,6 +1764,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
          this.yRotO = this.getYRot();
          this.xRotO = this.getXRot();
          this.setYHeadRot(yaw); // Paper - Update head rotation
@@ -207,7 +207,7 @@ index 33cbe3c68d714dbf38ebacf0b6f90cdc817d5869..f965d65affb8b4243ca910401d635a22
  
      public void absMoveTo(double x, double y, double z) {
 diff --git a/src/main/java/net/minecraft/world/entity/LivingEntity.java b/src/main/java/net/minecraft/world/entity/LivingEntity.java
-index 2c988e05299d530d483e21ab452de0a03e5bdcbd..8b1454b552acce8f698bf44f4b2d2cdf9763bf31 100644
+index be3795ad485b382b5665c055456691cbf8965e93..b5c1546b9c538c984883fd9f746e1ada7d6ddcb5 100644
 --- a/src/main/java/net/minecraft/world/entity/LivingEntity.java
 +++ b/src/main/java/net/minecraft/world/entity/LivingEntity.java
 @@ -2925,7 +2925,7 @@ public abstract class LivingEntity extends Entity {
@@ -267,10 +267,10 @@ index fe502e148e218ae404e0049c0251d3e3ca08c825..015422d2a01c99c121481643473b8a12
 +    // EMC end
  }
 diff --git a/src/main/java/net/minecraft/world/level/Level.java b/src/main/java/net/minecraft/world/level/Level.java
-index 90aa1d75b5c23e5ee27ceae9f6ef90de913a6601..1a7188b8b756b7fe625582b8e7144141cf9ed6dd 100644
+index e3f4e883ea0ec1dd06f9afca092fd36c57e61726..3f78ed4f64e0601474464a0bd3f9d33ff83c368d 100644
 --- a/src/main/java/net/minecraft/world/level/Level.java
 +++ b/src/main/java/net/minecraft/world/level/Level.java
-@@ -893,7 +893,11 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
+@@ -898,7 +898,11 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
  
      public void neighborChanged(BlockPos pos, Block sourceBlock, BlockPos neighborPos) {
          if (!this.isClientSide) {
@@ -284,7 +284,7 @@ index 90aa1d75b5c23e5ee27ceae9f6ef90de913a6601..1a7188b8b756b7fe625582b8e7144141
              try {
                  // CraftBukkit start
 diff --git a/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java b/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
-index 05c46f3b3bce5225b819d86e6e06729a5093e092..bd64a98720819bafd9d7ce5fad0d1bcaa1910232 100644
+index d17fb373c43b9bc3c18e3b34fd5f70d95d4d3215..0e9d23d81d2c451eeefa3731d13160621e0a7e0a 100644
 --- a/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
 +++ b/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
 @@ -930,7 +930,11 @@ public abstract class BlockBehaviour {
@@ -301,7 +301,7 @@ index 05c46f3b3bce5225b819d86e6e06729a5093e092..bd64a98720819bafd9d7ce5fad0d1bca
  
                  Block.updateOrDestroy(iblockdata, iblockdata1, world, blockposition_mutableblockposition, flags, maxUpdateDepth);
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-index ac41bc23d2f7e16bbacdc9b33fcf6c0d706fa023..dba5c4a65ab0f649d8dcb0e66398d5e5b0192854 100644
+index e17ee85bd03168bb55683cdc881a57165a04fc9e..3d9fd90fa20d87b7b818849f59ba3682e3b1665f 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 @@ -373,7 +373,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {

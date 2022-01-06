@@ -1,14 +1,14 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: JustMangoT <minetuan2@gmail.com>
-Date: Wed, 15 Dec 2021 10:28:57 +0700
+Date: Thu, 6 Jan 2022 20:55:24 +0700
 Subject: [PATCH] isDebugging API
 
 
 diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
-index 53c4e5ca208ee17c7c244e416c537c7b63edf194..8c699613b92a49e97f93d4376c22f215c0a6085f 100644
+index 53c4e5ca208ee17c7c244e416c537c7b63edf194..b81ee0c3da1f12c99e114d536162c0eb62ca9a58 100644
 --- a/src/main/java/org/bukkit/Bukkit.java
 +++ b/src/main/java/org/bukkit/Bukkit.java
-@@ -2149,6 +2149,16 @@ public final class Bukkit {
+@@ -2149,6 +2149,17 @@ public final class Bukkit {
          return server.getCurrentTick();
      }
  
@@ -22,14 +22,15 @@ index 53c4e5ca208ee17c7c244e416c537c7b63edf194..8c699613b92a49e97f93d4376c22f215
 +        return server.isDebugging();
 +    }
 +    // AtelierMC end
++
      /**
       * Checks if the server is in the process of being shutdown.
       *
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index e48af3822e9f118399c3a1c9358c56efae12e0da..47b8db94d422ee04745c86e251ef84c3bf52cea2 100644
+index e48af3822e9f118399c3a1c9358c56efae12e0da..fcee4c2b32034ffaff436cc8555ea52ac73d777a 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
-@@ -1867,6 +1867,14 @@ public interface Server extends PluginMessageRecipient, net.kyori.adventure.audi
+@@ -1867,6 +1867,15 @@ public interface Server extends PluginMessageRecipient, net.kyori.adventure.audi
       */
      int getCurrentTick();
  
@@ -41,6 +42,7 @@ index e48af3822e9f118399c3a1c9358c56efae12e0da..47b8db94d422ee04745c86e251ef84c3
 +     */
 +    boolean isDebugging();
 +    // AtelierMC end
++
      /**
       * Checks if the server is in the process of being shutdown.
       *

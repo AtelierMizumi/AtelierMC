@@ -1,11 +1,10 @@
 import io.papermc.paperweight.util.constants.*
-import io.papermc.paperweight.util.Git
 
 plugins {
     java
     `maven-publish`
-    id("com.github.johnrengelman.shadow") version "7.1.0" apply false
-    id("io.papermc.paperweight.patcher") version "1.3.2-SNAPSHOT"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("io.papermc.paperweight.patcher") version "1.3.3"
 }
 
 repositories {
@@ -57,69 +56,25 @@ subprojects {
     }
 }
 
-val pufferfishDir = layout.projectDirectory.dir("Pufferfish")
-val initSubmodules by tasks.registering {
-    outputs.upToDateWhen { false }
-    doLast {
-        Git(layout.projectDirectory)("submodule", "update", "--init").executeOut()
-    }
-}
-
-
 paperweight {
     serverProject.set(project(":ateliermc-server"))
 
     remapRepo.set("https://maven.fabricmc.net/")
     decompileRepo.set("https://files.minecraftforge.net/maven/")
 
-    upstreams {
-        register("pufferfish") {
-            upstreamDataTask {
-                dependsOn(initSubmodules)
-                projectDir.set(pufferfishDir)
-            }
+    useStandardUpstream("jettpack") {
+        url.set("https://gitlab.com/Titaniumtown/JettPack.git")
+        ref.set(providers.gradleProperty("jettpackRef"))
 
-            patchTasks {
-                register("api") {
-                    upstreamDir.set(pufferfishDir.dir("pufferfish-api"))
-                    patchDir.set(layout.projectDirectory.dir("patches/api"))
-                    outputDir.set(layout.projectDirectory.dir("ateliermc-api"))
-                }
-                register("server") {
-                    upstreamDir.set(pufferfishDir.dir("pufferfish-server"))
-                    patchDir.set(layout.projectDirectory.dir("patches/server"))
-                    outputDir.set(layout.projectDirectory.dir("ateliermc-server"))
-                    importMcDev.set(true)
-                }
-            }
-        }
-    }
-}
+        withStandardPatcher {
+            apiSourceDirPath.set("JettPack-API")
+            serverSourceDirPath.set("JettPack-Server")
 
-tasks.generateDevelopmentBundle {
-    apiCoordinates.set("ga.caomile.ateliermc:ateliermc-api")
-    mojangApiCoordinates.set("io.papermc.paper:paper-mojangapi")
-    libraryRepositories.set(
-        listOf(
-            "https://libraries.minecraft.net/",
-            "https://maven.quiltmc.org/repository/release/",
-            "https://repo.aikar.co/content/groups/aikar",
-            "https://ci.emc.gs/nexus/content/groups/aikar/",
-            "https://papermc.io/repo/repository/maven-public/",
-            "https://repo.velocitypowered.com/snapshots/",
-            "https://ysera.dyndns.org:444/releases/"
-        )
-    )
-}
+            apiPatchDir.set(layout.projectDirectory.dir("patches/api"))
+            serverPatchDir.set(layout.projectDirectory.dir("patches/server"))
 
-publishing {
-    // Publishing dev bundle:
-    // ./gradlew publishDevBundlePublicationTo(MavenLocal|MyRepoSnapshotsRepository) -PpublishDevBundle
-    if (project.hasProperty("publishDevBundle")) {
-        publications.create<MavenPublication>("devBundle") {
-            artifact(tasks.generateDevelopmentBundle) {
-                artifactId = "dev-bundle"
-            }
+            apiOutputDir.set(layout.projectDirectory.dir("AtelierMC-API"))
+            serverOutputDir.set(layout.projectDirectory.dir("AtelierMC-Server"))
         }
     }
 }

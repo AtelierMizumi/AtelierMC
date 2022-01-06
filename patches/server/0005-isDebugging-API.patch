@@ -5,10 +5,10 @@ Subject: [PATCH] isDebugging API
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 21f741cd8c439a3b815455b4442e575dae51edac..7c06979f5316224529d678419876ada1e6e9ea4f 100644
+index dd171dc1750a1402fea4f260c09e7d7513465cd5..747cd51b031df94f723f72a945d53d1c7193bb84 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -2493,7 +2493,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
+@@ -2481,7 +2481,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
      }
  
      public boolean isDebugging() {
@@ -18,10 +18,10 @@ index 21f741cd8c439a3b815455b4442e575dae51edac..7c06979f5316224529d678419876ada1
  
      @Deprecated
 diff --git a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
-index 9d4e872cf49407ec9968d9ecab4a6707f6b2d539..7e5bf2ceaa257d236fda121c6398bb1ec1184280 100644
+index 8aaccc7fb7cddfe89e1c123b6f7400c56c5d02e5..654ee1f29b106959c9631c42fea975a9b682a9d5 100644
 --- a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
-@@ -864,7 +864,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
+@@ -873,7 +873,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
  
      // CraftBukkit start
      public boolean isDebugging() {
@@ -31,10 +31,10 @@ index 9d4e872cf49407ec9968d9ecab4a6707f6b2d539..7e5bf2ceaa257d236fda121c6398bb1e
  
      @Override
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 8bc6fb6b578792a3f4583ae194cc16179009bbf1..500cec286758eabcd01145c847af3c9fad954fce 100644
+index 426974113e73ce07704d3e95c3a123f2fc2f7df2..e65972ce72b344c81c7190eb46fc185fa7045018 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -2804,6 +2804,13 @@ public final class CraftServer implements Server {
+@@ -2805,6 +2805,13 @@ public final class CraftServer implements Server {
          return net.minecraft.server.MinecraftServer.currentTick;
      }
  
