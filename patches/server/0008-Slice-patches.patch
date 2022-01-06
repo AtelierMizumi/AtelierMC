@@ -149,6 +149,18 @@ index 6b3726a2aa235772520edfa9ec1481405bc22358..0af18eb21f84d91bc4d170fc58b59d36
          }
  
          if (this.entity instanceof LivingEntity) {
+diff --git a/src/main/java/net/minecraft/server/level/ServerPlayer.java b/src/main/java/net/minecraft/server/level/ServerPlayer.java
+index 0011192cdba6dcb7ca125ae4a49ca89a93cc40f2..7c162997901b4d0add12ff22b22c440405f0976c 100644
+--- a/src/main/java/net/minecraft/server/level/ServerPlayer.java
++++ b/src/main/java/net/minecraft/server/level/ServerPlayer.java
+@@ -258,6 +258,7 @@ public class ServerPlayer extends Player {
+     public double lastEntitySpawnRadiusSquared; // Paper - optimise isOutsideRange, this field is in blocks
+     public final com.destroystokyo.paper.util.misc.PooledLinkedHashSets.PooledObjectLinkedOpenHashSet<ServerPlayer> cachedSingleHashSet; // Paper
+     public org.bukkit.event.player.PlayerQuitEvent.QuitReason quitReason = null; // Paper - there are a lot of changes to do if we change all methods leading to the event
++    public boolean smoothWorldTeleport; // Slice
+ 
+     public ServerPlayer(MinecraftServer server, ServerLevel world, GameProfile profile) {
+         super(world, world.getSharedSpawnPos(), world.getSharedSpawnAngle(), profile);
 diff --git a/src/main/java/net/minecraft/server/level/WorldGenRegion.java b/src/main/java/net/minecraft/server/level/WorldGenRegion.java
 index 9b25d36fe5230e287d81b99be31b9eddd8e76002..20235df3239ef941f16c437acb7ee0831da18050 100644
 --- a/src/main/java/net/minecraft/server/level/WorldGenRegion.java
@@ -171,6 +183,25 @@ index 9b25d36fe5230e287d81b99be31b9eddd8e76002..20235df3239ef941f16c437acb7ee083
          if (!this.ensureCanWrite(pos)) {
              return false;
          } else {
+diff --git a/src/main/java/net/minecraft/server/players/PlayerList.java b/src/main/java/net/minecraft/server/players/PlayerList.java
+index f55f8c0b2c748a5442199c0a7f772b02ed533753..ba608ac359aee4ae652b607e97b514c9cbadfadb 100644
+--- a/src/main/java/net/minecraft/server/players/PlayerList.java
++++ b/src/main/java/net/minecraft/server/players/PlayerList.java
+@@ -937,12 +937,12 @@ public abstract class PlayerList {
+         }
+         // CraftBukkit start
+         LevelData worlddata = worldserver1.getLevelData();
+-        entityplayer1.connection.send(new ClientboundRespawnPacket(worldserver1.dimensionType(), worldserver1.dimension(), BiomeManager.obfuscateSeed(worldserver1.getSeed()), entityplayer1.gameMode.getGameModeForPlayer(), entityplayer1.gameMode.getPreviousGameModeForPlayer(), worldserver1.isDebug(), worldserver1.isFlat(), flag));
++        if (!entityplayer.smoothWorldTeleport) entityplayer1.connection.send(new ClientboundRespawnPacket(worldserver1.dimensionType(), worldserver1.dimension(), BiomeManager.obfuscateSeed(worldserver1.getSeed()), entityplayer1.gameMode.getGameModeForPlayer(), entityplayer1.gameMode.getPreviousGameModeForPlayer(), worldserver1.isDebug(), worldserver1.isFlat(), flag)); // Slice
+         entityplayer1.connection.send(new ClientboundSetChunkCacheRadiusPacket(worldserver1.spigotConfig.viewDistance)); // Spigot
+         entityplayer1.connection.send(new ClientboundSetSimulationDistancePacket(worldserver1.spigotConfig.simulationDistance)); // Spigot
+         entityplayer1.spawnIn(worldserver1);
+         entityplayer1.unsetRemoved();
+-        entityplayer1.connection.teleport(new Location(worldserver1.getWorld(), entityplayer1.getX(), entityplayer1.getY(), entityplayer1.getZ(), entityplayer1.getYRot(), entityplayer1.getXRot()));
++        if (!entityplayer.smoothWorldTeleport) entityplayer1.connection.teleport(new Location(worldserver1.getWorld(), entityplayer1.getX(), entityplayer1.getY(), entityplayer1.getZ(), entityplayer1.getYRot(), entityplayer1.getXRot()));
+         entityplayer1.setShiftKeyDown(false);
+ 
+         // entityplayer1.connection.teleport(entityplayer1.getX(), entityplayer1.getY(), entityplayer1.getZ(), entityplayer1.getYRot(), entityplayer1.getXRot());
 diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
 index 219d8b92bf5bffb509c6edb06ac82972cb826f44..1eb7869cddcb0e36ca18846ec0ec470c117e8cda 100644
 --- a/src/main/java/net/minecraft/world/entity/Entity.java

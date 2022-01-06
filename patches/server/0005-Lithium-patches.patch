@@ -556,7 +556,7 @@ index 88f10d729aa1e0a01790521821d691a0ecd373a2..eba510e825f51e2e9d1e9886c8e2fac6
      // Paper end
  }
 diff --git a/src/main/java/net/minecraft/server/level/ServerChunkCache.java b/src/main/java/net/minecraft/server/level/ServerChunkCache.java
-index 587855dcd2eb40f89c2a2282c202e9fbef2c7382..a68d0ea11914aaacdb19ba66fa2736c51fa2f321 100644
+index f51fcaba69c9ddc27130ab615526e05b1b4f0e07..78f40f081dfc0fcc8baec0666782c83dc91b34b8 100644
 --- a/src/main/java/net/minecraft/server/level/ServerChunkCache.java
 +++ b/src/main/java/net/minecraft/server/level/ServerChunkCache.java
 @@ -76,6 +76,8 @@ public class ServerChunkCache extends ChunkSource {
@@ -754,10 +754,10 @@ index 8b1454b552acce8f698bf44f4b2d2cdf9763bf31..ab6a19986c2dd6c84557cba6c8f7fdfd
  
          for (int j = 0; j < i; ++j) {
 diff --git a/src/main/java/net/minecraft/world/entity/Mob.java b/src/main/java/net/minecraft/world/entity/Mob.java
-index 607e78c24edabb26fd7494855087f7f19cfdc576..2add62d13564b0dc28aa152a5a6d8c8df00fa8c8 100644
+index 35ff7abd8251b0af6c23fbb63804db632ec5b85d..44d46997de1919665213b04ffcf046196d4e8766 100644
 --- a/src/main/java/net/minecraft/world/entity/Mob.java
 +++ b/src/main/java/net/minecraft/world/entity/Mob.java
-@@ -1009,7 +1009,7 @@ public abstract class Mob extends LivingEntity {
+@@ -1011,7 +1011,7 @@ public abstract class Mob extends LivingEntity {
      @Override
      protected void dropCustomDeathLoot(DamageSource source, int lootingMultiplier, boolean allowDrops) {
          super.dropCustomDeathLoot(source, lootingMultiplier, allowDrops);
@@ -766,7 +766,7 @@ index 607e78c24edabb26fd7494855087f7f19cfdc576..2add62d13564b0dc28aa152a5a6d8c8d
          int j = aenumitemslot.length;
  
          for (int k = 0; k < j; ++k) {
-@@ -1067,7 +1067,7 @@ public abstract class Mob extends LivingEntity {
+@@ -1069,7 +1069,7 @@ public abstract class Mob extends LivingEntity {
              }
  
              boolean flag = true;
@@ -775,7 +775,7 @@ index 607e78c24edabb26fd7494855087f7f19cfdc576..2add62d13564b0dc28aa152a5a6d8c8d
              int j = aenumitemslot.length;
  
              for (int k = 0; k < j; ++k) {
-@@ -1154,7 +1154,7 @@ public abstract class Mob extends LivingEntity {
+@@ -1156,7 +1156,7 @@ public abstract class Mob extends LivingEntity {
          float f = difficulty.getSpecialMultiplier();
  
          this.enchantSpawnedWeapon(f);
@@ -784,7 +784,7 @@ index 607e78c24edabb26fd7494855087f7f19cfdc576..2add62d13564b0dc28aa152a5a6d8c8d
          int i = aenumitemslot.length;
  
          for (int j = 0; j < i; ++j) {
-@@ -1365,7 +1365,7 @@ public abstract class Mob extends LivingEntity {
+@@ -1367,7 +1367,7 @@ public abstract class Mob extends LivingEntity {
              t0.setInvulnerable(this.isInvulnerable());
              if (flag) {
                  t0.setCanPickUpLoot(this.canPickUpLoot());
