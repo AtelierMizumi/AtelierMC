@@ -54,7 +54,7 @@ index 1617437515590a32c42687d290dd11bc8fa8edf5..ea9ca58435d05be367b7f7019b63e921
      }
  
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index c6793bc121b5b8e01a3be797a0f9c6a30545d2e3..13a5483328cf79f2222cb4418a4d8a43acf62230 100644
+index bf4ca0b295e0a8043646b316831e89ec76896409..b4c5bd97fdf8abf17ec91d4f949c5bcb6fb89af9 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -304,6 +304,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
@@ -65,7 +65,7 @@ index c6793bc121b5b8e01a3be797a0f9c6a30545d2e3..13a5483328cf79f2222cb4418a4d8a43
      public final SlackActivityAccountant slackActivityAccountant = new SlackActivityAccountant();
      // Spigot end
      public static long currentTickLong = 0L; // Paper
-@@ -1253,6 +1254,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
+@@ -1251,6 +1252,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
                          this.recentTps[1] = tps5.getAverage();
                          this.recentTps[2] = tps15.getAverage();
                          // Paper end
@@ -74,7 +74,7 @@ index c6793bc121b5b8e01a3be797a0f9c6a30545d2e3..13a5483328cf79f2222cb4418a4d8a43
                      }
                      // Spigot end
 diff --git a/src/main/java/net/minecraft/server/level/ServerEntity.java b/src/main/java/net/minecraft/server/level/ServerEntity.java
-index 26b7d6b09065b8f64a34fb6c22c7bd0fa5a14573..04a3e6e682eb9fe932183b062bf05fb775756e2e 100644
+index c8a319587497d1a46a3541528987b59727a5d466..7b5a2496fea6a87db49b03c2959321ed23761e0c 100644
 --- a/src/main/java/net/minecraft/server/level/ServerEntity.java
 +++ b/src/main/java/net/minecraft/server/level/ServerEntity.java
 @@ -189,6 +189,7 @@ public class ServerEntity {
@@ -207,7 +207,7 @@ index 777f85d3e0b44d97794858c09d7ded04cd58d87e..e4677995d1d42b4388095a282b4341fa
  
      public void absMoveTo(double x, double y, double z) {
 diff --git a/src/main/java/net/minecraft/world/entity/LivingEntity.java b/src/main/java/net/minecraft/world/entity/LivingEntity.java
-index be3795ad485b382b5665c055456691cbf8965e93..b5c1546b9c538c984883fd9f746e1ada7d6ddcb5 100644
+index 713aa628a509341a519c5bd82736bcb85d18bbfc..03ff9dfd265b96b6a1dfbbb65f98a4ab2540da80 100644
 --- a/src/main/java/net/minecraft/world/entity/LivingEntity.java
 +++ b/src/main/java/net/minecraft/world/entity/LivingEntity.java
 @@ -2925,7 +2925,7 @@ public abstract class LivingEntity extends Entity {
@@ -267,7 +267,7 @@ index fe502e148e218ae404e0049c0251d3e3ca08c825..015422d2a01c99c121481643473b8a12
 +    // EMC end
  }
 diff --git a/src/main/java/net/minecraft/world/level/Level.java b/src/main/java/net/minecraft/world/level/Level.java
-index e3f4e883ea0ec1dd06f9afca092fd36c57e61726..3f78ed4f64e0601474464a0bd3f9d33ff83c368d 100644
+index 904bfc59d3ad54f54a5608de2575717c5c70503e..5bf19e17e6ea1ec99a63f06e347604477cb8855e 100644
 --- a/src/main/java/net/minecraft/world/level/Level.java
 +++ b/src/main/java/net/minecraft/world/level/Level.java
 @@ -898,7 +898,11 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
@@ -284,7 +284,7 @@ index e3f4e883ea0ec1dd06f9afca092fd36c57e61726..3f78ed4f64e0601474464a0bd3f9d33f
              try {
                  // CraftBukkit start
 diff --git a/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java b/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
-index d17fb373c43b9bc3c18e3b34fd5f70d95d4d3215..0e9d23d81d2c451eeefa3731d13160621e0a7e0a 100644
+index b7c4f2144fae2ceadcdfd94f7e3948d9ceef4a4a..de67cf3186e8b49c48736be168901e412a033e5c 100644
 --- a/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
 +++ b/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
 @@ -930,7 +930,11 @@ public abstract class BlockBehaviour {
