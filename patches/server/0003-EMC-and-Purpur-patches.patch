@@ -54,7 +54,7 @@ index 1617437515590a32c42687d290dd11bc8fa8edf5..ea9ca58435d05be367b7f7019b63e921
      }
  
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index bf4ca0b295e0a8043646b316831e89ec76896409..b4c5bd97fdf8abf17ec91d4f949c5bcb6fb89af9 100644
+index 8d0ede0169f1cd86d342c1972945983448a9ca09..8b1df96357c4640caa7ff5906b7c9c9d6812a0f3 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -304,6 +304,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
@@ -301,10 +301,10 @@ index b7c4f2144fae2ceadcdfd94f7e3948d9ceef4a4a..de67cf3186e8b49c48736be168901e41
  
                  Block.updateOrDestroy(iblockdata, iblockdata1, world, blockposition_mutableblockposition, flags, maxUpdateDepth);
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-index e17ee85bd03168bb55683cdc881a57165a04fc9e..3d9fd90fa20d87b7b818849f59ba3682e3b1665f 100644
+index a117edcf95cebdb1bd4d781f6423cf1620dea478..58809ab0b86aa8124c046c6f2c396ef4c7eddf0d 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-@@ -373,7 +373,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -398,7 +398,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
  
      @Override
      public boolean unloadChunk(int x, int z) {
