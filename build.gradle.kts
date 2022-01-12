@@ -16,7 +16,7 @@ repositories {
 
 dependencies {
     remapper("net.fabricmc:tiny-remapper:0.7.0:fat")
-    decompiler("net.minecraftforge:forgeflower:1.5.498.22")
+    decompiler("org.quiltmc.quiltflower:1.7.0")
     paperclip("io.papermc:paperclip:3.0.2")
 }
 
@@ -36,12 +36,14 @@ subprojects {
         options.encoding = Charsets.UTF_8.name()
         options.release.set(17)
     }
-        tasks.withType<Javadoc> {
-            options.encoding = Charsets.UTF_8.name()
-        }
-        tasks.withType<ProcessResources> {
-            filteringCharset = Charsets.UTF_8.name()
-        }
+
+    tasks.withType<Javadoc> {
+        options.encoding = Charsets.UTF_8.name()
+    }
+
+    tasks.withType<ProcessResources> {
+        filteringCharset = Charsets.UTF_8.name()
+    }
 
     repositories {
         mavenCentral()
@@ -60,7 +62,7 @@ paperweight {
     serverProject.set(project(":ateliermc-server"))
 
     remapRepo.set("https://maven.fabricmc.net/")
-    decompileRepo.set("https://files.minecraftforge.net/maven/")
+    decompileRepo.set("https://maven.quiltmc.org/")
 
     useStandardUpstream("jettpack") {
         url.set("https://gitlab.com/Titaniumtown/JettPack.git")
