@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Cryptite <cryptite@gmail.com>
+From: JustMangoT <minetuan2@gmail.com>
 Date: Wed, 12 Jan 2022 07:41:04 +0700
-Subject: [PATCH] (Slice) Dont send fire packets if player has Fire Resistance
+Subject: [PATCH] (Slice) Ignore fire packets if player has Fire Resistance
 
 
 diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java

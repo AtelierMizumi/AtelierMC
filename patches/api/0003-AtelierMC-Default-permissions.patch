@@ -1,0 +1,52 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: JustMangoT <minetuan2@gmail.com>
+Date: Wed, 12 Jan 2022 08:23:13 +0700
+Subject: [PATCH] AtelierMC Default permissions
+
+
+diff --git a/src/main/java/org/bukkit/util/permissions/AtelierMCPermissions.java b/src/main/java/org/bukkit/util/permissions/AtelierMCPermissions.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..1f2413498074cf92b4145e6d07d043669efbfc0b
+--- /dev/null
++++ b/src/main/java/org/bukkit/util/permissions/AtelierMCPermissions.java
+@@ -0,0 +1,27 @@
++package org.bukkit.util.permissions;
++
++import org.bukkit.permissions.Permission;
++import org.bukkit.permissions.PermissionDefault;
++import org.jetbrains.annotations.NotNull;
++
++public final class AtelierMCPermissions {
++    private static final String ROOT = "ateliermc";
++    private static final String PREFIX = ROOT + ".";
++
++    private AtelierMCPermissions() {}
++
++    @NotNull
++    public static Permission registerPermission() {
++        Permission ateliermc = DefaultPermissions.registerPermission(ROOT, "Gives the user the ability to use all AtelierMC utilities and commands", PermissionDefault.FALSE);
++
++        DefaultPermissions.registerPermission(PREFIX + "enderchest.rows.six", "Gives the user six rows of enderchest space", PermissionDefault.FALSE, ateliermc);
++        DefaultPermissions.registerPermission(PREFIX + "enderchest.rows.five", "Gives the user five rows of enderchest space", PermissionDefault.FALSE, ateliermc);
++        DefaultPermissions.registerPermission(PREFIX + "enderchest.rows.four", "Gives the user four rows of enderchest space", PermissionDefault.FALSE, ateliermc);
++        DefaultPermissions.registerPermission(PREFIX + "enderchest.rows.three", "Gives the user three rows of enderchest space", PermissionDefault.FALSE, ateliermc);
++        DefaultPermissions.registerPermission(PREFIX + "enderchest.rows.two", "Gives the user two rows of enderchest space", PermissionDefault.FALSE, ateliermc);
++        DefaultPermissions.registerPermission(PREFIX + "enderchest.rows.one", "Gives the user one row of enderchest space", PermissionDefault.FALSE, ateliermc);
++
++        ateliermc.recalculatePermissibles();
++        return ateliermc;
++    }
++}
+diff --git a/src/main/java/org/bukkit/util/permissions/DefaultPermissions.java b/src/main/java/org/bukkit/util/permissions/DefaultPermissions.java
+index e1a4ddf2c07cdd242fa8054a0152522fe4039e85..d97487bb15ad359c4c7eb4411dcb9a9158de8a3b 100644
+--- a/src/main/java/org/bukkit/util/permissions/DefaultPermissions.java
++++ b/src/main/java/org/bukkit/util/permissions/DefaultPermissions.java
+@@ -89,6 +89,8 @@ public final class DefaultPermissions {
+         CommandPermissions.registerPermissions(parent);
+         BroadcastPermissions.registerPermissions(parent);
+ 
++        AtelierMCPermissions.registerPermission(); // AtelierMC
++
+         parent.recalculatePermissibles();
+     }
+ }
