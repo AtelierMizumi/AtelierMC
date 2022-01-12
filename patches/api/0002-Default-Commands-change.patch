@@ -24,7 +24,7 @@ index 74252236b138969560e6513f24e7ecc6dc4a4127..023f7c9874bd178ee8dc47a1c3bff688
      }
  
 diff --git a/src/main/java/org/bukkit/command/defaults/VersionCommand.java b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
-index 57a21495843f3a144cd73473cdc8781d6129b7ca..e13b76d4091b6a60e7b2f863aabd32bd9fc3e9ba 100644
+index 57a21495843f3a144cd73473cdc8781d6129b7ca..5527c20179840ad55c92f3008f4360714f7a5d70 100644
 --- a/src/main/java/org/bukkit/command/defaults/VersionCommand.java
 +++ b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
 @@ -41,15 +41,25 @@ public class VersionCommand extends BukkitCommand {
@@ -46,10 +46,10 @@ index 57a21495843f3a144cd73473cdc8781d6129b7ca..e13b76d4091b6a60e7b2f863aabd32bd
 +        }
  
 +        sender.sendMessage(
-+            "§3-----------------------------------------",
++            "§3----------------------------------------------------",
 +            "§fThis server is running on §b☃ §fAtelierMC software",
-+            "§fMade with determination by §eMangoStudio §fx §eAtelier",
-+            "§3-----------------------------------------"
++            "§fMade with determination by §eMangoStudio §fx §eAtelierMC",
++            "§3----------------------------------------------------"
 +        );
 +        /*
          if (args.length == 0) {

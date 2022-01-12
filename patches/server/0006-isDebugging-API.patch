@@ -5,10 +5,10 @@ Subject: [PATCH] isDebugging API
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 72017d86693f3a1afaabb9a6f491aea043228a5d..9a406cb1b558780425632fbf864d2ae27f43f193 100644
+index 71fe392c3e81421dcbb2b1dc7c3dab8413775de3..ad29ea4655448868eb6749567d619b5e6080cf32 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -2479,7 +2479,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
+@@ -2485,7 +2485,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
      }
  
      public boolean isDebugging() {
@@ -31,7 +31,7 @@ index df8dc6f1e10ec95a01578bb9033e33b527a4fb48..71dc6cd1a96872649f6ff9bfa25a7846
  
      @Override
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 426974113e73ce07704d3e95c3a123f2fc2f7df2..e65972ce72b344c81c7190eb46fc185fa7045018 100644
+index c038ab5a299cd8d83e6d11f2fc58464f67610d20..393f73dd317e78ad9239f8a8d842546a60d31320 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -2805,6 +2805,13 @@ public final class CraftServer implements Server {

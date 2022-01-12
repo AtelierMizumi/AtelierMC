@@ -5,7 +5,7 @@ Subject: [PATCH] Optimized halloween checker
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index b4c5bd97fdf8abf17ec91d4f949c5bcb6fb89af9..72017d86693f3a1afaabb9a6f491aea043228a5d 100644
+index 4eab5f0ab87504c544b4fb574704a7b6394addf6..71fe392c3e81421dcbb2b1dc7c3dab8413775de3 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -2,9 +2,6 @@ package net.minecraft.server;
@@ -51,7 +51,7 @@ index b4c5bd97fdf8abf17ec91d4f949c5bcb6fb89af9..72017d86693f3a1afaabb9a6f491aea0
  
  public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnable> implements CommandSource, AutoCloseable {
  
-@@ -1529,6 +1522,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
+@@ -1535,6 +1528,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
              this.runAllTasks();
          }
          // Paper end

@@ -54,7 +54,7 @@ index 1617437515590a32c42687d290dd11bc8fa8edf5..ea9ca58435d05be367b7f7019b63e921
      }
  
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 8d0ede0169f1cd86d342c1972945983448a9ca09..8b1df96357c4640caa7ff5906b7c9c9d6812a0f3 100644
+index 07968d890e66ae24e8d6352b3fbd1a105b27853d..4eab5f0ab87504c544b4fb574704a7b6394addf6 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -304,6 +304,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
@@ -109,7 +109,7 @@ index c8a319587497d1a46a3541528987b59727a5d466..7b5a2496fea6a87db49b03c2959321ed
          this.entity.stopSeenByPlayer(player);
          player.connection.send(new ClientboundRemoveEntitiesPacket(new int[]{this.entity.getId()}));
 diff --git a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
-index 889a4804eaa128e2f79a4ea48b8aa796336576d1..86d7f14fddf99a0f1bf6e487b268eef3903b238e 100644
+index 0105a60a9a361624f650e21c3efbd1ee5adb86a1..23d067f8467d38b44c6afaf19661ebec9cd30ff2 100644
 --- a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
 +++ b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
 @@ -228,6 +228,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
@@ -195,7 +195,7 @@ index 4fa79d37ff4e70c61672cce7c55257c46232c026..df43d0a0f3d1e34baabae150cbf01a00
              // Paper end
          }
 diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
-index 777f85d3e0b44d97794858c09d7ded04cd58d87e..e4677995d1d42b4388095a282b4341fabc8daddf 100644
+index 94d80562ce28333faea050a0c880b8d0db57e1c0..1e5e6c99bdd7e7fe79de7e9c302cc7f315d43426 100644
 --- a/src/main/java/net/minecraft/world/entity/Entity.java
 +++ b/src/main/java/net/minecraft/world/entity/Entity.java
 @@ -1764,6 +1764,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
@@ -207,10 +207,10 @@ index 777f85d3e0b44d97794858c09d7ded04cd58d87e..e4677995d1d42b4388095a282b4341fa
  
      public void absMoveTo(double x, double y, double z) {
 diff --git a/src/main/java/net/minecraft/world/entity/LivingEntity.java b/src/main/java/net/minecraft/world/entity/LivingEntity.java
-index 713aa628a509341a519c5bd82736bcb85d18bbfc..03ff9dfd265b96b6a1dfbbb65f98a4ab2540da80 100644
+index 04051de5d67f74834e293c401cec0311f235664d..e838957fe80c581ec5675bae9bd321b1e4c4798d 100644
 --- a/src/main/java/net/minecraft/world/entity/LivingEntity.java
 +++ b/src/main/java/net/minecraft/world/entity/LivingEntity.java
-@@ -2925,7 +2925,7 @@ public abstract class LivingEntity extends Entity {
+@@ -2924,7 +2924,7 @@ public abstract class LivingEntity extends Entity {
              }
          }
  

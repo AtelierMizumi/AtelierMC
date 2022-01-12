@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Cryptite <cryptite@gmail.com>
+Date: Wed, 12 Jan 2022 07:41:04 +0700
+Subject: [PATCH] (Slice) Dont send fire packets if player has Fire Resistance
+
+
+diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
+index 1e5e6c99bdd7e7fe79de7e9c302cc7f315d43426..bec2298a79674c42e84ee2cf34643bb3239b8cf3 100644
+--- a/src/main/java/net/minecraft/world/entity/Entity.java
++++ b/src/main/java/net/minecraft/world/entity/Entity.java
+@@ -796,7 +796,13 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
+ 
+         this.checkOutOfWorld();
+         if (!this.level.isClientSide) {
+-            this.setSharedFlagOnFire(this.remainingFireTicks > 0);
++            // AtelierMC start - Slice: Dont send fire packets if player has Fire Resistance
++            if (this instanceof net.minecraft.world.entity.LivingEntity livingEntity) {
++                this.setSharedFlagOnFire(this.remainingFireTicks > 0 && !livingEntity.hasEffect(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE));
++            } else {
++                this.setSharedFlagOnFire(this.remainingFireTicks > 0);
++            }
++            // AtelierMC end
+         }
+ 
+         this.firstTick = false;
