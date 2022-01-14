@@ -5,10 +5,10 @@ Subject: [PATCH] (Slice) Ignore fire packets if player has Fire Resistance
 
 
 diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
-index 1e5e6c99bdd7e7fe79de7e9c302cc7f315d43426..bec2298a79674c42e84ee2cf34643bb3239b8cf3 100644
+index b300463bf0e3bc29acc226c85d203a0abc91320a..fa4080cb1b5f7c192e9ca9a2bdf1165c614c433a 100644
 --- a/src/main/java/net/minecraft/world/entity/Entity.java
 +++ b/src/main/java/net/minecraft/world/entity/Entity.java
-@@ -796,7 +796,13 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
+@@ -816,7 +816,13 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
  
          this.checkOutOfWorld();
          if (!this.level.isClientSide) {
