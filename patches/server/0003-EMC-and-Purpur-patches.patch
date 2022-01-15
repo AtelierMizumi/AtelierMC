@@ -195,10 +195,10 @@ index 4fa79d37ff4e70c61672cce7c55257c46232c026..df43d0a0f3d1e34baabae150cbf01a00
              // Paper end
          }
 diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
-index d8baa239c8cec5a67e30e4756ef37d47f4e6e367..b300463bf0e3bc29acc226c85d203a0abc91320a 100644
+index 5927315477992dd32b6cdc283d0e84dc500ebf37..3caf9fba1dddceccfb6e18311c14abdc2c5c5828 100644
 --- a/src/main/java/net/minecraft/world/entity/Entity.java
 +++ b/src/main/java/net/minecraft/world/entity/Entity.java
-@@ -1784,6 +1784,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
+@@ -1790,6 +1790,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
          this.yRotO = this.getYRot();
          this.xRotO = this.getXRot();
          this.setYHeadRot(yaw); // Paper - Update head rotation
