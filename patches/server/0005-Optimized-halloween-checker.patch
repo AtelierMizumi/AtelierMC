@@ -149,7 +149,7 @@ index e23fe546291e670f89447398507d08a0a07efa85..3664054eae24bf223d23406fc0d93e90
  
          return entityData;
 diff --git a/src/main/java/net/minecraft/world/entity/monster/Zombie.java b/src/main/java/net/minecraft/world/entity/monster/Zombie.java
-index e72e9b748b3f3e34baddf01366c703efba50c67c..183a2ef2bd89a4227aa6916729dda7a6726d5be6 100644
+index 35f0203d260c11b729c30e6241316fda4b70bfd7..3ebb00cb3318b20fc2979814dd2612ab7b9e6ba9 100644
 --- a/src/main/java/net/minecraft/world/entity/monster/Zombie.java
 +++ b/src/main/java/net/minecraft/world/entity/monster/Zombie.java
 @@ -1,7 +1,5 @@
@@ -168,7 +168,7 @@ index e72e9b748b3f3e34baddf01366c703efba50c67c..183a2ef2bd89a4227aa6916729dda7a6
  // CraftBukkit end
  
  public class Zombie extends Monster {
-@@ -536,14 +535,19 @@ public class Zombie extends Monster {
+@@ -541,14 +540,19 @@ public class Zombie extends Monster {
          }
  
          if (this.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {

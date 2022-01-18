@@ -301,10 +301,10 @@ index b7c4f2144fae2ceadcdfd94f7e3948d9ceef4a4a..de67cf3186e8b49c48736be168901e41
  
                  Block.updateOrDestroy(iblockdata, iblockdata1, world, blockposition_mutableblockposition, flags, maxUpdateDepth);
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-index a117edcf95cebdb1bd4d781f6423cf1620dea478..58809ab0b86aa8124c046c6f2c396ef4c7eddf0d 100644
+index a5ec6a6832be422bdbdb110209bac72bfc185db0..65a61083865db78b17e320ff6d270b5e76252611 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-@@ -398,7 +398,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -400,7 +400,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
  
      @Override
      public boolean unloadChunk(int x, int z) {
