@@ -109,7 +109,7 @@ index c8a319587497d1a46a3541528987b59727a5d466..7b5a2496fea6a87db49b03c2959321ed
          this.entity.stopSeenByPlayer(player);
          player.connection.send(new ClientboundRemoveEntitiesPacket(new int[]{this.entity.getId()}));
 diff --git a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
-index 0105a60a9a361624f650e21c3efbd1ee5adb86a1..23d067f8467d38b44c6afaf19661ebec9cd30ff2 100644
+index e63da34e290ff81ec3e579d4b186a415c16ded22..6e4898e7591fdb29c1dba5cc07ada9398f24429c 100644
 --- a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
 +++ b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
 @@ -228,6 +228,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
@@ -148,7 +148,7 @@ index 0105a60a9a361624f650e21c3efbd1ee5adb86a1..23d067f8467d38b44c6afaf19661ebec
          // Paper end
  
          this.server.getProfiler().pop();
-@@ -2085,7 +2100,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+@@ -2087,7 +2102,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
      private void handleChat(TextFilter.FilteredText message) {
          if (this.player.isRemoved() || this.player.getChatVisibility() == ChatVisiblity.HIDDEN) { // CraftBukkit - dead men tell no tales
              this.send(new ClientboundChatPacket((new TranslatableComponent("chat.disabled.options")).withStyle(ChatFormatting.RED), ChatType.SYSTEM, Util.NIL_UUID));
@@ -157,7 +157,7 @@ index 0105a60a9a361624f650e21c3efbd1ee5adb86a1..23d067f8467d38b44c6afaf19661ebec
              this.player.resetLastActionTime();
              String s = message.getRaw();
  
-@@ -3100,6 +3115,8 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+@@ -3102,6 +3117,8 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
  
      @Override
      public void handleKeepAlive(ServerboundKeepAlivePacket packet) {
@@ -166,7 +166,7 @@ index 0105a60a9a361624f650e21c3efbd1ee5adb86a1..23d067f8467d38b44c6afaf19661ebec
          //PlayerConnectionUtils.ensureMainThread(packetplayinkeepalive, this, this.player.getWorldServer()); // CraftBukkit // Paper - This shouldn't be on the main thread
          if (this.keepAlivePending && packet.getId() == this.keepAliveChallenge) {
              int i = (int) (Util.getMillis() - this.keepAliveTime);
-@@ -3113,7 +3130,14 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+@@ -3115,7 +3132,14 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
              });
              // Paper end
          }

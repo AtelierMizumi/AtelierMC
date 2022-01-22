@@ -5,10 +5,10 @@ Subject: [PATCH] isDebugging API
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 71fe392c3e81421dcbb2b1dc7c3dab8413775de3..ad29ea4655448868eb6749567d619b5e6080cf32 100644
+index 4eab5f0ab87504c544b4fb574704a7b6394addf6..265838571cb4819edaa39b3484c89602accbd170 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -2485,7 +2485,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
+@@ -2491,7 +2491,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
      }
  
      public boolean isDebugging() {
