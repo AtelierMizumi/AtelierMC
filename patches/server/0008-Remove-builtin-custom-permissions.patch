@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: JustMangoT <38831897+JustMangoT@users.noreply.github.com>
+Date: Sun, 23 Jan 2022 12:15:06 +0700
+Subject: [PATCH] Remove builtin custom permissions
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 393f73dd317e78ad9239f8a8d842546a60d31320..8738ba321fef4c1f6c1c66d4eee1ca4913adddbf 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -1092,6 +1092,8 @@ public final class CraftServer implements Server {
+ 
+     @SuppressWarnings({ "unchecked", "finally" })
+     private void loadCustomPermissions() {
++        // AtelierMC start
++        /*
+         File file = new File(this.configuration.getString("settings.permissions-file"));
+         FileInputStream stream;
+ 
+@@ -1135,6 +1137,11 @@ public final class CraftServer implements Server {
+                 this.getLogger().log(Level.SEVERE, "Permission in " + file + " was already defined", ex);
+             }
+         }
++        */
++        if (this.pluginManager.getPlugin("LuckPerms") == null) {
++            this.getLogger().severe("LuckPerms not found! Permission management is not going to work!");
++        }
++        // AtelierMC end
+     }
+ 
+     @Override

@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: JustMangoT <38831897+JustMangoT@users.noreply.github.com>
+Date: Sun, 23 Jan 2022 13:04:36 +0700
+Subject: [PATCH] Remove help.yml
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/help/HelpYamlReader.java b/src/main/java/org/bukkit/craftbukkit/help/HelpYamlReader.java
+index 74b49f4c1649c161c3c785be7708f5970989f7f3..29ad94065af465b08049aae455a11f9eaa39e67f 100644
+--- a/src/main/java/org/bukkit/craftbukkit/help/HelpYamlReader.java
++++ b/src/main/java/org/bukkit/craftbukkit/help/HelpYamlReader.java
+@@ -25,6 +25,9 @@ public class HelpYamlReader {
+     public HelpYamlReader(Server server) {
+         this.server = server;
+ 
++        // AtelierMC start - Remove help.yml
++        this.helpYaml = new YamlConfiguration();
++        /*
+         File helpYamlFile = new File("help.yml");
+         YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("configurations/help.yml"), Charsets.UTF_8));
+ 
+@@ -44,6 +47,8 @@ public class HelpYamlReader {
+             server.getLogger().severe("Failed to load help.yml. Verify the yaml indentation is correct. Reverting to default help.yml.");
+             this.helpYaml = defaultConfig;
+         }
++        */
++        // AtelierMC end
+     }
+ 
+     /**

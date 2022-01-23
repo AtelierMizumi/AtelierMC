@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: JustMangoT <38831897+JustMangoT@users.noreply.github.com>
+Date: Sun, 23 Jan 2022 12:33:16 +0700
+Subject: [PATCH] Do not save OpList to file
+
+
+diff --git a/src/main/java/net/minecraft/server/players/ServerOpList.java b/src/main/java/net/minecraft/server/players/ServerOpList.java
+index e80323a54dcd3b065ec73f0abe5bb196d7de93a0..9b52739f6890bca7118ba6417a21d5cf7c4b6c22 100644
+--- a/src/main/java/net/minecraft/server/players/ServerOpList.java
++++ b/src/main/java/net/minecraft/server/players/ServerOpList.java
+@@ -3,6 +3,7 @@ package net.minecraft.server.players;
+ import com.google.gson.JsonObject;
+ import com.mojang.authlib.GameProfile;
+ import java.io.File;
++import java.io.IOException;
+ import java.util.Objects;
+ 
+ public class ServerOpList extends StoredUserList<GameProfile, ServerOpListEntry> {
+@@ -27,6 +28,13 @@ public class ServerOpList extends StoredUserList<GameProfile, ServerOpListEntry>
+         return serverOpListEntry != null ? serverOpListEntry.getBypassesPlayerLimit() : false;
+     }
+ 
++    // AtelierMC start - Do not save OpList to file
++    @Override
++    public void save() throws IOException {
++        // NOOP
++    }
++    // AtelierMC end
++
+     @Override
+     protected String getKeyForUser(GameProfile gameProfile) {
+         return gameProfile.getId().toString();

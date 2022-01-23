@@ -1,0 +1,75 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: JustMangoT <38831897+JustMangoT@users.noreply.github.com>
+Date: Sun, 23 Jan 2022 12:40:30 +0700
+Subject: [PATCH] Use default config for JettPack
+
+
+diff --git a/src/main/java/gg/pufferfish/pufferfish/PufferfishConfig.java b/src/main/java/gg/pufferfish/pufferfish/PufferfishConfig.java
+index a5cacc7aeadb52f799b534c602b636a41ec4e83c..3a26c4d80504361e75ab1aa9cc3510c4be6785d4 100644
+--- a/src/main/java/gg/pufferfish/pufferfish/PufferfishConfig.java
++++ b/src/main/java/gg/pufferfish/pufferfish/PufferfishConfig.java
+@@ -64,7 +64,6 @@ public class PufferfishConfig {
+ 				"Join our Discord for support: https://discord.gg/reZw4vQV9H",
+ 				"Download new builds at https://ci.pufferfish.host/job/Pufferfish");
+ 		*/
+-		
+ 		for (Method method : PufferfishConfig.class.getDeclaredMethods()) {
+ 			if (Modifier.isStatic(method.getModifiers()) && Modifier.isPrivate(method.getModifiers()) && method.getParameterCount() == 0 &&
+ 					method.getReturnType() == Void.TYPE && !method.getName().startsWith("lambda")) {
+diff --git a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
+index 71dc6cd1a96872649f6ff9bfa25a7846b0b8cb6d..d60a8d35e7fe85de45f6e3df3070532cba5e0070 100644
+--- a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
++++ b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
+@@ -235,6 +235,8 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
+         gg.pufferfish.pufferfish.PufferfishConfig.load(); // Pufferfish
+         gg.pufferfish.pufferfish.PufferfishCommand.init(); // Pufferfish
+ 
++        // AtelierMC start - Do not load JettPack config
++        /*
+         // Yatopia start
+         try {
+             me.titaniumtown.JettPackConfig.init((java.io.File) options.valueOf("jettpack-settings"));
+@@ -243,6 +245,8 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
+             return false;
+         }
+         // Yatopia end
++        */
++        // AtelierMC end
+ 
+         this.setPvpAllowed(dedicatedserverproperties.pvp);
+         this.setFlightAllowed(dedicatedserverproperties.allowFlight);
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 8738ba321fef4c1f6c1c66d4eee1ca4913adddbf..c39dd91255af6e6f2e6ba01399e5ca02ecfe5c79 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -952,7 +952,7 @@ public final class CraftServer implements Server {
+ 
+         org.spigotmc.SpigotConfig.init((File) console.options.valueOf("spigot-settings")); // Spigot
+         com.destroystokyo.paper.PaperConfig.init((File) console.options.valueOf("paper-settings")); // Paper
+-        me.titaniumtown.JettPackConfig.init((File) console.options.valueOf("jettpack-settings")); // JettPack
++        // me.titaniumtown.JettPackConfig.init((File) console.options.valueOf("jettpack-settings")); // JettPack // AtelierMC - Do not load JettPack config
+         for (ServerLevel world : this.console.getAllLevels()) {
+             // world.serverLevelData.setDifficulty(config.difficulty); // Paper - per level difficulty
+             world.setSpawnSettings(world.serverLevelData.getDifficulty() != Difficulty.PEACEFUL && config.spawnMonsters, config.spawnAnimals); // Paper - per level difficulty (from MinecraftServer#setDifficulty(ServerLevel, Difficulty, boolean))
+diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
+index 647589549f1971cd65d2aa09201777a7199275c0..085e592c33c12ea3d748848d73827188b5503417 100644
+--- a/src/main/java/org/bukkit/craftbukkit/Main.java
++++ b/src/main/java/org/bukkit/craftbukkit/Main.java
+@@ -153,6 +153,8 @@ public class Main {
+                         .describedAs("Jar file");
+                 // Paper end
+ 
++                // AtelierMC start
++                /*
+                 // JettPack start
+                 acceptsAll(asList("jettpack", "jettpack-settings"), "File for jettpack settings")
+                         .withRequiredArg()
+@@ -160,6 +162,8 @@ public class Main {
+                         .defaultsTo(new File("jettpack.yml"))
+                         .describedAs("Yml file");
+                 // JettPack end
++                */
++                // AtelierMC end
+ 
+                 // Paper start
+                 acceptsAll(asList("server-name"), "Name of the server")
