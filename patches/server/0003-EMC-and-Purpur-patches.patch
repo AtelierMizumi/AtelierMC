@@ -267,10 +267,10 @@ index fe502e148e218ae404e0049c0251d3e3ca08c825..015422d2a01c99c121481643473b8a12
 +    // EMC end
  }
 diff --git a/src/main/java/net/minecraft/world/level/Level.java b/src/main/java/net/minecraft/world/level/Level.java
-index 904bfc59d3ad54f54a5608de2575717c5c70503e..5bf19e17e6ea1ec99a63f06e347604477cb8855e 100644
+index ad51ef5b1e253eb3b3b76dd24f753d171bb1f447..88f05cf5174243442bf339e52350070c049794cf 100644
 --- a/src/main/java/net/minecraft/world/level/Level.java
 +++ b/src/main/java/net/minecraft/world/level/Level.java
-@@ -898,7 +898,11 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
+@@ -896,7 +896,11 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
  
      public void neighborChanged(BlockPos pos, Block sourceBlock, BlockPos neighborPos) {
          if (!this.isClientSide) {
