@@ -195,10 +195,10 @@ index 4fa79d37ff4e70c61672cce7c55257c46232c026..df43d0a0f3d1e34baabae150cbf01a00
              // Paper end
          }
 diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
-index dd0f0d84a9e636e017452bfb5d61e8d95be3389c..c791376c2a052ea34fd4d336e5752f3081785874 100644
+index 224c24abcd79e86c8ba1b6e8707f6aa55ad55646..50333bca5efae22cb4bb29d47d505e713137abb1 100644
 --- a/src/main/java/net/minecraft/world/entity/Entity.java
 +++ b/src/main/java/net/minecraft/world/entity/Entity.java
-@@ -1789,6 +1789,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
+@@ -1796,6 +1796,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, i
          this.yRotO = this.getYRot();
          this.xRotO = this.getXRot();
          this.setYHeadRot(yaw); // Paper - Update head rotation
@@ -207,10 +207,10 @@ index dd0f0d84a9e636e017452bfb5d61e8d95be3389c..c791376c2a052ea34fd4d336e5752f30
  
      public void absMoveTo(double x, double y, double z) {
 diff --git a/src/main/java/net/minecraft/world/entity/LivingEntity.java b/src/main/java/net/minecraft/world/entity/LivingEntity.java
-index 04051de5d67f74834e293c401cec0311f235664d..e838957fe80c581ec5675bae9bd321b1e4c4798d 100644
+index 5b66b19a7d318b3739e8c252433ecad9aada115e..be08ee578f2e3e69390346abd3b04d7d19c00407 100644
 --- a/src/main/java/net/minecraft/world/entity/LivingEntity.java
 +++ b/src/main/java/net/minecraft/world/entity/LivingEntity.java
-@@ -2924,7 +2924,7 @@ public abstract class LivingEntity extends Entity {
+@@ -2923,7 +2923,7 @@ public abstract class LivingEntity extends Entity {
              }
          }
  
