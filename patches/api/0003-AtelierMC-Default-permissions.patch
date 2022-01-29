@@ -3,6 +3,8 @@ From: JustMangoT <minetuan2@gmail.com>
 Date: Wed, 12 Jan 2022 08:23:13 +0700
 Subject: [PATCH] AtelierMC Default permissions
 
+Original code by PurpurMC, licensed under MIT
+You can find the original code on https://github.com/PurpurMC/Purpur
 
 diff --git a/src/main/java/org/bukkit/util/permissions/AtelierMCPermissions.java b/src/main/java/org/bukkit/util/permissions/AtelierMCPermissions.java
 new file mode 100644
