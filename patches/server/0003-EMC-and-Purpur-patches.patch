@@ -3,6 +3,11 @@ From: JustMangoT <minetuan2@gmail.com>
 Date: Fri, 10 Dec 2021 00:29:56 +0700
 Subject: [PATCH] EMC and Purpur patches
 
+Original EMC patches by starlis, licensed under MIT
+You can find the original code on https://github.com/starlis/empirecraft
+
+Original Purpur patches by PurpurMC, licensed under MIT
+You can find the original code on https://github.com/PurpurMC/Purpur
 
 diff --git a/src/main/java/io/papermc/paper/adventure/PaperAdventure.java b/src/main/java/io/papermc/paper/adventure/PaperAdventure.java
 index 3661ac5e3bfdebb2911cb1b118942b9fc7884140..4622d42221f75206e1a7495c8d4896c3d6f35b34 100644

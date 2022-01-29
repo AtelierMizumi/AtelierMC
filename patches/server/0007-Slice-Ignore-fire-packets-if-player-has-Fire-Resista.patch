@@ -1,8 +1,10 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: JustMangoT <minetuan2@gmail.com>
-Date: Wed, 12 Jan 2022 07:41:04 +0700
+From: Cryptite <cryptite@gmail.com>
+Date: Thu, 23 Sep 2021 09:29:09 -0500
 Subject: [PATCH] (Slice) Ignore fire packets if player has Fire Resistance
 
+Original code by Cryptite, licensed under MIT
+You can find the original code on https://github.com/Cryptite/Slice
 
 diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
 index 50333bca5efae22cb4bb29d47d505e713137abb1..64a435fa0e0d74244805da50c8d87827fb8a9b1c 100644

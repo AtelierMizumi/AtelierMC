@@ -3,6 +3,8 @@ From: JustMangoT <minetuan2@gmail.com>
 Date: Wed, 15 Dec 2021 20:05:17 +0700
 Subject: [PATCH] Enderchest 6 rows
 
+Original code by PurpurMC, licensed under MIT
+You can find the original code on https://github.com/PurpurMC/Purpur
 
 diff --git a/src/main/java/net/minecraft/world/inventory/ChestMenu.java b/src/main/java/net/minecraft/world/inventory/ChestMenu.java
 index e9d9245f7efaaeefc8f107b8016a462ce173816a..cc5c792ec805c62f8c666c5bbaf78d5841d5c903 100644
